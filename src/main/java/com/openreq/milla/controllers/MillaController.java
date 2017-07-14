@@ -23,8 +23,22 @@ public class MillaController {
     private String mulperiAddress;
 	
 	@ResponseBody
+	@RequestMapping(value = "{path}", method = RequestMethod.GET)
+	public ResponseEntity<?> getFromMulperi(@PathVariable("path") String path) {
+		
+		RestTemplate rt = new RestTemplate();
+		
+		String actualPath = getActualPath(path);
+		
+		String completeAddress = mulperiAddress + actualPath;
+		
+		return rt.getForEntity(completeAddress, String.class);
+		
+	}
+	
+	@ResponseBody
 	@RequestMapping(value = "{path}", method = RequestMethod.POST)
-	public ResponseEntity<?> sendForwardToMulperi(@RequestBody String data, @PathVariable("path") String path) {
+	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path) {
 		
 		RestTemplate rt = new RestTemplate();
 		
@@ -44,7 +58,12 @@ public class MillaController {
 	private String getActualPath(String path) {
 		if (path.equals("mulson")) return "models/mulson";
 		if (path.equals("reqif")) return "models/reqif";
-		return null;
+		if (path.contains("configurate:")) {
+			String modelName = path.split(":", 2)[1];			
+			return "models/" + modelName + "/configurations";
+		}
+			
+		return path;
 	}
 	
 }
