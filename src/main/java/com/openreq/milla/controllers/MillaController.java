@@ -1,5 +1,7 @@
 package com.openreq.milla.controllers;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpEntity;
@@ -13,6 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.openreq.milla.models.jira.Jira;
+import com.openreq.milla.models.mulson.Requirement;
+import com.openreq.milla.services.FormatTransformerService;
 
 @SpringBootApplication
 @Controller
@@ -65,5 +73,25 @@ public class MillaController {
 			
 		return path;
 	}
+	
+	@ResponseBody
+	@RequestMapping(value = "jira", method = RequestMethod.POST)
+	public ResponseEntity<?> loadFromJira(@RequestBody String path) throws JsonProcessingException {
+		
+		RestTemplate rt = new RestTemplate();
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
+		ResponseEntity<Jira> test = rt.getForEntity(path, Jira.class);
+		
+		FormatTransformerService transformer = new FormatTransformerService();
+		
+		List<Requirement> requirements = transformer.convertJiraToMulson(test.getBody());
+		
+		ObjectMapper mapper = new ObjectMapper();
+		return this.postToMulperi(mapper.writeValueAsString(requirements), "mulson");
+	}
+	
 	
 }
