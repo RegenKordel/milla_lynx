@@ -1,5 +1,7 @@
 package com.openreq.milla.controllers;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -59,7 +62,15 @@ public class MillaController {
 		
 		HttpEntity<String> entity = new HttpEntity<String>(data, headers);
 		
-		return rt.postForEntity(completeAddress, entity, String.class);
+		ResponseEntity<?> response = null;
+		
+		try {
+			response = rt.postForEntity(completeAddress, entity, String.class);
+		} catch (HttpClientErrorException e) {
+			return new ResponseEntity<>("Mulperi error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+		}
+		
+		return response;
 		
 	}
 
@@ -74,23 +85,39 @@ public class MillaController {
 		return path;
 	}
 	
+	/**
+	 * Inputs an array of search queries (return array of issues), ex:
+	 [
+	    "https://bugreports.qt.io/rest/api/2/search?jql=\"Epic Link\"=QTBUG-60623",
+	    "https://bugreports.qt.io/rest/api/2/search?jql=issue = QTBUG-60467"
+	 ]
+	 * @param paths
+	 * @return
+	 * @throws JsonProcessingException
+	 */
 	@ResponseBody
 	@RequestMapping(value = "jira", method = RequestMethod.POST)
-	public ResponseEntity<?> loadFromJira(@RequestBody String path) throws JsonProcessingException {
+	public ResponseEntity<?> loadFromJira(@RequestBody List<String> paths) throws JsonProcessingException {
+		FormatTransformerService transformer = new FormatTransformerService();
 		
 		RestTemplate rt = new RestTemplate();
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		
-		ResponseEntity<Jira> test = rt.getForEntity(path, Jira.class);
+		ArrayList<Jira> jiras = new ArrayList<>();
 		
-		FormatTransformerService transformer = new FormatTransformerService();
+		for(String url : paths) {
+			ResponseEntity<Jira> jiraResponse = rt.getForEntity(url, Jira.class);
+			jiras.add(jiraResponse.getBody());
+		}
 		
-		List<Requirement> requirements = transformer.convertJiraToMulson(test.getBody());
+		Collection<Requirement> requirements = transformer.convertJirasToMulson(jiras);
 		
 		ObjectMapper mapper = new ObjectMapper();
-		return this.postToMulperi(mapper.writeValueAsString(requirements), "mulson");
+		String mulsonString = mapper.writeValueAsString(requirements);
+
+		return this.postToMulperi(mulsonString, "mulson");
 	}
 	
 	

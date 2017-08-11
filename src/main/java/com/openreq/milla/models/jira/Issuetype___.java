@@ -15,12 +15,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "self",
     "id",
     "description",
+    "iconUrl",
     "name",
-    "archived",
-    "released",
-    "releaseDate"
+    "subtask"
 })
-public class Version {
+public class Issuetype___ {
 
     @JsonProperty("self")
     private String self;
@@ -28,14 +27,12 @@ public class Version {
     private String id;
     @JsonProperty("description")
     private String description;
+    @JsonProperty("iconUrl")
+    private String iconUrl;
     @JsonProperty("name")
     private String name;
-    @JsonProperty("archived")
-    private Boolean archived;
-    @JsonProperty("released")
-    private Boolean released;
-    @JsonProperty("releaseDate")
-    private String releaseDate;
+    @JsonProperty("subtask")
+    private Boolean subtask;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -69,6 +66,16 @@ public class Version {
         this.description = description;
     }
 
+    @JsonProperty("iconUrl")
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    @JsonProperty("iconUrl")
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
+
     @JsonProperty("name")
     public String getName() {
         return name;
@@ -79,34 +86,14 @@ public class Version {
         this.name = name;
     }
 
-    @JsonProperty("archived")
-    public Boolean getArchived() {
-        return archived;
+    @JsonProperty("subtask")
+    public Boolean getSubtask() {
+        return subtask;
     }
 
-    @JsonProperty("archived")
-    public void setArchived(Boolean archived) {
-        this.archived = archived;
-    }
-
-    @JsonProperty("released")
-    public Boolean getReleased() {
-        return released;
-    }
-
-    @JsonProperty("released")
-    public void setReleased(Boolean released) {
-        this.released = released;
-    }
-
-    @JsonProperty("releaseDate")
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    @JsonProperty("releaseDate")
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
+    @JsonProperty("subtask")
+    public void setSubtask(Boolean subtask) {
+        this.subtask = subtask;
     }
 
     @JsonAnyGetter

@@ -14,17 +14,20 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "self",
     "id",
-    "description",
+    "key",
+    "colorName",
     "name"
 })
-public class Resolution {
+public class StatusCategory___ {
 
     @JsonProperty("self")
     private String self;
     @JsonProperty("id")
-    private String id;
-    @JsonProperty("description")
-    private String description;
+    private Integer id;
+    @JsonProperty("key")
+    private String key;
+    @JsonProperty("colorName")
+    private String colorName;
     @JsonProperty("name")
     private String name;
     @JsonIgnore
@@ -41,23 +44,33 @@ public class Resolution {
     }
 
     @JsonProperty("id")
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
     @JsonProperty("id")
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    @JsonProperty("description")
-    public String getDescription() {
-        return description;
+    @JsonProperty("key")
+    public String getKey() {
+        return key;
     }
 
-    @JsonProperty("description")
-    public void setDescription(String description) {
-        this.description = description;
+    @JsonProperty("key")
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    @JsonProperty("colorName")
+    public String getColorName() {
+        return colorName;
+    }
+
+    @JsonProperty("colorName")
+    public void setColorName(String colorName) {
+        this.colorName = colorName;
     }
 
     @JsonProperty("name")

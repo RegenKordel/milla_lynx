@@ -65,7 +65,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "customfield_10910",
     "customfield_10911",
     "progress",
-    "votes"
+    "votes",
+    "customfield_10030",
+    "customfield_10500",
+    "customfield_10501",
+    "customfield_10183",
+    "customfield_10184",
+    "customfield_10401",
+    "customfield_10402",
+    "customfield_10403",
+    "customfield_10404",
+    "duedate"
 })
 public class Fields {
 
@@ -84,13 +94,13 @@ public class Fields {
     @JsonProperty("aggregatetimespent")
     private Object aggregatetimespent;
     @JsonProperty("resolution")
-    private Resolution resolution;
+    private Object resolution;
     @JsonProperty("customfield_10027")
     private Customfield10027 customfield10027;
     @JsonProperty("customfield_10302")
     private Object customfield10302;
     @JsonProperty("resolutiondate")
-    private String resolutiondate;
+    private Object resolutiondate;
     @JsonProperty("workratio")
     private Integer workratio;
     @JsonProperty("customfield_10906")
@@ -128,7 +138,7 @@ public class Fields {
     @JsonProperty("aggregatetimeoriginalestimate")
     private Object aggregatetimeoriginalestimate;
     @JsonProperty("versions")
-    private List<Version> versions = null;
+    private List<Object> versions = null;
     @JsonProperty("issuelinks")
     private List<Issuelink> issuelinks = null;
     @JsonProperty("assignee")
@@ -156,7 +166,7 @@ public class Fields {
     @JsonProperty("creator")
     private Creator creator;
     @JsonProperty("subtasks")
-    private List<Object> subtasks = null;
+    private List<Subtask> subtasks = null;
     @JsonProperty("reporter")
     private Reporter reporter;
     @JsonProperty("aggregateprogress")
@@ -164,7 +174,7 @@ public class Fields {
     @JsonProperty("customfield_10200")
     private String customfield10200;
     @JsonProperty("customfield_10400")
-    private String customfield10400;
+    private Object customfield10400;
     @JsonProperty("environment")
     private Object environment;
     @JsonProperty("customfield_10910")
@@ -175,6 +185,26 @@ public class Fields {
     private Progress progress;
     @JsonProperty("votes")
     private Votes votes;
+    @JsonProperty("customfield_10030")
+    private Object customfield10030;
+    @JsonProperty("customfield_10500")
+    private String customfield10500;
+    @JsonProperty("customfield_10501")
+    private String customfield10501;
+    @JsonProperty("customfield_10183")
+    private Object customfield10183;
+    @JsonProperty("customfield_10184")
+    private Object customfield10184;
+    @JsonProperty("customfield_10401")
+    private Customfield10401 customfield10401;
+    @JsonProperty("customfield_10402")
+    private Object customfield10402;
+    @JsonProperty("customfield_10403")
+    private Object customfield10403;
+    @JsonProperty("customfield_10404")
+    private Object customfield10404;
+    @JsonProperty("duedate")
+    private Object duedate;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -249,12 +279,12 @@ public class Fields {
     }
 
     @JsonProperty("resolution")
-    public Resolution getResolution() {
+    public Object getResolution() {
         return resolution;
     }
 
     @JsonProperty("resolution")
-    public void setResolution(Resolution resolution) {
+    public void setResolution(Object resolution) {
         this.resolution = resolution;
     }
 
@@ -279,12 +309,12 @@ public class Fields {
     }
 
     @JsonProperty("resolutiondate")
-    public String getResolutiondate() {
+    public Object getResolutiondate() {
         return resolutiondate;
     }
 
     @JsonProperty("resolutiondate")
-    public void setResolutiondate(String resolutiondate) {
+    public void setResolutiondate(Object resolutiondate) {
         this.resolutiondate = resolutiondate;
     }
 
@@ -469,12 +499,12 @@ public class Fields {
     }
 
     @JsonProperty("versions")
-    public List<Version> getVersions() {
+    public List<Object> getVersions() {
         return versions;
     }
 
     @JsonProperty("versions")
-    public void setVersions(List<Version> versions) {
+    public void setVersions(List<Object> versions) {
         this.versions = versions;
     }
 
@@ -609,12 +639,12 @@ public class Fields {
     }
 
     @JsonProperty("subtasks")
-    public List<Object> getSubtasks() {
+    public List<Subtask> getSubtasks() {
         return subtasks;
     }
 
     @JsonProperty("subtasks")
-    public void setSubtasks(List<Object> subtasks) {
+    public void setSubtasks(List<Subtask> subtasks) {
         this.subtasks = subtasks;
     }
 
@@ -649,12 +679,12 @@ public class Fields {
     }
 
     @JsonProperty("customfield_10400")
-    public String getCustomfield10400() {
+    public Object getCustomfield10400() {
         return customfield10400;
     }
 
     @JsonProperty("customfield_10400")
-    public void setCustomfield10400(String customfield10400) {
+    public void setCustomfield10400(Object customfield10400) {
         this.customfield10400 = customfield10400;
     }
 
@@ -706,6 +736,106 @@ public class Fields {
     @JsonProperty("votes")
     public void setVotes(Votes votes) {
         this.votes = votes;
+    }
+
+    @JsonProperty("customfield_10030")
+    public Object getCustomfield10030() {
+        return customfield10030;
+    }
+
+    @JsonProperty("customfield_10030")
+    public void setCustomfield10030(Object customfield10030) {
+        this.customfield10030 = customfield10030;
+    }
+
+    @JsonProperty("customfield_10500")
+    public String getCustomfield10500() {
+        return customfield10500;
+    }
+
+    @JsonProperty("customfield_10500")
+    public void setCustomfield10500(String customfield10500) {
+        this.customfield10500 = customfield10500;
+    }
+
+    @JsonProperty("customfield_10501")
+    public String getCustomfield10501() {
+        return customfield10501;
+    }
+
+    @JsonProperty("customfield_10501")
+    public void setCustomfield10501(String customfield10501) {
+        this.customfield10501 = customfield10501;
+    }
+
+    @JsonProperty("customfield_10183")
+    public Object getCustomfield10183() {
+        return customfield10183;
+    }
+
+    @JsonProperty("customfield_10183")
+    public void setCustomfield10183(Object customfield10183) {
+        this.customfield10183 = customfield10183;
+    }
+
+    @JsonProperty("customfield_10184")
+    public Object getCustomfield10184() {
+        return customfield10184;
+    }
+
+    @JsonProperty("customfield_10184")
+    public void setCustomfield10184(Object customfield10184) {
+        this.customfield10184 = customfield10184;
+    }
+
+    @JsonProperty("customfield_10401")
+    public Customfield10401 getCustomfield10401() {
+        return customfield10401;
+    }
+
+    @JsonProperty("customfield_10401")
+    public void setCustomfield10401(Customfield10401 customfield10401) {
+        this.customfield10401 = customfield10401;
+    }
+
+    @JsonProperty("customfield_10402")
+    public Object getCustomfield10402() {
+        return customfield10402;
+    }
+
+    @JsonProperty("customfield_10402")
+    public void setCustomfield10402(Object customfield10402) {
+        this.customfield10402 = customfield10402;
+    }
+
+    @JsonProperty("customfield_10403")
+    public Object getCustomfield10403() {
+        return customfield10403;
+    }
+
+    @JsonProperty("customfield_10403")
+    public void setCustomfield10403(Object customfield10403) {
+        this.customfield10403 = customfield10403;
+    }
+
+    @JsonProperty("customfield_10404")
+    public Object getCustomfield10404() {
+        return customfield10404;
+    }
+
+    @JsonProperty("customfield_10404")
+    public void setCustomfield10404(Object customfield10404) {
+        this.customfield10404 = customfield10404;
+    }
+
+    @JsonProperty("duedate")
+    public Object getDuedate() {
+        return duedate;
+    }
+
+    @JsonProperty("duedate")
+    public void setDuedate(Object duedate) {
+        this.duedate = duedate;
     }
 
     @JsonAnyGetter
