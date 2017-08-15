@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+	<head>
+		<title>Example GUI</title>
+		<style>
+			.level {
+			    margin-left: 25px;
+			}
+		</style>
+	</head>
+	
+	<body>
+        <h1>Generate model</h1>
+		
+		<p>Milla URL: <input type="text" id="millaUrl" /></p>
+		<p>Payload: <textarea id="payload">[]</textarea></p>
+		<p><input type="button" value="Submit" onclick="postToMilla()" /></p>		
+		
+		<h1>Select requirements</h1>
+		
+		<p>Mulperi URL: <input type="text" size="40" id="mulperiUrl" th:value="${mulperiAddress}" /></p>
+		<p>Model name: <input type="text" size="40" id="modelName" /></p>
+		<p>
+			<input type="button" value="Get options" onclick="getOptions()" /> 
+			<input type="button" value="Get configuration" onclick="getConfiguration()" />
+			<select id="autosubmit">
+				<option value="1">Autosubmit on </option>
+				<option value="0">Autosubmit off</option>
+			</select>
+		</p>
+		
+		
+		<div class="level" id="configuration">
+		</div>
+		
+		<script>
+			document.getElementById("millaUrl").value = window.location.origin + "/jira";
+		</script>
+		<script type="text/javascript" th:src="@{/js/src/gui.js}"></script>      
+        
+    </body>
+</html>
