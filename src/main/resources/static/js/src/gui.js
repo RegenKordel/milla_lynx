@@ -21,6 +21,9 @@ function postToMilla() {
  * @returns
  */
 function getOptions() {
+	//clear old options
+	document.getElementById("configuration").innerHTML = "";
+	
 	var url = document.getElementById("mulperiUrl").value
 		+ "/models/" + document.getElementById("modelName").value;
 	
