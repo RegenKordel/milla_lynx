@@ -51,6 +51,7 @@ function getConfiguration() {
 		if (this.readyState == 4 && this.status == 200) {
 			deselectFeatures();
 			selectFeatures("configuration", JSON.parse(this.responseText)["features"]);
+			autohide();
 		} else if(this.readyState == 4) {
 			alert("Error:" + this.responseText);
 		}
@@ -83,7 +84,7 @@ function createSelectionTree(parent, features) {
 		var element = document.createElement("div");
 		element.appendChild(checkbox);
 	    element.appendChild(document.createTextNode(name + "/" + type));
-	    element.setAttribute("id", name + type);
+	    element.setAttribute("id", "div_" + type);
 	    element.setAttribute("class", "level");
 	    document.getElementById(parent).appendChild(element);
 	    
@@ -94,7 +95,6 @@ function createSelectionTree(parent, features) {
 	    	attribute.onchange = function(){ autosubmit(); };
 	    	attribute.options.add( new Option("Let CaaS decide", "") );
 	    	attributes[ feature["attributes"][j]["name"] ] = attribute;
-	    	
 		}
 	    
 	    for (var j = 0; j < feature["attributes"].length; j++) { //values for each attribute
@@ -110,7 +110,7 @@ function createSelectionTree(parent, features) {
 	    	element.appendChild(attributeDiv);
 	    }
 	    
-	    createSelectionTree(name + type, feature["features"]);
+	    createSelectionTree("div_" + type, feature["features"]);
 	}
 }
 
@@ -122,6 +122,22 @@ function autosubmit() {
 	var e = document.getElementById("autosubmit");
 	if(e.options[e.selectedIndex].value === "1") {
 		getConfiguration();
+	}
+}
+
+/**
+ * If autohide is selected, only selected features and their children are shown
+ * @returns
+ */
+function autohide() {
+	var e = document.getElementById("autohide");
+	if(e.options[e.selectedIndex].value === "1") {
+		hideUnselectedFeatures();
+	} else { //show all
+		var elements = document.querySelectorAll('.level');
+		for (var i = 0; i < elements.length; i++) {
+			elements[i].style.display = "block";
+		}
 	}
 }
 
@@ -159,7 +175,6 @@ function selectFeatures(parent, features) {
 			element.value = attributes[j]["value"];
 		}
 		
-		
 	    selectFeatures(name, feature["features"]);
 	}
 }
@@ -169,9 +184,9 @@ function selectFeatures(parent, features) {
  * @returns
  */
 function selectionsToJson() {
-	var checkboxes = document.querySelectorAll("input[type='checkbox']");
 	
 	//features and their attributes into featureSelections
+	var checkboxes = document.querySelectorAll("input[type='checkbox']");
 	var featureSelections = [];
 	for (var i = 0; i < checkboxes.length; i++) {
 		if (checkboxes[i].checked) {
@@ -220,6 +235,10 @@ function selectionsToJson() {
 }
 
 var constraintNumber = 0;
+/**
+ * Add a constraint form to GUI
+ * @returns
+ */
 function addConstraint() {
 	var div = document.getElementById("constraints");
 	
@@ -250,4 +269,36 @@ function addConstraint() {
 	
 	div.appendChild(document.createElement("br"));
 	constraintNumber++;
+}
+
+/**
+ * GUI manipulation only, hides extraneous features and attributes
+ * @returns
+ */
+function hideUnselectedFeatures() {
+	//hide all features
+	var elements = document.querySelectorAll('.level');
+	for (var index = 0; index < elements.length; index++) {
+		elements[index].style.display = "none";
+	}
+	
+	//find selected features
+	var checkboxes = document.querySelectorAll("input[type='checkbox']");
+	for (var i = 0; i < checkboxes.length; i++) {
+		if (!checkboxes[i].checked) {
+			continue;
+		}
+		
+		//show this feature ...
+		var div = document.getElementById("div_" + checkboxes[i].getAttribute("id").replace("checkbox_", ""));
+		div.style.display = "block";
+		
+		//... and it's subfeatures
+		var divs = div.children;
+		for(var j = 0; j < divs.length; j++) {
+			if(divs[j].tagName === "DIV") {
+				divs[j].style.display = "block";
+			}
+		}
+	}
 }
