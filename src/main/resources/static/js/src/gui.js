@@ -62,7 +62,7 @@ function getConfiguration() {
 }
 
 /**
- * 
+ * Create visual tree of possible selections
  * @param parent ID of parent div
  * @param features A feature has a name and type. 
  * 			It's attributes are in attributes-array and subfeatures are in features-array 
@@ -92,6 +92,7 @@ function createSelectionTree(parent, features) {
 	    	var attribute = document.createElement("select");
 	    	attribute.setAttribute("id", "select_" + type + "-" + feature["attributes"][j]["name"]);
 	    	attribute.onchange = function(){ autosubmit(); };
+	    	attribute.options.add( new Option("Let CaaS decide", "") );
 	    	attributes[ feature["attributes"][j]["name"] ] = attribute;
 	    	
 		}
@@ -169,8 +170,9 @@ function selectFeatures(parent, features) {
  */
 function selectionsToJson() {
 	var checkboxes = document.querySelectorAll("input[type='checkbox']");
-	var featureSelections = [];
 	
+	//features and their attributes into featureSelections
+	var featureSelections = [];
 	for (var i = 0; i < checkboxes.length; i++) {
 		if (checkboxes[i].checked) {
 			//select feature
@@ -183,7 +185,9 @@ function selectionsToJson() {
 			for(var j = 0; j < attributes.length; j++) {
 				var attributeName = attributes[j].id.replace("select_" + type + "-", "");
 				var attributeValue = attributes[j].options[attributes[j].selectedIndex].value;
-				selectedAttributes.push( { "name": attributeName, "value": attributeValue } );
+				if(attributeValue !== "") {
+					selectedAttributes.push( { "name": attributeName, "value": attributeValue } );
+				}
 			}
 			selection["attributes"] = selectedAttributes;
 			
@@ -191,5 +195,59 @@ function selectionsToJson() {
 		}
 	}
 	
-	return JSON.stringify(featureSelections);
+	//sum constraints into calculationConstraints
+	var calculationConstraints = [];
+	for (var i = 0; i < constraintNumber; i++) {
+		var attributeName = document.getElementById("constraint_name_" + i).value;
+		var operatorElement = document.getElementById("constraint_operator_" + i);
+		var operator = operatorElement.options[operatorElement.selectedIndex].value;
+		var value = document.getElementById("constraint_value_" + i).value;
+		
+		if(attributeName != "" && value != "") {
+			var constraint = {
+					"attName": attributeName,
+					"operator": operator,
+					"value": value
+			}
+			calculationConstraints.push(constraint);
+		}
+	}
+	
+	var selections = { "featureSelections": featureSelections,
+			"calculationConstraints": calculationConstraints };
+	
+	return JSON.stringify(selections);
+}
+
+var constraintNumber = 0;
+function addConstraint() {
+	var div = document.getElementById("constraints");
+	
+	var name = document.createElement("input");
+	name.setAttribute("type", "text");
+	name.setAttribute("id", "constraint_name_" + constraintNumber);
+	name.setAttribute("placeholder", "Attribute name");
+	name.onchange = function(){ autosubmit(); };
+	div.appendChild(name);
+	
+	var operator = document.createElement("select");
+	operator.setAttribute("id", "constraint_operator_" + constraintNumber);
+	operator.onchange = function(){ autosubmit(); };
+	operator.options.add( new Option(">") );
+	operator.options.add( new Option("<") );
+	operator.options.add( new Option(">=") );
+	operator.options.add( new Option("<=") );
+	operator.options.add( new Option("=") );
+	operator.options.add( new Option("!=") );
+	div.appendChild(operator);
+	
+	var value = document.createElement("input");
+	value.setAttribute("type", "text");
+	value.setAttribute("id", "constraint_value_" + constraintNumber);
+	value.setAttribute("placeholder", "Compared value");
+	value.onchange = function(){ autosubmit(); };
+	div.appendChild(value);
+	
+	div.appendChild(document.createElement("br"));
+	constraintNumber++;
 }

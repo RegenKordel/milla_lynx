@@ -29,20 +29,13 @@
 			</select>
 		</p>
 		
-<!-- 		Sum constraint: -->
-<!-- 		<input type="text" id="calculation" placeholder="Attribute name" /> -->
-<!-- 		<select id="operator"> -->
-<!-- 			<option>&gt;</option> -->
-<!-- 			<option>&lt;</option> -->
-<!-- 			<option>&gt;=</option> -->
-<!-- 			<option>&lt;=</option> -->
-<!-- 			<option>=</option> -->
-<!-- 			<option>!=</option> -->
-<!-- 		</select> -->
-<!-- 		<input type="text" id="value" placeholder="Compared value" /> -->
+		<button onclick="addConstraint()">Add sum constraint</button>
 		
-		<div class="level" id="configuration">
-		</div>
+		<div id="constraints"></div>
+		
+		<br />
+		
+		<div class="level" id="configuration"></div>
 		
 		<script>
 			document.getElementById("millaUrl").value = window.location.origin + "/jira";
