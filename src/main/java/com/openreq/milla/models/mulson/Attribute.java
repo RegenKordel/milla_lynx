@@ -5,7 +5,6 @@ import java.util.List;
 public class Attribute {
 
 	private String name;
-	private String role;
 	private List<String> values;
 	private String defaultValue;
 	
@@ -14,12 +13,6 @@ public class Attribute {
 	}
 	public void setName(String name) {
 		this.name = name;
-	}
-	public String getRole() {
-		return role;
-	}
-	public void setRole(String role) {
-		this.role = role;
 	}
 	public List<String> getValues() {
 		return values;

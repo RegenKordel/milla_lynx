@@ -18,7 +18,7 @@ public class FormatTransformerService {
 
 	/**
 	 * 
-	 * @param jira Class files made with http://www.jsonschema2pojo.org/
+	 * @param jiras Class files made with http://www.jsonschema2pojo.org/
 	 * @return
 	 */
 	public Collection<Requirement> convertJirasToMulson(List<Jira> jiras) {
@@ -48,8 +48,6 @@ public class FormatTransformerService {
 		}
 		return requirements.values();
 	}
-
-
 
 	private void addSubtask(HashMap<String, Requirement> requirements, Requirement req, Subtask subtask) {
 		Requirement req2 = new Requirement();
