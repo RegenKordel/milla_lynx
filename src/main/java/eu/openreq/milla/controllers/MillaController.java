@@ -26,6 +26,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.openreq.milla.models.jira.Jira;
 import eu.openreq.milla.models.mulson.Requirement;
 import eu.openreq.milla.services.FormatTransformerService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @SpringBootApplication
 @Controller
@@ -35,8 +38,10 @@ public class MillaController {
 	@Value("${milla.mulperiAddress}")
     private String mulperiAddress;
 	
+	@ApiOperation(value = "Relay GET to Mulperi",
+		    notes = "Get a configuration from Mulperi")
 	@ResponseBody
-	@RequestMapping(value = "{path}", method = RequestMethod.GET)
+	@RequestMapping(value = "relay/{path}", method = RequestMethod.GET)
 	public ResponseEntity<?> getFromMulperi(@PathVariable("path") String path) {
 		
 		RestTemplate rt = new RestTemplate();
@@ -46,11 +51,12 @@ public class MillaController {
 		String completeAddress = mulperiAddress + actualPath;
 		
 		return rt.getForEntity(completeAddress, String.class);
-		
 	}
 	
+	@ApiOperation(value = "Relay POST to Mulperi",
+		    notes = "Post a model or configuration request to Mulperi")
 	@ResponseBody
-	@RequestMapping(value = "{path}", method = RequestMethod.POST)
+	@RequestMapping(value = "relay/{path}", method = RequestMethod.POST)
 	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path) {
 		
 		RestTemplate rt = new RestTemplate();
@@ -79,7 +85,7 @@ public class MillaController {
 	private String getActualPath(String path) {
 		if (path.equals("mulson")) return "models/mulson";
 		if (path.equals("reqif")) return "models/reqif";
-		if (path.contains("configurate:")) {
+		if (path.contains("configure:")) {
 			String modelName = path.split(":", 2)[1];			
 			return "models/" + modelName + "/configurations";
 		}
@@ -97,6 +103,13 @@ public class MillaController {
 	 * @return
 	 * @throws JsonProcessingException
 	 */
+	@ApiOperation(value = "Parse Jira",
+		    notes = "Generate a model from an array of Jira search queries (that return an array of issues)",
+		    response = String.class)
+	@ApiResponses(value = { 
+			@ApiResponse(code = 201, message = "Success, returns the name of the generated model"),
+			@ApiResponse(code = 400, message = "Failure, ex. malformed JSON"),
+			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs")}) 
 	@ResponseBody
 	@RequestMapping(value = "jira", method = RequestMethod.POST)
 	public ResponseEntity<?> loadFromJira(@RequestBody List<String> paths) throws JsonProcessingException {
