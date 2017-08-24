@@ -1,4 +1,4 @@
-package com.openreq.milla;
+package eu.openreq.milla.test;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
