@@ -1,8 +1,8 @@
 package eu.openreq.milla.controllers;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -79,7 +79,6 @@ public class MillaController {
 		}
 		
 		return response;
-		
 	}
 
 	private String getActualPath(String path) {
@@ -120,14 +119,14 @@ public class MillaController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		
-		ArrayList<Jira> jiras = new ArrayList<>();
+		ConcurrentHashMap<String, Jira> jiras = new ConcurrentHashMap<>();
 		
-		for(String url : paths) {
+		paths.parallelStream().forEach((url) -> {
 			ResponseEntity<Jira> jiraResponse = rt.getForEntity(url, Jira.class);
-			jiras.add(jiraResponse.getBody());
-		}
+			jiras.put(url, jiraResponse.getBody());
+		});
 		
-		Collection<Requirement> requirements = transformer.convertJirasToMulson(jiras);
+		Collection<Requirement> requirements = transformer.convertJirasToMulson(jiras.values());
 		
 		ObjectMapper mapper = new ObjectMapper();
 		String mulsonString = mapper.writeValueAsString(requirements);

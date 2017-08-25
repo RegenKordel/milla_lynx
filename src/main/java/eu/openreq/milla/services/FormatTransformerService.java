@@ -27,7 +27,7 @@ public class FormatTransformerService {
 	 * @param jiras Class files made with http://www.jsonschema2pojo.org/
 	 * @return
 	 */
-	public Collection<Requirement> convertJirasToMulson(List<Jira> jiras) {
+	public Collection<Requirement> convertJirasToMulson(Collection<Jira> jiras) {
 		HashMap<String, Requirement> requirements = new HashMap<>();
 		
 		for(Jira jira : jiras) {
