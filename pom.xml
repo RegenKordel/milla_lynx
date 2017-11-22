@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.openreq</groupId>
+	<groupId>eu.openreq</groupId>
 	<artifactId>Milla</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>Milla</name>
@@ -67,20 +67,17 @@
 			<version>1.5.3.RELEASE</version>
 		</dependency>
 		
-		<!-- swagger -->
+		<!-- Swagger -->
 		<dependency>
 		    <groupId>io.springfox</groupId>
 		    <artifactId>springfox-swagger2</artifactId>
 		    <version>2.7.0</version>
 		</dependency>
-
-		<!-- Swagger ui -->
 		<dependency>
 		    <groupId>io.springfox</groupId>
 		    <artifactId>springfox-swagger-ui</artifactId>
 		    <version>2.7.0</version>
 		</dependency>
-		
 	</dependencies>
 
 	<build>

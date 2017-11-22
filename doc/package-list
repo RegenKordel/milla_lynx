@@ -1,5 +1,6 @@
 com.openreq.milla
-com.openreq.milla.controllers
-com.openreq.milla.models.jira
-com.openreq.milla.models.mulson
-com.openreq.milla.services
+eu.openreq.milla
+eu.openreq.milla.controllers
+eu.openreq.milla.models.jira
+eu.openreq.milla.models.mulson
+eu.openreq.milla.services
