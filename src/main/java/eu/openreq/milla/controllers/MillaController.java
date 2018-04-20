@@ -1,6 +1,8 @@
 package eu.openreq.milla.controllers;
 
+import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,10 +24,13 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonElement;
 
+import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.jira.Jira;
 import eu.openreq.milla.models.mulson.Requirement;
 import eu.openreq.milla.services.FormatTransformerService;
+import eu.openreq.milla.qtjiraimporter.QtJiraImporter;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -133,6 +138,44 @@ public class MillaController {
 
 		return this.postToMulperi(mulsonString, "mulson");
 	}
+	
+	/**
+	 * Uses QtJiraImporter to get the issues of a selected project in mulson format to Mulperi
+	 * @return 
+	 * @throws JsonProcessingException
+	 */
+	@ApiOperation(value = "Import QT Jira",
+		    notes = "Generate a model from a project imported from Qt Jira (return an array of issues)",
+		    response = String.class)
+	@ApiResponses(value = { 
+			@ApiResponse(code = 201, message = "Success, returns the name/id of the generated model"),
+			@ApiResponse(code = 400, message = "Failure, ex. malformed JSON"),
+			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs")}) 
+	@ResponseBody
+	@RequestMapping(value = "qtjira", method = RequestMethod.POST)
+	public ResponseEntity<?> importFromQtJira() throws JsonProcessingException {
+		FormatTransformerService transformer = new FormatTransformerService();		
+		QtJiraImporter jiraImporter = new QtJiraImporter();
+		
+		HashMap<String, JsonElement> projectIssuesAsJson;
+		try {
+			projectIssuesAsJson = jiraImporter.getProjectIssues();
+			
+			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson.values());
+			Collection<Requirement> requirements = transformer.convertIssuesToMulson(issues);
+			
+			ObjectMapper mapper = new ObjectMapper();
+			String mulsonString = mapper.writeValueAsString(requirements);
+
+			return this.postToMulperi(mulsonString, "mulson");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+		
+	}	
+	
 	
 	@RequestMapping(value = "/example/gui", method = RequestMethod.GET)
 	public String exampleGUI(Model model) {

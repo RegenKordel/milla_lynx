@@ -1,6 +1,7 @@
 package eu.openreq.milla.qtjiraimporter;
 
 import com.google.gson.*;
+
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;
@@ -52,6 +53,7 @@ public class ProjectIssues
             String responseJSON = run.run(requestURL, client);
             Gson issueJSON = new Gson();
             JsonObject issueElement = issueJSON.fromJson(responseJSON, JsonElement.class).getAsJsonObject();
+           
             //filter out the error messages
             if(!issueElement.equals(error))
             {

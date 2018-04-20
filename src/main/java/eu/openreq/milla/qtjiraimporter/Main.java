@@ -1,17 +1,23 @@
-package eu.openreq.milla.qtjiraimporter;
+/*package eu.openreq.milla.qtjiraimporter;
 
 import com.google.gson.JsonElement;
 import java.io.IOException;
 import java.util.*;
 
-/**
+*//**
  * Notes: Some issues link to other projects (f.e. QTPLAYGROUND-1 links to QTBUG-32034),
  * since we have all the issues in JSON format, we can filter for specific keys.
- */
+ *//*
 
+*//**
+ * The original Main class by CML, now unused
+ *
+ *//*
 public class Main
 {
     // We want to select a project from a list of projects
+	
+	
     public static void main(String[] args) throws IOException
     {
         long start = System.nanoTime();
@@ -37,7 +43,7 @@ public class Main
                 int i = 0;
                 System.out.println("got everything");
 
-                //print everyhting
+                //print everything
 
                 for (String name: allIssues.keySet())
                 {
@@ -62,4 +68,4 @@ public class Main
         }
 
     }
-}
+}*/
