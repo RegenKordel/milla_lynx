@@ -141,7 +141,8 @@ public class MillaController {
 	
 	/**
 	 * Uses QtJiraImporter to get the issues of a selected project in mulson format to Mulperi
-	 * @return 
+	 * @param projectId, ID of the selected project
+	 * @return mulsonString to Mulperi
 	 * @throws JsonProcessingException
 	 */
 	@ApiOperation(value = "Import QT Jira",
@@ -153,13 +154,13 @@ public class MillaController {
 			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs")}) 
 	@ResponseBody
 	@RequestMapping(value = "qtjira", method = RequestMethod.POST)
-	public ResponseEntity<?> importFromQtJira() throws JsonProcessingException {
+	public ResponseEntity<?> importFromQtJira(@RequestBody String projectId) throws JsonProcessingException {
 		FormatTransformerService transformer = new FormatTransformerService();		
 		QtJiraImporter jiraImporter = new QtJiraImporter();
 		
 		HashMap<String, JsonElement> projectIssuesAsJson;
 		try {
-			projectIssuesAsJson = jiraImporter.getProjectIssues();
+			projectIssuesAsJson = jiraImporter.getProjectIssues(projectId);
 			
 			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson.values());
 			Collection<Requirement> requirements = transformer.convertIssuesToMulson(issues);
@@ -169,7 +170,9 @@ public class MillaController {
 
 			return this.postToMulperi(mulsonString, "mulson");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}

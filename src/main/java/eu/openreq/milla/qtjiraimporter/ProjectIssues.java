@@ -17,11 +17,11 @@ import java.util.HashMap;
  */
 public class ProjectIssues
 {
-    //hashmap to save in the Issue identifier and the JSON of the issue
+    //HashMap to save in the Issue identifier and the JSON of the issue
     private HashMap<String, JsonElement> _projectIssues;
     //name of the project
     private String _project;
-    //amounf of issues in a project
+    //amount of issues in a project
     private int _maxProjectIssues;
     //the REST API URI
     private String _PROJECT_ISSUES_URL;
@@ -59,6 +59,7 @@ public class ProjectIssues
             {
                 _projectIssues.put(_project + "-" + i, issueElement);
             }
+
             int perc10 = _maxProjectIssues/10;
 
             if(i%perc10==0)

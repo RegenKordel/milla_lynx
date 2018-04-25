@@ -1,5 +1,8 @@
 package eu.openreq.milla.services;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -62,17 +65,53 @@ public class FormatTransformerService {
 	/**
 	 * Converts JsonElement objects to Issue Objects
 	 * 
-	 * @param jsonElements a collection of JsonElement objects
+	 * @param jsonElements
+	 *            a collection of JsonElement objects
 	 * @return a List of Issue objects.
+	 * @throws IOException
 	 */
-	public List<Issue> convertJsonElementsToIssues(Collection<JsonElement> jsonElements) {
+	public List<Issue> convertJsonElementsToIssues(Collection<JsonElement> jsonElements) throws IOException {
 		List<Issue> issues = new ArrayList<>();
 		Gson gson = new Gson();
+
+//		//Printing all issues to a file for testing
+//		String fileName = ""; // File name and path must be added if a log file of the issues is needed
+//		FileWriter fileWriter = new FileWriter(fileName);
+//		PrintWriter printWriter = new PrintWriter(fileWriter);
+//		String newLine = System.getProperty("line.separator");
+		
 
 		for (JsonElement element : jsonElements) {
 			Issue issue = gson.fromJson(element, Issue.class);
 			issues.add(issue);
+			
+//			//The following lines are here just for printing the issues for testing
+//			if (issue.getFields() != null) {
+//				if (!issue.getFields().getIssuelinks().isEmpty()) {
+//					printWriter.print(issue.getKey() + "\t" + "issue links are" + "\t");
+//					for (int i = 0; i < issue.getFields().getIssuelinks().size(); i++) {
+//						// printWriter.print("invardIssues: " +
+//						if (issue.getFields().getIssuelinks().get(i).getInwardIssue() != null) {
+//							printWriter.print("inward issue" + "\t" 
+//									+ issue.getFields().getIssuelinks().get(i).getInwardIssue().getKey()
+//									+ "\t" +"issueLink type"  + "\t" + issue.getFields().getIssuelinks().get(i).getType().getName()
+//									+ "\t");
+//						}
+//						if (issue.getFields().getIssuelinks().get(i).getOutwardIssue() != null) {
+//							printWriter.print("outward issue" + "\t"
+//									+ issue.getFields().getIssuelinks().get(i).getOutwardIssue().getKey()
+//									+ "\t" + "issueLink type"+ "\t" + issue.getFields().getIssuelinks().get(i).getType().getName()
+//									+ "\t");
+//						}
+//					}
+//					printWriter.print(newLine);
+//				} else {
+//					printWriter.print(issue.getKey() + "\t"+ "no issue links" + newLine);
+//				}
+//			}
 		}
+		
+//		printWriter.close();
 
 		return issues;
 	}
@@ -80,30 +119,36 @@ public class FormatTransformerService {
 	/**
 	 * Converts a List of Issue objects into Mulson Requirements
 	 * 
-	 * @param issues List of Issue objects
+	 * @param issues
+	 *            List of Issue objects
 	 * @return a collection of Requirement objects
 	 */
-	public Collection<Requirement> convertIssuesToMulson(List<Issue> issues) {
+	public Collection<Requirement> convertIssuesToMulson(List<Issue> issues) throws Exception {
 		HashMap<String, Requirement> requirements = new HashMap<>();
-
 		for (Issue issue : issues) {
-			Requirement req = new Requirement();
-			req.setRequirementId(issue.getKey().replace("-", "_")); // Kumbang doesn't like hyphens
-			req.setName(issue.getFields().getSummary());
-			requirements.put(req.getRequirementId(), req);
+			try {
+				Requirement req = new Requirement();
+				req.setRequirementId(issue.getKey().replace("-", "_")); // Kumbang doesn't like hyphens
+				String name = issue.getFields().getSummary();
+				String fixedName = name.replaceAll("[^\\x20-\\x7e]", ""); //TODO This is a quick fix, must be modified into a better version
+				req.setName(fixedName);
+				requirements.put(req.getRequirementId(), req);
 
-			addAttribute(req, "priority", issue.getFields().getPriority().getId());
-			addAttribute(req, "status", issue.getFields().getStatus().getName());
+				addAttribute(req, "priority", issue.getFields().getPriority().getId());
+				addAttribute(req, "status", issue.getFields().getStatus().getName());
 
-			addRequiredRelationships(issue, req);
+				addRequiredRelationships(issue, req);
 
-			updateParentEpic(requirements, issue, req);
+				updateParentEpic(requirements, issue, req);
 
-			List<Subtask> subtasks = issue.getFields().getSubtasks();
-			if (subtasks != null && !subtasks.isEmpty()) {
-				for (Subtask subtask : subtasks) {
-					addSubtask(requirements, req, subtask);
+				List<Subtask> subtasks = issue.getFields().getSubtasks();
+				if (subtasks != null && !subtasks.isEmpty()) {
+					for (Subtask subtask : subtasks) {
+						addSubtask(requirements, req, subtask);
+					}
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 
