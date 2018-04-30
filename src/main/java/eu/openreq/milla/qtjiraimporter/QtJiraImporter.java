@@ -37,7 +37,7 @@ public class QtJiraImporter {
 		System.out.println("got everything");
 
 		// print everything
-//		String fileName = ""; //This must be added if a log file is needed
+//		String fileName = "" + projectId + "_log.txt"; //File path must be added if a log file is needed
 //		FileWriter fileWriter = new FileWriter(fileName);
 //		PrintWriter printWriter = new PrintWriter(fileWriter);
 //		String newLine = System.getProperty("line.separator");
@@ -48,7 +48,7 @@ public class QtJiraImporter {
 //			printWriter.print(key + " " + value + newLine);
 //			printWriter.print(" ");
 //			printWriter.print(" ");
-			System.out.println(key + " " + value);
+			System.out.println(key + " " + value); //Probably a good idea to leave the printing out when dealing with large projects
 			i++;
 		}
 //		printWriter.close();

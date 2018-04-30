@@ -1,6 +1,8 @@
 package eu.openreq.milla.controllers;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -62,8 +64,8 @@ public class MillaController {
 		    notes = "Post a model or configuration request to Mulperi")
 	@ResponseBody
 	@RequestMapping(value = "relay/{path}", method = RequestMethod.POST)
-	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path) {
-		
+	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path) throws IOException {
+
 		RestTemplate rt = new RestTemplate();
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -136,7 +138,13 @@ public class MillaController {
 		ObjectMapper mapper = new ObjectMapper();
 		String mulsonString = mapper.writeValueAsString(requirements);
 
-		return this.postToMulperi(mulsonString, "mulson");
+		try {
+			return this.postToMulperi(mulsonString, "mulson");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	/**
@@ -162,7 +170,7 @@ public class MillaController {
 		try {
 			projectIssuesAsJson = jiraImporter.getProjectIssues(projectId);
 			
-			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson.values());
+			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson.values(), projectId);
 			Collection<Requirement> requirements = transformer.convertIssuesToMulson(issues);
 			
 			ObjectMapper mapper = new ObjectMapper();
