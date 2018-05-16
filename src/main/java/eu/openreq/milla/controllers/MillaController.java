@@ -99,53 +99,53 @@ public class MillaController {
 		return path;
 	}
 	
-	/**
-	 * Inputs an array of search queries (return array of issues), ex:
-	 [
-	    "https://bugreports.qt.io/rest/api/2/search?jql=\"Epic Link\"=QTBUG-60623",
-	    "https://bugreports.qt.io/rest/api/2/search?jql=issue = QTBUG-60467"
-	 ]
-	 * @param paths
-	 * @return
-	 * @throws JsonProcessingException
-	 */
-	@ApiOperation(value = "Parse Jira",
-		    notes = "Generate a model from an array of Jira search queries (that return an array of issues)",
-		    response = String.class)
-	@ApiResponses(value = { 
-			@ApiResponse(code = 201, message = "Success, returns the name of the generated model"),
-			@ApiResponse(code = 400, message = "Failure, ex. malformed JSON"),
-			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs")}) 
-	@ResponseBody
-	@RequestMapping(value = "jira", method = RequestMethod.POST)
-	public ResponseEntity<?> loadFromJira(@RequestBody List<String> paths) throws JsonProcessingException {
-		FormatTransformerService transformer = new FormatTransformerService();
-		
-		RestTemplate rt = new RestTemplate();
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		
-		ConcurrentHashMap<String, Jira> jiras = new ConcurrentHashMap<>();
-		
-		paths.parallelStream().forEach((url) -> {
-			ResponseEntity<Jira> jiraResponse = rt.getForEntity(url, Jira.class);
-			jiras.put(url, jiraResponse.getBody());
-		});
-		
-		Collection<Requirement> requirements = transformer.convertJirasToMulson(jiras.values());
-		
-		ObjectMapper mapper = new ObjectMapper();
-		String mulsonString = mapper.writeValueAsString(requirements);
-
-		try {
-			return this.postToMulperi(mulsonString, "mulson");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-	}
+//	/**
+//	 * Inputs an array of search queries (return array of issues), ex:
+//	 [
+//	    "https://bugreports.qt.io/rest/api/2/search?jql=\"Epic Link\"=QTBUG-60623",
+//	    "https://bugreports.qt.io/rest/api/2/search?jql=issue = QTBUG-60467"
+//	 ]
+//	 * @param paths
+//	 * @return
+//	 * @throws JsonProcessingException
+//	 */
+//	@ApiOperation(value = "Parse Jira",
+//		    notes = "Generate a model from an array of Jira search queries (that return an array of issues)",
+//		    response = String.class)
+//	@ApiResponses(value = { 
+//			@ApiResponse(code = 201, message = "Success, returns the name of the generated model"),
+//			@ApiResponse(code = 400, message = "Failure, ex. malformed JSON"),
+//			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs")}) 
+//	@ResponseBody
+//	@RequestMapping(value = "jira", method = RequestMethod.POST)
+//	public ResponseEntity<?> loadFromJira(@RequestBody List<String> paths) throws JsonProcessingException {
+//		FormatTransformerService transformer = new FormatTransformerService();
+//		
+//		RestTemplate rt = new RestTemplate();
+//		
+//		HttpHeaders headers = new HttpHeaders();
+//		headers.setContentType(MediaType.APPLICATION_JSON);
+//		
+//		ConcurrentHashMap<String, Jira> jiras = new ConcurrentHashMap<>();
+//		
+//		paths.parallelStream().forEach((url) -> {
+//			ResponseEntity<Jira> jiraResponse = rt.getForEntity(url, Jira.class);
+//			jiras.put(url, jiraResponse.getBody());
+//		});
+//		
+//		Collection<Requirement> requirements = transformer.convertJirasToMulson(jiras.values());
+//		
+//		ObjectMapper mapper = new ObjectMapper();
+//		String mulsonString = mapper.writeValueAsString(requirements);
+//
+//		try {
+//			return this.postToMulperi(mulsonString, "mulson");
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			return null;
+//		}
+//	}
 	
 	/**
 	 * Uses QtJiraImporter to get the issues of a selected project in mulson format to Mulperi
@@ -171,7 +171,7 @@ public class MillaController {
 			projectIssuesAsJson = jiraImporter.getProjectIssues(projectId);
 			
 			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson.values(), projectId);
-			Collection<Requirement> requirements = transformer.convertIssuesToMulson(issues);
+			Collection<Requirement> requirements = transformer.convertIssuesToMulson(issues, projectId);
 			
 			ObjectMapper mapper = new ObjectMapper();
 			String mulsonString = mapper.writeValueAsString(requirements);

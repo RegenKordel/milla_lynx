@@ -33,7 +33,6 @@ public class QtJiraImporter {
 
 		// for testing
 		HashMap<String, JsonElement> allIssues = projectIssues.getProjectIssues();
-		int i = 0;
 		System.out.println("got everything");
 
 		// print everything
@@ -42,17 +41,16 @@ public class QtJiraImporter {
 //		PrintWriter printWriter = new PrintWriter(fileWriter);
 //		String newLine = System.getProperty("line.separator");
 		
-		for (String name : allIssues.keySet()) {
-			String key = name.toString();
-			JsonElement value = allIssues.get(name);
-//			printWriter.print(key + " " + value + newLine);
-//			printWriter.print(" ");
-//			printWriter.print(" ");
-			System.out.println(key + " " + value); //Probably a good idea to leave the printing out when dealing with large projects
-			i++;
-		}
+//		for (String name : allIssues.keySet()) {
+//			String key = name.toString();
+//			JsonElement value = allIssues.get(name);
+////			printWriter.print(key + " " + value + newLine);
+////			printWriter.print(" ");
+////			printWriter.print(" ");
+////			System.out.println(key + " " + value); //Probably a good idea to leave the printing out when dealing with large projects
+//
+//		}
 //		printWriter.close();
-		System.out.println(i);
 
 		long end = System.nanoTime();
 		long durationSec = (end - start) / 1000000000;

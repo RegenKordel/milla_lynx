@@ -69,8 +69,9 @@ public class FormatTransformerService {
 	}
 
 	/**
-	 * Converts JsonElement objects to Issue Objects and adds "mock" issues to the Issue list to replace the issues that are linked
-	 * to the project's issues, but are not in the same project
+	 * Converts JsonElement objects to Issue Objects and adds "mock" issues to the
+	 * Issue list to replace the issues that are linked to the project's issues, but
+	 * are not in the same project
 	 * 
 	 * @param jsonElements
 	 *            a collection of JsonElement objects
@@ -83,10 +84,10 @@ public class FormatTransformerService {
 		Gson gson = new Gson();
 
 		// Printing all issues to a file for testing
-//		String fileName = "" + projectId + "_issues.txt"; // File name and path must be added if  a log file of the issues is needed
-//		FileWriter fileWriter = new FileWriter(fileName);
-//		PrintWriter printWriter = new PrintWriter(fileWriter);
-//		String newLine = System.getProperty("line.separator");
+//		 String fileName = "" + projectId + "_issues.txt"; // File name and path must be added if a log file of the issues is needed
+//		 FileWriter fileWriter = new FileWriter(fileName);
+//		 PrintWriter printWriter = new PrintWriter(fileWriter);
+//		 String newLine = System.getProperty("line.separator");
 		Set<String> allIssueKeys = new HashSet<>();
 		Set<String> linkedProjectIssueKeys = new HashSet<>();
 
@@ -95,46 +96,48 @@ public class FormatTransformerService {
 			issues.add(issue);
 			allIssueKeys.add(issue.getKey());
 
-			// The following lines are here for getting all linked issues to their own sets and for printing all issues to a file
+			// The following lines are here for getting all linked issues to their own sets
+			// and for printing all issues to a file
 			if (issue.getFields() != null) {
 				if (!issue.getFields().getIssuelinks().isEmpty()) {
-			//		printWriter.print(issue.getKey() + "\t" + "issue links are" + "\t");
+//					 printWriter.print(issue.getKey() + "\t" + "issue links are" + "\t");
 					for (int i = 0; i < issue.getFields().getIssuelinks().size(); i++) {
 						if (issue.getFields().getIssuelinks().get(i).getInwardIssue() != null) {
 							String inward = issue.getFields().getIssuelinks().get(i).getInwardIssue().getKey();
 							linkedProjectIssueKeys.add(inward);
-							
-//							printWriter.print("inward issue" + "\t"
-//									+ issue.getFields().getIssuelinks().get(i).getInwardIssue().getKey() + "\t"
-//									+ "issueLink type" + "\t"
-//									+ issue.getFields().getIssuelinks().get(i).getType().getName() + "\t");
+
+//							 printWriter.print("inward issue" + "\t"
+//							 + issue.getFields().getIssuelinks().get(i).getInwardIssue().getKey() + "\t"
+//							 + "issueLink type" + "\t"
+//							 + issue.getFields().getIssuelinks().get(i).getType().getName() + "\t");
 						}
 						if (issue.getFields().getIssuelinks().get(i).getOutwardIssue() != null) {
 							String outward = issue.getFields().getIssuelinks().get(i).getOutwardIssue().getKey();
 							linkedProjectIssueKeys.add(outward);
-//							
-//							printWriter.print("outward issue" + "\t"
-//									+ issue.getFields().getIssuelinks().get(i).getOutwardIssue().getKey() + "\t"
-//									+ "issueLink type" + "\t"
-//									+ issue.getFields().getIssuelinks().get(i).getType().getName() + "\t");
+							
+//							 printWriter.print("outward issue" + "\t"
+//							 + issue.getFields().getIssuelinks().get(i).getOutwardIssue().getKey() + "\t"
+//							 + "issueLink type" + "\t"
+//							 + issue.getFields().getIssuelinks().get(i).getType().getName() + "\t");
 						}
 					}
-				//	printWriter.print(newLine);
-				} 
-//				else {
-//					printWriter.print(issue.getKey() + "\t" + "no issue links" + newLine);
-//				}
+//					 printWriter.print(newLine);
+				}
+//				 else {
+//				 printWriter.print(issue.getKey() + "\t" + "no issue links" + newLine);
+//				 }
 			}
 		}
 		int i = 1;
-		linkedProjectIssueKeys.removeAll(allIssueKeys); //This leaves to the set of linked issues only those issues that are in a different project
-		for (String key : linkedProjectIssueKeys) {		
+		linkedProjectIssueKeys.removeAll(allIssueKeys); // This leaves to the set of linked issues only those issues
+														// that are in a different project
+		for (String key : linkedProjectIssueKeys) {
 			Issue otherIssue = createMockIssue(key, i);
 			issues.add(otherIssue);
 			i++;
 		}
 
-	//	printWriter.close();
+//		 printWriter.close();
 
 		return issues;
 	}
@@ -146,7 +149,7 @@ public class FormatTransformerService {
 	 *            List of Issue objects
 	 * @return a collection of Requirement objects
 	 */
-	public Collection<Requirement> convertIssuesToMulson(List<Issue> issues) throws Exception {
+	public Collection<Requirement> convertIssuesToMulson(List<Issue> issues, String projectId) throws Exception {
 		HashMap<String, Requirement> requirements = new HashMap<>();
 		for (Issue issue : issues) {
 			try {
@@ -176,7 +179,6 @@ public class FormatTransformerService {
 				// e.printStackTrace();
 			}
 		}
-
 		return requirements.values();
 	}
 
@@ -228,7 +230,7 @@ public class FormatTransformerService {
 	}
 
 	private void addRequiredRelationships(Issue issue, Requirement req) {
-		if (issue.getFields().getIssuelinks() != null) { 
+		if (issue.getFields().getIssuelinks() != null) {
 			for (Issuelink link : issue.getFields().getIssuelinks()) {
 				if (!"depends on".equals(link.getType().getOutward())) {
 					continue;
@@ -256,12 +258,16 @@ public class FormatTransformerService {
 			System.out.println("No " + name);
 		}
 	}
-	
+
 	/**
-	 * Method for creating a "mock" Issue of Issues that are mentioned in a project's Issues' issueLinks, 
-	 * but do not belong to the same project.
-	 * @param key of the Issue associated with the project's issues, a real key/identifier
-	 * @param i an index used for creating mock identifiers
+	 * Method for creating a "mock" Issue of Issues that are mentioned in a
+	 * project's Issues' issueLinks, but do not belong to the same project.
+	 * 
+	 * @param key
+	 *            of the Issue associated with the project's issues, a real
+	 *            key/identifier
+	 * @param i
+	 *            an index used for creating mock identifiers
 	 * @return Issue with made-up fields etc
 	 */
 	private Issue createMockIssue(String key, int i) {
@@ -280,7 +286,7 @@ public class FormatTransformerService {
 		otherIssue.setFields(fields);
 		otherIssue.setId("" + i + 1);
 		otherIssue.setSelf("");
-		
+
 		return otherIssue;
 	}
 }

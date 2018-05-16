@@ -15,8 +15,21 @@ public class Run {
                 .build();
 
         try (Response response = client.newCall(request).execute())
-        {
-            return response.body().string();
+        {	
+//        	if (!response.isSuccessful()) {
+//        		System.out.println(response);
+//        		//throw new IOException("Unexpected code " + response);
+//        		return null;
+//        	}
+        	String result = response.body().string(); //Changed this, added close...
+
+        //	response.close(); //This is here for running QTBUG in four parts
+            return result;
+        //	return response.body().string();
         }
+//        catch(Exception e) {
+//        	System.out.println(e);
+//        	return null;
+//        }
     }
 }
