@@ -10,9 +10,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
+import eu.openreq.milla.models.entity.IssueObject;
 import eu.openreq.milla.models.jira.Fields;
 import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.jira.Issuelink;
@@ -25,6 +29,7 @@ import eu.openreq.milla.models.mulson.Attribute;
 import eu.openreq.milla.models.mulson.Relationship;
 import eu.openreq.milla.models.mulson.Requirement;
 import eu.openreq.milla.models.mulson.SubFeature;
+import eu.openreq.milla.repositories.IssueRepository;
 
 /**
  * Methods used to convert between formats
@@ -32,7 +37,11 @@ import eu.openreq.milla.models.mulson.SubFeature;
  * @author iivorait
  * @author tlaurinen
  */
+@Service
 public class FormatTransformerService {
+	
+	@Autowired
+	private IssueRepository issueRepository;
 
 	/**
 	 * 
@@ -95,7 +104,15 @@ public class FormatTransformerService {
 			Issue issue = gson.fromJson(element, Issue.class);
 			issues.add(issue);
 			allIssueKeys.add(issue.getKey());
-
+			
+			//Create a new IssueObject based on the issue and JsonElement and save
+			if(issueRepository.findByKey(issue.getKey())==null) {
+				IssueObject issueObject = new IssueObject();
+				issueObject.setKey(issue.getKey());
+				issueObject.setIssueId(issue.getId());
+				issueObject.setContent(element.toString());
+				issueRepository.save(issueObject);
+			}
 			// The following lines are here for getting all linked issues to their own sets
 			// and for printing all issues to a file
 			if (issue.getFields() != null) {

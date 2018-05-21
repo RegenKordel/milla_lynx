@@ -18,9 +18,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "key",
     "fields"
 })
-public class Issue {
 
-    @JsonProperty("expand")
+public class Issue  {
+
+	@JsonProperty("expand")
     private String expand;
     @JsonProperty("id")
     private String id;
@@ -42,12 +43,12 @@ public class Issue {
     public void setExpand(String expand) {
         this.expand = expand;
     }
-
+    
     @JsonProperty("id")
     public String getId() {
         return id;
     }
-
+    
     @JsonProperty("id")
     public void setId(String id) {
         this.id = id;

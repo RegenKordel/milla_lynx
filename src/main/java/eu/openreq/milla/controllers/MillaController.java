@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpEntity;
@@ -28,11 +29,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonElement;
 
+import eu.openreq.milla.models.entity.IssueObject;
 import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.jira.Jira;
 import eu.openreq.milla.models.mulson.Requirement;
 import eu.openreq.milla.services.FormatTransformerService;
 import eu.openreq.milla.qtjiraimporter.QtJiraImporter;
+import eu.openreq.milla.repositories.IssueRepository;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -44,6 +47,12 @@ public class MillaController {
 
 	@Value("${milla.mulperiAddress}")
     private String mulperiAddress;
+	
+	@Autowired
+	IssueRepository issueRepository;
+	
+	@Autowired
+	FormatTransformerService transformer;		
 	
 	@ApiOperation(value = "Relay GET to Mulperi",
 		    notes = "Get a configuration from Mulperi")
@@ -162,15 +171,23 @@ public class MillaController {
 			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs")}) 
 	@ResponseBody
 	@RequestMapping(value = "qtjira", method = RequestMethod.POST)
-	public ResponseEntity<?> importFromQtJira(@RequestBody String projectId) throws JsonProcessingException {
-		FormatTransformerService transformer = new FormatTransformerService();		
+	public ResponseEntity<?> importFromQtJira(@RequestBody String projectId) throws JsonProcessingException {		
 		QtJiraImporter jiraImporter = new QtJiraImporter();
+		//issueRepository.deleteAll();
+		//The following lines are there just for testing the database
+//		List<IssueObject> issueObjects = issueRepository.findAll();
+//		System.out.println("IssueObjects length is " + issueObjects.size());
+//		for(IssueObject issue : issueObjects) {
+//			System.out.println(issue.getKey());
+//		}
 		
 		HashMap<String, JsonElement> projectIssuesAsJson;
 		try {
 			projectIssuesAsJson = jiraImporter.getProjectIssues(projectId);
 			
 			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson.values(), projectId);
+			
+//			System.out.println("First issue on the list " + this.issueRepository.findByKey(issues.get(0).getKey()).getContent());
 			Collection<Requirement> requirements = transformer.convertIssuesToMulson(issues, projectId);
 			
 			ObjectMapper mapper = new ObjectMapper();
