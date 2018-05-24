@@ -3,6 +3,7 @@ package eu.openreq.milla.services;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,39 +44,39 @@ public class FormatTransformerService {
 	@Autowired
 	private IssueRepository issueRepository;
 
-	/**
-	 * 
-	 * @param jiras
-	 *            Class files made with http://www.jsonschema2pojo.org/
-	 * @return
-	 */
-	public Collection<Requirement> convertJirasToMulson(Collection<Jira> jiras) {
-		HashMap<String, Requirement> requirements = new HashMap<>();
-
-		for (Jira jira : jiras) {
-			for (Issue issue : jira.getIssues()) {
-				Requirement req = new Requirement();
-				req.setRequirementId(issue.getKey().replace("-", "_")); // Kumbang doesn't like hyphens
-				req.setName(issue.getFields().getSummary());
-				requirements.put(req.getRequirementId(), req);
-
-				addAttribute(req, "priority", issue.getFields().getPriority().getId());
-				addAttribute(req, "status", issue.getFields().getStatus().getName());
-
-				addRequiredRelationships(issue, req);
-
-				updateParentEpic(requirements, issue, req);
-
-				List<Subtask> subtasks = issue.getFields().getSubtasks();
-				if (subtasks != null && !subtasks.isEmpty()) {
-					for (Subtask subtask : subtasks) {
-						addSubtask(requirements, req, subtask);
-					}
-				}
-			}
-		}
-		return requirements.values();
-	}
+//	/**
+//	 * Not used anymore
+//	 * @param jiras
+//	 *            Class files made with http://www.jsonschema2pojo.org/
+//	 * @return
+//	 */
+//	public Collection<Requirement> convertJirasToMulson(Collection<Jira> jiras) {
+//		HashMap<String, Requirement> requirements = new HashMap<>();
+//
+//		for (Jira jira : jiras) {
+//			for (Issue issue : jira.getIssues()) {
+//				Requirement req = new Requirement();
+//				req.setRequirementId(issue.getKey().replace("-", "_")); // Kumbang doesn't like hyphens
+//				req.setName(issue.getFields().getSummary());
+//				requirements.put(req.getRequirementId(), req);
+//
+//				addAttribute(req, "priority", issue.getFields().getPriority().getId());
+//				addAttribute(req, "status", issue.getFields().getStatus().getName());
+//
+//				addRequiredRelationships(issue, req);
+//
+//				updateParentEpic(requirements, issue, req);
+//
+//				List<Subtask> subtasks = issue.getFields().getSubtasks();
+//				if (subtasks != null && !subtasks.isEmpty()) {
+//					for (Subtask subtask : subtasks) {
+//						addSubtask(requirements, req, subtask);
+//					}
+//				}
+//			}
+//		}
+//		return requirements.values();
+//	}
 
 	/**
 	 * Converts JsonElement objects to Issue Objects and adds "mock" issues to the
@@ -91,6 +92,8 @@ public class FormatTransformerService {
 			throws IOException {
 		List<Issue> issues = new ArrayList<>();
 		Gson gson = new Gson();
+		
+		long start = System.nanoTime();
 
 		// Printing all issues to a file for testing
 //		 String fileName = "" + projectId + "_issues.txt"; // File name and path must be added if a log file of the issues is needed
@@ -99,20 +102,16 @@ public class FormatTransformerService {
 //		 String newLine = System.getProperty("line.separator");
 		Set<String> allIssueKeys = new HashSet<>();
 		Set<String> linkedProjectIssueKeys = new HashSet<>();
-
+		System.out.println("Starting to create Issues and saving to database");
 		for (JsonElement element : jsonElements) {
 			Issue issue = gson.fromJson(element, Issue.class);
 			issues.add(issue);
 			allIssueKeys.add(issue.getKey());
 			
-			//Create a new IssueObject based on the issue and JsonElement and save
-			if(issueRepository.findByKey(issue.getKey())==null) {
-				IssueObject issueObject = new IssueObject();
-				issueObject.setKey(issue.getKey());
-				issueObject.setIssueId(issue.getId());
-				issueObject.setContent(element.toString());
-				issueRepository.save(issueObject);
-			}
+			//Create a new IssueObject based on the Issue and JsonElement and save
+//			if(issueRepository.findByKey(issue.getKey())==null) {
+//				saveIssueObjectToDatabase(issue, element);
+//			}
 			// The following lines are here for getting all linked issues to their own sets
 			// and for printing all issues to a file
 			if (issue.getFields() != null) {
@@ -145,16 +144,23 @@ public class FormatTransformerService {
 //				 }
 			}
 		}
+//		 printWriter.close();
+		 
 		int i = 1;
-		linkedProjectIssueKeys.removeAll(allIssueKeys); // This leaves to the set of linked issues only those issues
-														// that are in a different project
+		linkedProjectIssueKeys.removeAll(allIssueKeys); // This leaves to the set of linked issues only those issues that are in a different project
+		System.out.println("Issue creation and saving complete");											 
 		for (String key : linkedProjectIssueKeys) {
 			Issue otherIssue = createMockIssue(key, i);
 			issues.add(otherIssue);
 			i++;
 		}
+		System.out.println("MockIssues added");
+		long end = System.nanoTime();
+		long durationSec = (end - start) / 1000000000;
+		double durationMin = durationSec / 60.0;
 
-//		 printWriter.close();
+		System.out.println("All done, it took " + durationSec + " second(s) or " + durationMin + " minute(s).");
+		
 
 		return issues;
 	}
@@ -172,17 +178,14 @@ public class FormatTransformerService {
 			try {
 				Requirement req = new Requirement();
 				req.setRequirementId(issue.getKey().replace("-", "_")); // Kumbang doesn't like hyphens
-				String name = issue.getFields().getSummary();
-				String fixedName = name.replaceAll("[^\\x20-\\x7e]", ""); // TODO This is a quick fix, must be modified
-																			// into a better version
-				req.setName(fixedName);
+				String name = fixSpecialCharacters(issue.getFields().getSummary());
+				req.setName(name);
 				requirements.put(req.getRequirementId(), req);
 
 				addAttribute(req, "priority", issue.getFields().getPriority().getId());
 				addAttribute(req, "status", issue.getFields().getStatus().getName());
 
 				addRequiredRelationships(issue, req);
-
 				updateParentEpic(requirements, issue, req);
 
 				List<Subtask> subtasks = issue.getFields().getSubtasks();
@@ -197,6 +200,11 @@ public class FormatTransformerService {
 			}
 		}
 		return requirements.values();
+	}
+	
+	private String fixSpecialCharacters(String name) {
+		String fixedName = name.replaceAll("[^\\x20-\\x7e]", ""); // TODO This is a quick fix, must be modified into a better version
+		return fixedName;
 	}
 
 	private void addSubtask(HashMap<String, Requirement> requirements, Requirement req, Subtask subtask) {
@@ -305,5 +313,20 @@ public class FormatTransformerService {
 		otherIssue.setSelf("");
 
 		return otherIssue;
+	}
+	
+	/**
+	 * Creates an IssueObject and saves it to the database
+	 * @param issue
+	 * @param element
+	 */
+	private void saveIssueObjectToDatabase(Issue issue, JsonElement element) {
+		IssueObject issueObject = new IssueObject();
+		issueObject.setKey(issue.getKey());
+		issueObject.setIssueId(issue.getId());
+		issueObject.setContent(element.toString());
+		issueObject.setUpdated(issue.getFields().getUpdated());
+		issueObject.setTimestamp(LocalDateTime.now());
+		issueRepository.save(issueObject);
 	}
 }

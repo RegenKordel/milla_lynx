@@ -7,7 +7,7 @@ import okhttp3.Response;
 import java.io.IOException;
 
 public class Run {
-//	testiesti
+	
     public String run(String url, OkHttpClient client) throws IOException
     {
         Request request = new Request.Builder()
@@ -16,20 +16,16 @@ public class Run {
 
         try (Response response = client.newCall(request).execute())
         {	
-//        	if (!response.isSuccessful()) {
-//        		System.out.println(response);
-//        		//throw new IOException("Unexpected code " + response);
-//        		return null;
-//        	}
-        	String result = response.body().string(); //Changed this, added close...
-
-        //	response.close(); //This is here for running QTBUG in four parts
-            return result;
-        //	return response.body().string();
+        	if (!response.isSuccessful()) {
+        		//System.out.println(response);
+        		return null;
+        	}
+        	return response.body().string();
         }
-//        catch(Exception e) {
-//        	System.out.println(e);
-//        	return null;
-//        }
+        catch(Exception e) {
+        	System.out.println(url);
+        	System.out.println(e);
+        	return null;
+        }
     }
 }

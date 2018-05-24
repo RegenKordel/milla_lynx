@@ -1,5 +1,7 @@
 package eu.openreq.milla.models.entity;
 
+import java.time.LocalDateTime;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
@@ -22,6 +24,14 @@ public class IssueObject extends AbstractPersistable<Long>{
 	@Lob
 	@Column(name = "content")
 	private String content;
+	
+	//timestamp when updated in Jira (Fieldsin updated?)	
+	private String updated;
+	
+	//timestamp when added to the H2 databaseen (LocalDateTime?)
+	private LocalDateTime timestamp;
+	
+	//component
 
 	public String getKey() {
 		return key;
@@ -45,6 +55,22 @@ public class IssueObject extends AbstractPersistable<Long>{
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public String getUpdated() {
+		return updated;
+	}
+
+	public void setUpdated(String updated) {
+		this.updated = updated;
+	}
+
+	public LocalDateTime getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(LocalDateTime timestamp) {
+		this.timestamp = timestamp;
 	}
 	
 }
