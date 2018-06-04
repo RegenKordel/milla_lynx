@@ -1,8 +1,7 @@
 package eu.openreq.milla.controllers;
 
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +34,6 @@ import eu.openreq.milla.models.jira.Jira;
 import eu.openreq.milla.models.mulson.Requirement;
 import eu.openreq.milla.services.FormatTransformerService;
 import eu.openreq.milla.qtjiraimporter.QtJiraImporter;
-import eu.openreq.milla.repositories.IssueRepository;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -46,90 +44,115 @@ import io.swagger.annotations.ApiResponses;
 public class MillaController {
 
 	@Value("${milla.mulperiAddress}")
-    private String mulperiAddress;
-	
+	private String mulperiAddress;
+
+	@Value("${milla.mallikasAddress}")
+	private String mallikasAddress;
+
 	@Autowired
-	IssueRepository issueRepository;
-	
-	@Autowired
-	FormatTransformerService transformer;		
-	
-	@ApiOperation(value = "Relay POST to Mulperi",
-		    notes = "Post a model or configuration request to Mulperi")
+	FormatTransformerService transformer;
+
+	@ApiOperation(value = "Relay POST to Mulperi", notes = "Post a model or configuration request to Mulperi")
 	@ResponseBody
 	@RequestMapping(value = "relay/{path}", method = RequestMethod.POST)
-	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path) throws IOException {
+	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path)
+			throws IOException {
 
 		RestTemplate rt = new RestTemplate();
-		
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		
+
 		String actualPath = getActualPath(path);
-		
+
 		String completeAddress = mulperiAddress + actualPath;
-		
+
 		HttpEntity<String> entity = new HttpEntity<String>(data, headers);
-		
+
 		ResponseEntity<?> response = null;
-		
+
 		try {
 			response = rt.postForEntity(completeAddress, entity, String.class);
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("Mulperi error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
 		}
-		
+
 		return response;
 	}
 
-	public String getActualPath(String path) {	//Changed to public for TestingContoller
-		if (path.equals("mulson")) return "models/mulson";
-		if (path.equals("reqif")) return "models/reqif";
+	@ApiOperation(value = "Relay POST to Mallikas", notes = "Post a list of issues to Mallikas database")
+	@ResponseBody
+	@RequestMapping(value = "/mallikas", method = RequestMethod.POST)
+	public ResponseEntity<?> postToMallikas(@RequestBody List<IssueObject> issues) throws IOException {
+
+		RestTemplate rt = new RestTemplate();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		String completeAddress = mallikasAddress + "/mallikas";
+
+		HttpEntity<Object> entity = new HttpEntity<Object>(issues, headers);
+		List<IssueObject> issueList = issues;
+		ResponseEntity<?> response = null;
+
+		try {
+			response = rt.postForEntity(completeAddress, issueList, List.class);
+
+		} catch (HttpClientErrorException e) {
+			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+		}
+		return response;
+	}
+
+	public String getActualPath(String path) { // Changed to public for TestingContoller
+		if (path.equals("mulson"))
+			return "models/mulson";
+		if (path.equals("reqif"))
+			return "models/reqif";
 		if (path.contains("configure:")) {
-			String modelName = path.split(":", 2)[1];			
+			String modelName = path.split(":", 2)[1];
 			return "models/" + modelName + "/configurations";
 		}
-			
+
 		return path;
 	}
-	
 
 	/**
-	 * Uses QtJiraImporter to get the issues of a selected project in mulson format to Mulperi
-	 * @param projectId, ID of the selected project
+	 * Uses QtJiraImporter to get the issues of a selected project in mulson format
+	 * to Mulperi
+	 * 
+	 * @param projectId,
+	 *            ID of the selected project
 	 * @return mulsonString to Mulperi
 	 * @throws JsonProcessingException
 	 */
-	@ApiOperation(value = "Import QT Jira",
-		    notes = "Generate a model from a project imported from Qt Jira (return an array of issues)",
-		    response = String.class)
-	@ApiResponses(value = { 
-			@ApiResponse(code = 201, message = "Success, returns the name/id of the generated model"),
+	@ApiOperation(value = "Import QT Jira", notes = "Generate a model from a project imported from Qt Jira (return an array of issues)", response = String.class)
+	@ApiResponses(value = { @ApiResponse(code = 201, message = "Success, returns the name/id of the generated model"),
 			@ApiResponse(code = 400, message = "Failure, ex. malformed JSON"),
-			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs")}) 
+			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs") })
 	@ResponseBody
 	@RequestMapping(value = "qtjira", method = RequestMethod.POST)
-	public ResponseEntity<?> importFromQtJira(@RequestBody String projectId) throws JsonProcessingException {		
+	public ResponseEntity<?> importFromQtJira(@RequestBody String projectId) throws JsonProcessingException {
 		QtJiraImporter jiraImporter = new QtJiraImporter();
-		//issueRepository.deleteAll();
-		//The following lines are there just for testing the database
-//		List<IssueObject> issueObjects = issueRepository.findAll();
-//		System.out.println("IssueObjects length is " + issueObjects.size());
-//		for(IssueObject issue : issueObjects) {
-//			System.out.println(issue.getKey());
-//		}
-		
-		HashMap<String, JsonElement> projectIssuesAsJson;
+
+		// HashMap<String, JsonElement> projectIssuesAsJson;
+		List<JsonElement> projectIssuesAsJson;
 		try {
 			projectIssuesAsJson = jiraImporter.getProjectIssues(projectId);
-			
-			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson.values(), projectId);
-			
-//			System.out.println("First issue on the list " + this.issueRepository.findByKey(issues.get(0).getKey()).getContent());
+
+			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson, projectId);
+			// if(projectIssuesAsJson.size()>10000) {
+			// issues =
+			// transformer.convertJsonElementsToIssuesLargeProject(projectIssuesAsJson,
+			// projectId);
+			// }
+
 			Collection<Requirement> requirements = transformer.convertIssuesToMulson(issues, projectId);
-			
+
 			ObjectMapper mapper = new ObjectMapper();
 			String mulsonString = mapper.writeValueAsString(requirements);
+			this.postToMallikas(transformer.getIssueObjects());
 
 			return this.postToMulperi(mulsonString, "mulson");
 		} catch (IOException e) {
@@ -139,8 +162,7 @@ public class MillaController {
 			e.printStackTrace();
 			return null;
 		}
-		
-	}	
-	
-	
+
+	}
+
 }

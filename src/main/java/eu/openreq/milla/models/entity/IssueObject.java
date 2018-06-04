@@ -5,13 +5,8 @@ import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
-import javax.persistence.OneToOne;
 
 import org.springframework.data.jpa.domain.AbstractPersistable;
-
-import com.google.gson.JsonElement;
-
-import eu.openreq.milla.models.jira.Issue;
 
 
 @Entity
@@ -29,8 +24,8 @@ public class IssueObject extends AbstractPersistable<Long>{
 	private String updated;
 	
 	//timestamp when added to the H2 databaseen (LocalDateTime?)
-	private LocalDateTime timestamp;
-	
+//	private LocalDateTime timestamp;
+//	
 	//component
 
 	public String getKey() {
@@ -65,12 +60,12 @@ public class IssueObject extends AbstractPersistable<Long>{
 		this.updated = updated;
 	}
 
-	public LocalDateTime getTimestamp() {
-		return timestamp;
-	}
-
-	public void setTimestamp(LocalDateTime timestamp) {
-		this.timestamp = timestamp;
-	}
+//	public LocalDateTime getTimestamp() {
+//		return timestamp;
+//	}
+//
+//	public void setTimestamp(LocalDateTime timestamp) {
+//		this.timestamp = timestamp;
+//	}
 	
 }

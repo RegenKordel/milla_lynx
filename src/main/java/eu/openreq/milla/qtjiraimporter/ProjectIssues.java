@@ -5,7 +5,9 @@ import com.google.gson.*;
 import okhttp3.OkHttpClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class gets all the issues of a project. Since the issues are enumerated
@@ -15,20 +17,26 @@ import java.util.HashMap;
  */
 public class ProjectIssues {
 	// HashMap to save in the Issue identifier and the JSON of the issue
-	private HashMap<String, JsonElement> _projectIssues;
+//	private HashMap<String, JsonElement> _projectIssues;
 	// name of the project
 	private String _project;
 	// amount of issues in a project
 	private int _maxProjectIssues;
 	// the REST API URI
 	private String _PROJECT_ISSUES_URL;
+	
+//	private List<String> responses;
+	
+	private List<JsonElement> projectIssues;
 
 	public ProjectIssues(String project) throws IOException {
-		_projectIssues = new HashMap<String, JsonElement>();
+//		_projectIssues = new HashMap<String, JsonElement>();
 		_project = project;
 		NumberOfIssuesHTML numberOfIssues = new NumberOfIssuesHTML(project);
 		_maxProjectIssues = numberOfIssues.getNumberOfIssues();
 		_PROJECT_ISSUES_URL = "https://bugreports.qt.io/rest/api/2/issue/" + _project + "-%d";
+//		responses = new ArrayList<String>();
+		projectIssues = new ArrayList<JsonElement>();
 	}
 
 	public void collectAllIssues() throws IOException {
@@ -48,16 +56,19 @@ public class ProjectIssues {
 			// access the issue JSONs
 			String requestURL = String.format(_PROJECT_ISSUES_URL, i);
 			String responseJSON = run.run(requestURL, client);
-
+			
 			if (responseJSON != null) {
+//				responses.add(responseJSON);
 				JsonObject issueElement = issueJSON.fromJson(responseJSON, JsonElement.class).getAsJsonObject();
-				_projectIssues.put(_project + "-" + i, issueElement);
+				//_projectIssues.put(_project + "-" + i, issueElement);
+				projectIssues.add(issueElement);
 			}
 			if (i % perc10 == 0) {
 				printProgress(i, j, perc10);
 				j++;
 			}
 		}
+	
 	}
 
 	private void printProgress(long i, int j, int perc10) {
@@ -74,8 +85,16 @@ public class ProjectIssues {
 
 	}
 
-	public HashMap<String, JsonElement> getProjectIssues() {
-		return _projectIssues;
+//	public HashMap<String, JsonElement> getProjectIssues() {
+//		return _projectIssues;
+//	}
+	
+	public List<JsonElement> getProjectIssues() {
+		return projectIssues;
 	}
+	
+//	public List<String> getResponses() {
+//		return responses;
+//	}
 
 }
