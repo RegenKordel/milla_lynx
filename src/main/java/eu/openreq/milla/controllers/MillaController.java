@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,6 +34,7 @@ import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.jira.Jira;
 import eu.openreq.milla.models.mulson.Requirement;
 import eu.openreq.milla.services.FormatTransformerService;
+import eu.openreq.milla.qtjiraimporter.ProjectIssues;
 import eu.openreq.milla.qtjiraimporter.QtJiraImporter;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -86,13 +88,13 @@ public class MillaController {
 	public ResponseEntity<?> postToMallikas(@RequestBody List<IssueObject> issues) throws IOException {
 
 		RestTemplate rt = new RestTemplate();
-
+		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		String completeAddress = mallikasAddress + "/mallikas";
 
-		HttpEntity<Object> entity = new HttpEntity<Object>(issues, headers);
+	//	HttpEntity<Object> entity = new HttpEntity<Object>(issues, headers);
 		List<IssueObject> issueList = issues;
 		ResponseEntity<?> response = null;
 
@@ -125,7 +127,7 @@ public class MillaController {
 	 * @param projectId,
 	 *            ID of the selected project
 	 * @return mulsonString to Mulperi
-	 * @throws JsonProcessingException
+	 * @throws IOException 
 	 */
 	@ApiOperation(value = "Import QT Jira", notes = "Generate a model from a project imported from Qt Jira (return an array of issues)", response = String.class)
 	@ApiResponses(value = { @ApiResponse(code = 201, message = "Success, returns the name/id of the generated model"),
@@ -133,26 +135,48 @@ public class MillaController {
 			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs") })
 	@ResponseBody
 	@RequestMapping(value = "qtjira", method = RequestMethod.POST)
-	public ResponseEntity<?> importFromQtJira(@RequestBody String projectId) throws JsonProcessingException {
-		QtJiraImporter jiraImporter = new QtJiraImporter();
-
-		// HashMap<String, JsonElement> projectIssuesAsJson;
+	public ResponseEntity<?> importFromQtJira(@RequestBody String projectId) throws IOException {
+	//	QtJiraImporter jiraImporter = new QtJiraImporter();
+		
+		ProjectIssues projectIssues = new ProjectIssues(projectId);
+		
+		int issueCount = projectIssues.getNumberOfIssues();
+		int divided = issueCount;
+		
+		if(issueCount>10000) {
+			divided = issueCount/10;
+		}
+		int start = 1;
+		
+		int end = divided;
 		List<JsonElement> projectIssuesAsJson;
 		try {
-			projectIssuesAsJson = jiraImporter.getProjectIssues(projectId);
+			
+			while(true) {
+				if(end>=issueCount+divided) {
+					break;
+				}
+				projectIssuesAsJson = projectIssues.collectIssues(start, end);
+				List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson, projectId);
+				this.postToMallikas(transformer.getIssueObjects());
+				projectIssuesAsJson.clear();
+				issues.clear();
+				System.out.println("End is " + end);
+				start = end+1;
+				end = end+ divided;
+			}
+			
 
-			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson, projectId);
-			// if(projectIssuesAsJson.size()>10000) {
-			// issues =
-			// transformer.convertJsonElementsToIssuesLargeProject(projectIssuesAsJson,
-			// projectId);
-			// }
+			
 
-			Collection<Requirement> requirements = transformer.convertIssuesToMulson(issues, projectId);
-
-			ObjectMapper mapper = new ObjectMapper();
-			String mulsonString = mapper.writeValueAsString(requirements);
-			this.postToMallikas(transformer.getIssueObjects());
+//			List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson, projectId);
+//			Collection<Requirement> requirements = transformer.convertIssuesToMulson(issues, projectId);
+//
+//			ObjectMapper mapper = new ObjectMapper();
+//			String mulsonString = mapper.writeValueAsString(requirements);
+//			this.postToMallikas(transformer.getIssueObjects());
+			
+			String mulsonString = "";
 
 			return this.postToMulperi(mulsonString, "mulson");
 		} catch (IOException e) {
