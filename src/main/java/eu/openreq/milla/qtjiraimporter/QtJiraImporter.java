@@ -16,6 +16,7 @@ import com.google.gson.JsonElement;
 
 public class QtJiraImporter {
 	
+	private int numberOfIssues;
 //	/**
 //	 * Method for getting all issues related to one project as JsonElements
 //	 * @return a HashMap containing all issues belonging to one project
@@ -63,11 +64,13 @@ public class QtJiraImporter {
 //	}
 	
 	/**
+	 * AT THE MOMENT UNUSED, MAY BE MODIFIED LATER
+	 * 
 	 * Method for getting all issues related to one project as JsonElements
 	 * @return a HashMap containing all issues belonging to one project
 	 * @throws IOException
 	 */
-	public List<JsonElement> getProjectIssues(String projectId) throws IOException {
+	public List<JsonElement> getProjectIssues(String projectId, int startPoint, int endPoint) throws IOException {
 		long start = System.nanoTime();
 	
 		if(projectId==null) {
@@ -76,7 +79,8 @@ public class QtJiraImporter {
 		}
 
 		ProjectIssues projectIssues = new ProjectIssues(projectId);
-		projectIssues.collectAllIssues();
+		numberOfIssues = projectIssues.getNumberOfIssues();
+	//	projectIssues.collectAllIssues(startPoint, endPoint);
 //		responses = projectIssues.getResponses();
 
 		// for testing
@@ -106,6 +110,10 @@ public class QtJiraImporter {
 
 		System.out.println("done, it took " + durationSec + " second(s) or " + durationMin + " minute(s).");
 		return allIssues;
+	}
+	
+	public int getNumberOfIssues() {
+		return numberOfIssues;
 	}
 
 }

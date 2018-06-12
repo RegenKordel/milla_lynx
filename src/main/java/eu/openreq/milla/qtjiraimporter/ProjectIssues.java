@@ -25,9 +25,11 @@ public class ProjectIssues {
 	// the REST API URI
 	private String _PROJECT_ISSUES_URL;
 	
-//	private List<String> responses;
-	
 	private List<JsonElement> projectIssues;
+	
+	private int start;
+	private int end;
+	
 
 	public ProjectIssues(String project) throws IOException {
 //		_projectIssues = new HashMap<String, JsonElement>();
@@ -35,11 +37,50 @@ public class ProjectIssues {
 		NumberOfIssuesHTML numberOfIssues = new NumberOfIssuesHTML(project);
 		_maxProjectIssues = numberOfIssues.getNumberOfIssues();
 		_PROJECT_ISSUES_URL = "https://bugreports.qt.io/rest/api/2/issue/" + _project + "-%d";
-//		responses = new ArrayList<String>();
 		projectIssues = new ArrayList<JsonElement>();
 	}
 
-	public void collectAllIssues() throws IOException {
+//	public void collectAllIssues(int start, int end) throws IOException {
+//		this.start = start;
+//		this.end = end;
+//		OkHttpClient client = new OkHttpClient();
+//		Run run = new Run();
+//
+////		// create the error message JSON
+////		JsonParser parser = new JsonParser();
+////		JsonObject error = parser.parse("{\"errorMessages\":[\"Issue Does Not Exist\"],\"errors\":{}}")
+////				.getAsJsonObject();
+//
+//		int j = 1;
+//		Gson issueJSON = new Gson();
+//		int perc10 = end / 10;
+//
+//		for (int i = start; i <= end; i++) {
+//			// access the issue JSONs
+//			String requestURL = String.format(_PROJECT_ISSUES_URL, i);
+//			String responseJSON = run.run(requestURL, client);
+//			
+//			if (responseJSON != null) {
+////				responses.add(responseJSON);
+//				JsonObject issueElement = issueJSON.fromJson(responseJSON, JsonElement.class).getAsJsonObject();
+//				//_projectIssues.put(_project + "-" + i, issueElement);
+//				projectIssues.add(issueElement);
+//				issueElement = null;
+//			}
+////			if (i % perc10 == 0) {
+////				printProgress(i, j, perc10);
+////				j++;
+////			}
+//			requestURL = null;
+//			responseJSON = null;
+//		}
+//	
+//	}
+	
+	
+	public List<JsonElement> collectIssues(int start, int end) throws IOException {
+		this.start = start;
+		this.end = end;
 		OkHttpClient client = new OkHttpClient();
 		Run run = new Run();
 
@@ -50,9 +91,9 @@ public class ProjectIssues {
 
 		int j = 1;
 		Gson issueJSON = new Gson();
-		int perc10 = _maxProjectIssues / 10;
+		int perc10 = end / 10;
 
-		for (long i = 1; i <= _maxProjectIssues; i++) {
+		for (int i = start; i <= end; i++) {
 			// access the issue JSONs
 			String requestURL = String.format(_PROJECT_ISSUES_URL, i);
 			String responseJSON = run.run(requestURL, client);
@@ -62,14 +103,20 @@ public class ProjectIssues {
 				JsonObject issueElement = issueJSON.fromJson(responseJSON, JsonElement.class).getAsJsonObject();
 				//_projectIssues.put(_project + "-" + i, issueElement);
 				projectIssues.add(issueElement);
+				issueElement = null;
 			}
-			if (i % perc10 == 0) {
-				printProgress(i, j, perc10);
-				j++;
-			}
+//			if (i % perc10 == 0) {
+//				printProgress(i, j, perc10);
+//				j++;
+//			}
+			requestURL = null;
+			responseJSON = null;
 		}
+		
+		return projectIssues;
 	
 	}
+
 
 	private void printProgress(long i, int j, int perc10) {
 		int k = j * 10;
@@ -93,8 +140,8 @@ public class ProjectIssues {
 		return projectIssues;
 	}
 	
-//	public List<String> getResponses() {
-//		return responses;
-//	}
+	public int getNumberOfIssues() {
+		return _maxProjectIssues;
+	}
 
 }
