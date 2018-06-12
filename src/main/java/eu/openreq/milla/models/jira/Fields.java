@@ -65,6 +65,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "customfield_10910",
     "customfield_10911",
     "progress",
+    "comment",
     "votes",
     "customfield_10030",
     "customfield_10500",
@@ -183,6 +184,8 @@ public class Fields {
     private Object customfield10911;
     @JsonProperty("progress")
     private Progress progress;
+    @JsonProperty("comment")
+    private Comment comment;
     @JsonProperty("votes")
     private Votes votes;
     @JsonProperty("customfield_10030")
@@ -726,6 +729,17 @@ public class Fields {
     @JsonProperty("progress")
     public void setProgress(Progress progress) {
         this.progress = progress;
+    }
+    
+    @JsonProperty("comment")
+    public Comment getComment() {
+    
+        return comment;
+    }
+
+    @JsonProperty("commet")
+    public void setComment(Comment comment) {
+        this.comment = comment;
     }
 
     @JsonProperty("votes")
