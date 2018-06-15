@@ -14,7 +14,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "self",
     "id",
-    "body"
+    "body",
+    "created"
 })
 public class Comments {
 
@@ -26,6 +27,8 @@ public class Comments {
     private String body;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
+    private String created;
+    
 
     @JsonProperty("self")
     public String getSelf() {
@@ -66,5 +69,13 @@ public class Comments {
     public void setAdditionalProperty(String body, Object value) {
         this.additionalProperties.put(body, value);
     }
+
+	public String getCreated() {
+		return created;
+	}
+
+	public void setCreated(String created) {
+		this.created = created;
+	}
 
 }

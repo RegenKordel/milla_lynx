@@ -23,12 +23,12 @@ public class Comment {
 
     @JsonProperty("comments")
     public List<Comments> getComments() {
-    	
-    	if (this.comments.size() != 0) {
-    		System.out.println("Id: " + comments.get(0).getId() + " Body: " + comments.get(0).getBody());
-    	} else {
-    		System.out.println("First issue has no comments.");
-    	}
+//    	
+//    	if (this.comments.size() != 0) {
+//    		System.out.println("Id: " + comments.get(0).getId() + " Body: " + comments.get(0).getBody());
+//    	} else {
+//    		System.out.println("First issue has no comments.");
+//    	}
     	return comments;
     }
 

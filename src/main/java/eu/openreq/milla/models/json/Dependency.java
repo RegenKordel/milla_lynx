@@ -11,6 +11,15 @@ import com.google.gson.annotations.SerializedName;
 public class Dependency {
 
 	/**
+	* The unique identifier of a dependency
+	* (Required)
+	* 
+	*/
+	@SerializedName("id")
+	@Expose
+	private String id;
+	
+	/**
 	* The type of dependency between requirements
 	* (Required)
 	* 
@@ -37,17 +46,17 @@ public class Dependency {
 	* (Required)
 	* 
 	*/
-	@SerializedName("from")
+	@SerializedName("fromId")
 	@Expose
-	private Requirement from;
+	private String fromId;
 	/**
 	* The requirement dependent on another
 	* (Required)
 	* 
 	*/
-	@SerializedName("to")
+	@SerializedName("toId")
 	@Expose
-	private Requirement to;
+	private String toId;
 	
 	/**
 	* Creation timestamp
@@ -56,8 +65,16 @@ public class Dependency {
 	*/
 	@SerializedName("created_at")
 	@Expose
-	private int created_at;
+	private long created_at;
 
+	public String getId() {
+		return id;
+	}
+	
+	public void setId(String id) {
+		this.id=id;
+	}
+	
 	public Dependency_type getDependency_type() {
 		return dependency_type;
 	}
@@ -82,27 +99,27 @@ public class Dependency {
 		this.status = status;
 	}
 	
-	public Requirement getFrom() {
-		return from;
+	public String getFromId() {
+		return fromId;
 	}
 	
-	public void setFrom(Requirement from) {
-		this.from = from;
+	public void setFromId(String fromId) {
+		this.fromId = fromId;
 	}
 	
-	public Requirement getTo() {
-		return to;
+	public String getToId() {
+		return toId;
 	}
 	
-	public void setTo(Requirement to) {
-		this.to = to;
+	public void setToId(String toId) {
+		this.toId = toId;
 	}
 	
-	public int getCreated_at() {
+	public long getCreated_at() {
 		return created_at;
 	}
 	
-	public void setCreated_at(int created_at) {
+	public void setCreated_at(long created_at) {
 		this.created_at = created_at;
 	}
 }

@@ -34,21 +34,21 @@ public class Project {
 	*/
 	@SerializedName("created_at")
 	@Expose
-	private int created_at;
+	private long created_at;
 	/**
 	* Last modification time
 	* 
 	*/
 	@SerializedName("modified_at")
 	@Expose
-	private int modified_at;
+	private long modified_at;
 	/**
 	* The requirements specified in a project
 	* 
 	*/
 	@SerializedName("specifiedRequirements")
 	@Expose
-	private List<Requirement> specifiedRequirements = null;
+	private List<String> specifiedRequirements = null;
 	
 	public String getId() {
 	return id;
@@ -66,27 +66,27 @@ public class Project {
 	this.name = name;
 	}
 	
-	public int getCreated_at() {
+	public long getCreated_at() {
 	return created_at;
 	}
 	
-	public void setCreated_at(int created_at) {
+	public void setCreated_at(long created_at) {
 	this.created_at = created_at;
 	}
 	
-	public int getModified_at() {
+	public long getModified_at() {
 	return modified_at;
 	}
 	
-	public void setModified_at(int modified_at) {
+	public void setModified_at(long modified_at) {
 	this.modified_at = modified_at;
 	}
 	
-	public List<Requirement> getSpecifiedRequirements() {
+	public List<String> getSpecifiedRequirements() {
 	return specifiedRequirements;
 	}
 	
-	public void setSpecifiedRequirements(List<Requirement> specifiedRequirements) {
+	public void setSpecifiedRequirements(List<String> specifiedRequirements) {
 	this.specifiedRequirements = specifiedRequirements;
 	}
 }
