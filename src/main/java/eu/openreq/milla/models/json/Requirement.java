@@ -172,6 +172,9 @@ public class Requirement {
 	}
 	
 	public List<Requirement> getChildren() {
+		if(children==null) {
+			children = new ArrayList<Requirement>();
+		}
 		return children;
 	}
 	
