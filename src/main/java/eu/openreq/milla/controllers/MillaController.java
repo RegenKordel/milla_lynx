@@ -52,8 +52,8 @@ import io.swagger.annotations.ApiResponses;
 
 @SpringBootApplication
 @Controller
-@RequestMapping(value = "/")
-//@RequestMapping("uh/milla/")
+//@RequestMapping(value = "/")
+@RequestMapping("uh/milla/")
 public class MillaController {
 
 	@Value("${milla.mulperiAddress}")
