@@ -53,6 +53,7 @@ import io.swagger.annotations.ApiResponses;
 @SpringBootApplication
 @Controller
 @RequestMapping(value = "/")
+//@RequestMapping("uh/milla/")
 public class MillaController {
 
 	@Value("${milla.mulperiAddress}")
@@ -322,6 +323,29 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(requirement, HttpStatus.FOUND);
 		return response;
 	}
+	
+	/**
+	 * Fetch one Requirement and Requirements that depend on it from Mallikas
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Fetch one selected requirement and requirements dependent on it from the database", notes = "Fetch selected requirement and requirements that depend on it together with their dependencies from Mallikas database")
+	@ResponseBody
+	@RequestMapping(value = "/requirementAndDependents", method = RequestMethod.POST)
+	public ResponseEntity<?> getOneRequirementAndDependents(String id) throws IOException {
+
+		System.out.println("getOneRequirementAndDependents called");
+		String completeAddress = mallikasAddress + "/mallikas/dependent";
+
+		String requirement = mallikasService.getOneRequirementFromMallikas(completeAddress, id);
+
+		if (requirement == null || requirement.equals("")) {
+			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
+		}
+		ResponseEntity<String> response = new ResponseEntity<>(requirement, HttpStatus.FOUND);
+		return response;
+	}
 
 	/**
 	 * Uses QtJiraImporter to get the issues of a selected project in OpenReq JSON
@@ -392,7 +416,8 @@ public class MillaController {
 			//
 			// ObjectMapper mapper = new ObjectMapper();
 			// String mulsonString = mapper.writeValueAsString(requirements);
-
+			
+			//Just for testing
 			String mulsonString = mallikasService.getAllRequirementsWithClassifierFromMallikas("22527",
 					mallikasAddress + "/mallikas/classifiers");
 

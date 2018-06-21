@@ -60,6 +60,29 @@ public class MallikasService {
 		return req;
 	}
 	
+	
+//	/**
+//	 * Send request to Mallikas to get a Requirement and all Requirements that depend on it (and it depends on)
+//	 * @param url the address in Mallikas
+//	 * @param id String identifier of the Requirement
+//	 * @return
+//	 */
+//	public String getOneRequirementAndDepedentsFromMallikas(String url, String id) {
+//	
+//		RestTemplate rt = new RestTemplate();	
+//		String reqAndDependants = null;
+//		
+//		try {
+//			reqAndDependants = rt.postForObject(url, id, String.class);	
+//			System.out.println("Requirement received " + reqAndDependants);
+//		}
+//		catch (HttpClientErrorException e) { //Probably a different exception here? 
+//			System.out.println("Error " + e);
+//			e.printStackTrace();
+//		}
+//		return reqAndDependants;
+//	}
+	
 	/**
 	 * Send request to Mallikas to get a List of Requirements and their Dependecies as a String (based on a List of selected Requirement IDs) 
 	 * @param ids List<String> containing selected Requirement IDs
