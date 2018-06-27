@@ -244,6 +244,7 @@ public class FormatTransformerService {
 		setDependencyType(dependency, type);
 		dependency.setId(reqFrom + "_" + reqTo + "_" + dependency.getDependency_type());
 		setStatusForDependency(dependency, "accepted");
+		dependency.setCreated_at(new Date().getTime());
 		dependencies.add(dependency);
 	}
 
