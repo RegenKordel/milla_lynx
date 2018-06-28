@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -80,7 +81,7 @@ public class MillaController {
 	 */
 	@ApiOperation(value = "Relay POST to Mulperi", notes = "Post a model or configuration request to Mulperi")
 	@ResponseBody
-	@RequestMapping(value = "relay/{path}", method = RequestMethod.POST)
+	@PostMapping(value = "relay/{path}")
 	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path)
 			throws IOException {
 
@@ -136,7 +137,7 @@ public class MillaController {
 	 */
 	@ApiOperation(value = "Post requirements to Mallikas", notes = "Post a list of requirements to Mallikas database")
 	@ResponseBody
-	@RequestMapping(value = "requirements", method = RequestMethod.POST)
+	@PostMapping(value = "requirements")
 	public ResponseEntity<?> postRequirementsToMallikas(@RequestBody Collection<Requirement> requirements)
 			throws IOException {
 
@@ -170,7 +171,7 @@ public class MillaController {
 	 */
 	@ApiOperation(value = "Post dependencies to Mallikas", notes = "Post a list of dependencies to Mallikas database")
 	@ResponseBody
-	@RequestMapping(value = "dependencies", method = RequestMethod.POST)
+	@PostMapping(value = "dependencies")
 	public ResponseEntity<?> postDependenciesToMallikas(@RequestBody Collection<Dependency> dependencies)
 			throws IOException {
 
@@ -204,7 +205,7 @@ public class MillaController {
 	 */
 	@ApiOperation(value = "Post project to Mallikas", notes = "Post a Project to Mallikas database")
 	@ResponseBody
-	@RequestMapping(value = "project", method = RequestMethod.POST)
+	@PostMapping(value = "project")
 	public ResponseEntity<?> postProjectToMallikas(@RequestBody Project project) throws IOException {
 
 		RestTemplate rt = new RestTemplate();
@@ -236,12 +237,12 @@ public class MillaController {
 	 */
 	@ApiOperation(value = "Fetch requirements in the same component", notes = "Fetch all requirements in the same component from Mallikas database")
 	@ResponseBody
-	@RequestMapping(value = "requirementsInComponent", method = RequestMethod.POST)
+	@PostMapping(value = "requirementsInComponent")
 	public ResponseEntity<?> getRequirementsInSameComponent(@RequestBody String componentId) throws IOException {
 
 		System.out.println("getRequirementsInSameComponent called");
 
-		String completeAddress = mallikasAddress + "mallikas/classifiers";
+		String completeAddress = mallikasAddress + "classifiers";
 
 		String reqsInComponent = mallikasService.getAllRequirementsWithClassifierFromMallikas(componentId,
 				completeAddress);
@@ -265,10 +266,10 @@ public class MillaController {
 	 */
 	@ApiOperation(value = "Fetch selected requirements from the database", notes = "Fetch selected requirements (ids as a String list) from Mallikas database")
 	@ResponseBody
-	@RequestMapping(value = "requirementsWithIds", method = RequestMethod.POST)
-	public ResponseEntity<?> getRequirementsWithIds(@RequestBody List<String> ids) throws IOException {
+	@PostMapping(value = "requirementsWithIds")
+	public ResponseEntity<?> getRequirementsWithIds(@RequestBody Collection<String> ids) throws IOException {
 		System.out.println("getRequirementsWithIds called");
-		String completeAddress = mallikasAddress + "mallikas/reqs";
+		String completeAddress = mallikasAddress + "selectedReqs";
 
 		String reqsInComponent = mallikasService.getSelectedRequirementsFromMallikas(ids, completeAddress);
 
@@ -314,11 +315,11 @@ public class MillaController {
 	 */
 	@ApiOperation(value = "Fetch one selected requirement from the database", notes = "Fetch selected requirement and its dependencies from Mallikas database")
 	@ResponseBody
-	@RequestMapping(value = "oneRequirement", method = RequestMethod.POST)
-	public ResponseEntity<?> getOneRequirement(String id) throws IOException {
+	@PostMapping(value = "oneRequirement")
+	public ResponseEntity<?> getOneRequirement(@RequestBody String id) throws IOException {
 
 		System.out.println("getOneRequirement called");
-		String completeAddress = mallikasAddress + "mallikas/one";
+		String completeAddress = mallikasAddress + "one";
 
 		String requirement = mallikasService.getOneRequirementFromMallikas(completeAddress, id);
 
@@ -337,11 +338,13 @@ public class MillaController {
 	 */
 	@ApiOperation(value = "Fetch one selected requirement and requirements dependent on it from the database", notes = "Fetch selected requirement and requirements that depend on it together with their dependencies from Mallikas database")
 	@ResponseBody
-	@RequestMapping(value = "requirementAndDependents", method = RequestMethod.POST)
-	public ResponseEntity<?> getOneRequirementAndDependents(String id) throws IOException {
+	@PostMapping(value = "requirementAndDependents")
+	public ResponseEntity<?> getOneRequirementAndDependents(@RequestBody String id) throws IOException {
 
 		System.out.println("getOneRequirementAndDependents called");
-		String completeAddress = mallikasAddress + "mallikas/dependent";
+		String completeAddress = mallikasAddress + "dependents";
+		
+		System.out.println("Id is " + id);
 
 		String requirement = mallikasService.getOneRequirementFromMallikas(completeAddress, id);
 
@@ -366,7 +369,7 @@ public class MillaController {
 			@ApiResponse(code = 400, message = "Failure, ex. malformed JSON"),
 			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs") })
 	@ResponseBody
-	@RequestMapping(value = "qtjira", method = RequestMethod.POST)
+	@PostMapping(value = "qtjira")
 	public ResponseEntity<?> importFromQtJira(@RequestBody String projectId) throws IOException {
 
 		ProjectIssues projectIssues = new ProjectIssues(projectId);
@@ -408,7 +411,7 @@ public class MillaController {
 			//Just for testing
 //			String mulsonString = mallikasService.getAllRequirementsFromMallikas(mallikasAddress + "mallikas/all");
 			String mulsonString = mallikasService.getAllRequirementsWithClassifierFromMallikas("22527",
-					 mallikasAddress + "mallikas/classifiers");
+					 mallikasAddress + "classifiers");
 			
 			if (mulsonString == null) {
 				mulsonString = "No mulsonString";

@@ -1,5 +1,6 @@
 package eu.openreq.milla.services;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +90,7 @@ public class MallikasService {
 	 * @param url the address in Mallikas
 	 * @return
 	 */
-	public String getSelectedRequirementsFromMallikas(List<String> ids, String url) {
+	public String getSelectedRequirementsFromMallikas(Collection<String> ids, String url) {
 		
 		RestTemplate rt = new RestTemplate();	//Same line of code in every method, perhaps create a constructor?
 		String reqs = null;
