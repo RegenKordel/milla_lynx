@@ -96,6 +96,8 @@ public class FormatTransformerService {
 				req.setId(issue.getKey()); // Murmeli doesn't mind hyphens, hopefully?
 				String name = fixSpecialCharacters(issue.getFields().getSummary());
 				req.setName(name);
+				String text = fixSpecialCharacters(issue.getFields().getDescription());
+				req.setText(text);
 				requirements.put(req.getId(), req);
 				requirementIds.add(req.getId());
 
