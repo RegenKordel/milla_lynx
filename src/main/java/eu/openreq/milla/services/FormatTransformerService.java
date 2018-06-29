@@ -39,8 +39,14 @@ import eu.openreq.milla.models.json.Requirement_type;
 @Service
 public class FormatTransformerService {
 
+	/**
+	 * List of Dependencies between Requirements
+	 */
 	private List<Dependency> dependencies;
 
+	/**
+	 * List of Requirement IDs that are related to a Project
+	 */
 	private List<String> requirementIds;
 
 	/**

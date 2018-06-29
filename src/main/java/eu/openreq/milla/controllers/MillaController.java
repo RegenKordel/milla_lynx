@@ -255,6 +255,34 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(reqsInComponent, HttpStatus.FOUND);
 		return response;
 	}
+	
+	/**
+	 * Fetch Requirements that are in the selected Project
+	 * 
+	 * @param
+	 * @return ResponseEntity<?>
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Fetch requirements in the same project", notes = "Fetch all requirements in the same project from Mallikas database")
+	@ResponseBody
+	@PostMapping(value = "requirementsInProject")
+	public ResponseEntity<?> getRequirementsInProject(@RequestBody String projectId) throws IOException {
+
+		System.out.println("getRequirementsProject called");
+
+		String completeAddress = mallikasAddress + "projectRequirements";
+
+		String reqsInProject = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
+				completeAddress);
+
+		System.out.println("Reqs found " + reqsInProject);
+
+		if (reqsInProject == null) {
+			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
+		}
+		ResponseEntity<String> response = new ResponseEntity<>(reqsInProject, HttpStatus.FOUND);
+		return response;
+	}
 
 	/**
 	 * Fetch a List of selected Requirements from Mallikas
