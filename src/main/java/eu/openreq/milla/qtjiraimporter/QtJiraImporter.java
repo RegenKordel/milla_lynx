@@ -14,6 +14,11 @@ import com.google.gson.JsonElement;
  * 
  */
 
+/**
+* Notes: Some issues link to other projects (f.e. QTPLAYGROUND-1 links to QTBUG-32034),
+* since we have all the issues in JSON format, we can filter for specific keys.
+*/
+
 public class QtJiraImporter {
 	
 	private int numberOfIssues;

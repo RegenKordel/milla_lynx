@@ -8,6 +8,13 @@ import java.io.IOException;
 
 public class Run {
 	
+	/**
+	 * Creates the connection to a requested url, and returns a response (Jira issue). If an issue requested is missing (404) or unauthorized (401), return null.
+	 * @param url
+	 * @param client
+	 * @return
+	 * @throws IOException
+	 */
     public String run(String url, OkHttpClient client) throws IOException
     {
         Request request = new Request.Builder()

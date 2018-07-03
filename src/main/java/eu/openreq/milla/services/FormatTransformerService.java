@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import eu.openreq.milla.models.jira.Comments;
 import eu.openreq.milla.models.jira.Issue;
@@ -39,9 +40,27 @@ import eu.openreq.milla.models.json.Requirement_type;
 @Service
 public class FormatTransformerService {
 
+	/**
+	 * List of Dependencies between Requirements
+	 */
 	private List<Dependency> dependencies;
 
+	/**
+	 * List of Requirement IDs that are related to a Project
+	 */
 	private List<String> requirementIds;
+
+	private int epicCount;
+
+	public int getEpicCount() {
+		return epicCount;
+	}
+
+	private int subtaskCount;
+
+	public int getSubtaskCount() {
+		return subtaskCount;
+	}
 
 	/**
 	 * Converts JsonElements to Jira Issues
@@ -61,7 +80,12 @@ public class FormatTransformerService {
 
 		for (int i = 0; i < jsonElements.size(); i++) {
 			JsonElement element = jsonElements.get(i);
-			Issue issue = gson.fromJson(element, Issue.class);
+			
+			JsonObject issueJSON = element.getAsJsonObject();
+		//	System.out.println("here it is " + issueJSON.getAsJsonObject("fields").get("customfield_10400"));
+			Issue issue = gson.fromJson(issueJSON, Issue.class);
+		//	System.out.println(issue.getFields().getCustomfield10400());
+			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
 			issues.add(issue);
 			element = null;
 			issue = null;
@@ -88,6 +112,9 @@ public class FormatTransformerService {
 		dependencies = new ArrayList<>();
 		HashMap<String, Requirement> requirements = new HashMap<>();
 
+		epicCount = 0;
+		subtaskCount = 0;
+
 		requirementIds = new ArrayList<>();
 
 		for (Issue issue : issues) {
@@ -96,9 +123,13 @@ public class FormatTransformerService {
 				req.setId(issue.getKey()); // Murmeli doesn't mind hyphens, hopefully?
 				String name = fixSpecialCharacters(issue.getFields().getSummary());
 				req.setName(name);
+				String text = fixSpecialCharacters(issue.getFields().getDescription());
+				if (text != null && text.equals("")) {
+					req.setText(text);
+				}
 				requirements.put(req.getId(), req);
 				requirementIds.add(req.getId());
-
+		//		System.out.println("Issue customfield" + issue.getFields().getCustomfield10400());
 				int priority = Integer.parseInt(issue.getFields().getPriority().getId()); // Note! This might not be
 																							// actually a good idea, QT
 																							// priorities not numerical,
@@ -115,6 +146,11 @@ public class FormatTransformerService {
 				addClassifiers(issue, req);
 
 				updateParentEpic(requirements, issue, req);
+//				if(issue.getFields().getIssuetype().getName().toLowerCase().equals("epic")) {
+//					epicCount++;
+//					System.out.println("Epic is " +issue.getKey());
+//					
+//				}
 
 				List<Subtask> subtasks = issue.getFields().getSubtasks();
 				if (subtasks != null && !subtasks.isEmpty()) {
@@ -140,8 +176,10 @@ public class FormatTransformerService {
 	 * @return a fixed version of the name
 	 */
 	private String fixSpecialCharacters(String name) {
-		String fixedName = name.replaceAll("[^\\x20-\\x7e]", ""); // TODO This is a quick fix, must be modified into a
-																	// better version
+		String fixedName = name;
+		if (name != null && !name.equals("")) {
+			fixedName = name.replaceAll("[^\\x20-\\x7e]", ""); // TODO This is a quick fix, must be modified into a
+		} // better version
 		return fixedName;
 	}
 
@@ -244,6 +282,7 @@ public class FormatTransformerService {
 		setDependencyType(dependency, type);
 		dependency.setId(reqFrom + "_" + reqTo + "_" + dependency.getDependency_type());
 		setStatusForDependency(dependency, "accepted");
+		dependency.setCreated_at(new Date().getTime());
 		dependencies.add(dependency);
 	}
 
@@ -272,11 +311,14 @@ public class FormatTransformerService {
 	 */
 	private void updateParentEpic(HashMap<String, Requirement> requirements, Issue issue, Requirement req) {
 		Object epicKeyObject = issue.getFields().getCustomfield10400();
-		if (epicKeyObject == null) {
+		if(!epicKeyObject.toString().equals("null")) {
+			System.out.println("Epic key is " + epicKeyObject);
+		}
+	//	System.out.println("Epic key is " + epicKeyObject);
+		if (epicKeyObject.toString().equals("null")) {
 			return; // No parent
 		}
 		String epicKey = epicKeyObject.toString();
-
 		createDependency(epicKey, req.getId(), "epic");
 
 	}
@@ -387,9 +429,12 @@ public class FormatTransformerService {
 			break;
 		case "subtask":
 			dependency.setDependency_type(Dependency_type.DECOMPOSITION);
+			subtaskCount++;
 			break;
 		case "epic":
 			dependency.setDependency_type(Dependency_type.DECOMPOSITION);
+			System.out.println("Here epic");
+		epicCount++;
 			break;
 		}
 	}

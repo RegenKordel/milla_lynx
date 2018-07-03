@@ -16,82 +16,38 @@ import java.util.List;
  * actual amount of issues we get a few error messages which we ignore.
  */
 public class ProjectIssues {
-	// HashMap to save in the Issue identifier and the JSON of the issue
-//	private HashMap<String, JsonElement> _projectIssues;
+
 	// name of the project
 	private String _project;
 	// amount of issues in a project
 	private int _maxProjectIssues;
 	// the REST API URI
 	private String _PROJECT_ISSUES_URL;
-	
+	//List for the Jira issues as JsonElements
 	private List<JsonElement> projectIssues;
-	
-	private int start;
-	private int end;
-	
 
 	public ProjectIssues(String project) throws IOException {
-//		_projectIssues = new HashMap<String, JsonElement>();
 		_project = project;
 		NumberOfIssuesHTML numberOfIssues = new NumberOfIssuesHTML(project);
 		_maxProjectIssues = numberOfIssues.getNumberOfIssues();
 		_PROJECT_ISSUES_URL = "https://bugreports.qt.io/rest/api/2/issue/" + _project + "-%d";
 		projectIssues = new ArrayList<JsonElement>();
 	}
-
-//	public void collectAllIssues(int start, int end) throws IOException {
-//		this.start = start;
-//		this.end = end;
-//		OkHttpClient client = new OkHttpClient();
-//		Run run = new Run();
-//
-////		// create the error message JSON
-////		JsonParser parser = new JsonParser();
-////		JsonObject error = parser.parse("{\"errorMessages\":[\"Issue Does Not Exist\"],\"errors\":{}}")
-////				.getAsJsonObject();
-//
-//		int j = 1;
-//		Gson issueJSON = new Gson();
-//		int perc10 = end / 10;
-//
-//		for (int i = start; i <= end; i++) {
-//			// access the issue JSONs
-//			String requestURL = String.format(_PROJECT_ISSUES_URL, i);
-//			String responseJSON = run.run(requestURL, client);
-//			
-//			if (responseJSON != null) {
-////				responses.add(responseJSON);
-//				JsonObject issueElement = issueJSON.fromJson(responseJSON, JsonElement.class).getAsJsonObject();
-//				//_projectIssues.put(_project + "-" + i, issueElement);
-//				projectIssues.add(issueElement);
-//				issueElement = null;
-//			}
-////			if (i % perc10 == 0) {
-////				printProgress(i, j, perc10);
-////				j++;
-////			}
-//			requestURL = null;
-//			responseJSON = null;
-//		}
-//	
-//	}
 	
-	
+	/**
+	 * Collects issues that have keys between two numbers (start, end) from a specified project. 
+	 * @param start Integer, starting point of the import
+	 * @param end Integer, end point of the import
+	 * @return List of JsonElements
+	 * @throws IOException
+	 */
 	public List<JsonElement> collectIssues(int start, int end) throws IOException {
-		this.start = start;
-		this.end = end;
 		OkHttpClient client = new OkHttpClient();
 		Run run = new Run();
-
-//		// create the error message JSON
-//		JsonParser parser = new JsonParser();
-//		JsonObject error = parser.parse("{\"errorMessages\":[\"Issue Does Not Exist\"],\"errors\":{}}")
-//				.getAsJsonObject();
-
-		int j = 1;
 		Gson issueJSON = new Gson();
-		int perc10 = end / 10;
+
+	//	int j = 1;
+	//	int perc10 = end / 10;
 
 		for (int i = start; i <= end; i++) {
 			// access the issue JSONs
@@ -99,9 +55,7 @@ public class ProjectIssues {
 			String responseJSON = run.run(requestURL, client);
 			
 			if (responseJSON != null) {
-//				responses.add(responseJSON);
 				JsonObject issueElement = issueJSON.fromJson(responseJSON, JsonElement.class).getAsJsonObject();
-				//_projectIssues.put(_project + "-" + i, issueElement);
 				projectIssues.add(issueElement);
 				issueElement = null;
 			}
@@ -117,7 +71,12 @@ public class ProjectIssues {
 	
 	}
 
-
+	/**
+	 * Method for monitoring the progress of a project import, prints the stage of the import into console. 
+	 * @param i
+	 * @param j
+	 * @param perc10
+	 */
 	private void printProgress(long i, int j, int perc10) {
 		int k = j * 10;
 		System.out.print("[");
@@ -132,10 +91,6 @@ public class ProjectIssues {
 
 	}
 
-//	public HashMap<String, JsonElement> getProjectIssues() {
-//		return _projectIssues;
-//	}
-	
 	public List<JsonElement> getProjectIssues() {
 		return projectIssues;
 	}
