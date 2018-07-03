@@ -3,15 +3,7 @@ package eu.openreq.milla.controllers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.xml.transform.Source;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,17 +30,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonElement;
 
-import eu.openreq.milla.models.entity.IssueObject;
 import eu.openreq.milla.models.jira.Issue;
-import eu.openreq.milla.models.jira.Jira;
 import eu.openreq.milla.models.json.Dependency;
 import eu.openreq.milla.models.json.Project;
-//import eu.openreq.milla.models.mulson.Requirement;
 import eu.openreq.milla.models.json.Requirement;
 import eu.openreq.milla.services.FormatTransformerService;
 import eu.openreq.milla.services.MallikasService;
 import eu.openreq.milla.qtjiraimporter.ProjectIssues;
-import eu.openreq.milla.qtjiraimporter.QtJiraImporter;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -216,7 +204,6 @@ public class MillaController {
 		System.out.println("postProjectToMallikas called");
 		String completeAddress = mallikasAddress + "project";
 
-		Project newProject = project;
 		ResponseEntity<?> response = null;
 
 		try {
@@ -409,6 +396,9 @@ public class MillaController {
 		}
 		int start = 1;
 		int end = divided;
+		
+		int epicCount = 0;
+		int subtaskCount = 0;
 
 		List<String> requirementIds = new ArrayList<>();
 		List<JsonElement> projectIssuesAsJson;
@@ -421,6 +411,8 @@ public class MillaController {
 				List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson, projectId);
 				Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId);
 				Collection<Dependency> dependencies = transformer.getDependencies();
+				epicCount = epicCount + transformer.getEpicCount();
+				subtaskCount = subtaskCount + transformer.getSubtaskCount();
 				requirementIds.addAll(transformer.getRequirementIds());
 				this.postRequirementsToMallikas(requirements);
 				this.postDependenciesToMallikas(dependencies);
@@ -435,6 +427,9 @@ public class MillaController {
 
 			Project project = transformer.createProject(projectId, requirementIds);
 			this.postProjectToMallikas(project);
+			
+			System.out.println("Epic count is " + epicCount);
+			System.out.println("Subtask count is " + subtaskCount);
 			
 			//Just for testing
 //			String mulsonString = mallikasService.getAllRequirementsFromMallikas(mallikasAddress + "mallikas/all");
@@ -454,5 +449,6 @@ public class MillaController {
 			return null;
 		}
 	}
+
 
 }
