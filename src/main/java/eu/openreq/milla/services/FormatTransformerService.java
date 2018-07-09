@@ -80,11 +80,9 @@ public class FormatTransformerService {
 
 		for (int i = 0; i < jsonElements.size(); i++) {
 			JsonElement element = jsonElements.get(i);
-			
+
 			JsonObject issueJSON = element.getAsJsonObject();
-		//	System.out.println("here it is " + issueJSON.getAsJsonObject("fields").get("customfield_10400"));
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
-		//	System.out.println(issue.getFields().getCustomfield10400());
 			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
 			issues.add(issue);
 			element = null;
@@ -124,12 +122,11 @@ public class FormatTransformerService {
 				String name = fixSpecialCharacters(issue.getFields().getSummary());
 				req.setName(name);
 				String text = fixSpecialCharacters(issue.getFields().getDescription());
-				if (text != null && text.equals("")) {
+				if (text != null && !text.equals("")) {
 					req.setText(text);
 				}
 				requirements.put(req.getId(), req);
 				requirementIds.add(req.getId());
-		//		System.out.println("Issue customfield" + issue.getFields().getCustomfield10400());
 				int priority = Integer.parseInt(issue.getFields().getPriority().getId()); // Note! This might not be
 																							// actually a good idea, QT
 																							// priorities not numerical,
@@ -146,11 +143,6 @@ public class FormatTransformerService {
 				addClassifiers(issue, req);
 
 				updateParentEpic(requirements, issue, req);
-//				if(issue.getFields().getIssuetype().getName().toLowerCase().equals("epic")) {
-//					epicCount++;
-//					System.out.println("Epic is " +issue.getKey());
-//					
-//				}
 
 				List<Subtask> subtasks = issue.getFields().getSubtasks();
 				if (subtasks != null && !subtasks.isEmpty()) {
@@ -295,9 +287,7 @@ public class FormatTransformerService {
 	 * @param subtask
 	 */
 	private void addSubtask(Requirement req, Subtask subtask) {
-
 		createDependency(req.getId(), subtask.getKey(), "subtask");
-
 	}
 
 	/**
@@ -311,10 +301,6 @@ public class FormatTransformerService {
 	 */
 	private void updateParentEpic(HashMap<String, Requirement> requirements, Issue issue, Requirement req) {
 		Object epicKeyObject = issue.getFields().getCustomfield10400();
-		if(!epicKeyObject.toString().equals("null")) {
-			System.out.println("Epic key is " + epicKeyObject);
-		}
-	//	System.out.println("Epic key is " + epicKeyObject);
 		if (epicKeyObject.toString().equals("null")) {
 			return; // No parent
 		}
@@ -433,8 +419,7 @@ public class FormatTransformerService {
 			break;
 		case "epic":
 			dependency.setDependency_type(Dependency_type.DECOMPOSITION);
-			System.out.println("Here epic");
-		epicCount++;
+			epicCount++;
 			break;
 		}
 	}
