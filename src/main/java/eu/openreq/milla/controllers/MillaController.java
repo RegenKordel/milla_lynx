@@ -66,10 +66,10 @@ public class MillaController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Relay POST to Mulperi", notes = "Post a model or configuration request to Mulperi")
+	@ApiOperation(value = "Relay POST to Mulperi (obsolete relay)", notes = "Post a model or configuration request to Mulperi")
 	@ResponseBody
-	@PostMapping(value = "relay/{path}")
-	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path)
+	@PostMapping(value = "data")
+	public ResponseEntity<?> postToMulperi(@RequestBody String data)
 			throws IOException {
 
 		System.out.println("PostToMulperi");
@@ -78,14 +78,12 @@ public class MillaController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		String actualPath = getActualPath(path);
+		String actualPath = "models/requirementsToChoco"; 
 
 		String completeAddress = mulperiAddress + actualPath;
 
 		HttpEntity<String> entity = new HttpEntity<String>(data, headers);
-		System.out.println("Data is " + data);
 		ResponseEntity<?> response = null;
-
 		try {
 			response = rt.postForEntity(completeAddress, entity, String.class);
 		} catch (HttpClientErrorException e) {
@@ -94,24 +92,88 @@ public class MillaController {
 
 		return response;
 	}
-
+	
+	
 	/**
-	 * Method for setting the actual path to Mulperi
+	 * Fetch Requirements that are in the selected Project
 	 * 
-	 * @param path
-	 * @return
+	 * @param
+	 * @return ResponseEntity<?>
+	 * @throws IOException
 	 */
-	public String getActualPath(String path) { // Changed to public for TestingContoller
-		if (path.equals("mulson"))
-			return "models/mulson";
-		if (path.equals("reqif"))
-			return "models/reqif";
-		if (path.contains("configure:")) {
-			String modelName = path.split(":", 2)[1];
-			return "models/" + modelName + "/configurations";
+	@ApiOperation(value = "Fetch requirements in the same project", notes = "Fetch all requirements in the same project from Mallikas database")
+	@ResponseBody
+	@PostMapping(value = "sendProjectToMulperi")
+	public ResponseEntity<?> sendProjectToMulperi(@RequestBody String projectId) throws IOException {
+
+		System.out.println("getRequirementsProject called");
+
+		String completeAddress = mallikasAddress + "projectRequirements";
+
+		String reqsInProject = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
+				completeAddress);
+
+		
+		if (reqsInProject == null) {
+			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
 		}
-		return path;
+		//ResponseEntity<String> response = new ResponseEntity<>(reqsInProject, HttpStatus.FOUND);
+		return this.postToMulperi(reqsInProject);
 	}
+//	/**
+//	 * Post Requirements and Dependencies to Mulperi.
+//	 * 
+//	 * @param data
+//	 * @param path
+//	 * @return
+//	 * @throws IOException
+//	 */
+//	@ApiOperation(value = "Relay POST to Mulperi (obsolete relay)", notes = "Post a model or configuration request to Mulperi")
+//	@ResponseBody
+//	@PostMapping(value = "relay/{path}")
+//	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path)
+//			throws IOException {
+//
+//		System.out.println("PostToMulperi");
+//		RestTemplate rt = new RestTemplate();
+//
+//		HttpHeaders headers = new HttpHeaders();
+//		headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//		String actualPath = getActualPath(path);
+//
+//		String completeAddress = mulperiAddress + actualPath;
+//
+//		HttpEntity<String> entity = new HttpEntity<String>(data, headers);
+//		System.out.println("Data is " + data);
+//		ResponseEntity<?> response = null;
+//
+//		try {
+//			response = rt.postForEntity(completeAddress, entity, String.class);
+//		} catch (HttpClientErrorException e) {
+//			return new ResponseEntity<>("Mulperi error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+//		}
+//
+//		return response;
+//	}
+//
+//	/**
+//	 * Method for setting the actual path to Mulperi
+//	 * 
+//	 * @param path
+//	 * @return
+//	 */
+//	public String getActualPath(String path) { // Changed to public for TestingContoller
+//		if (path.equals("mulson"))
+//			return "models/mulson";
+//		if (path.equals("reqif"))
+//			return "models/reqif";
+//		if (path.contains("configure:")) {
+//			String modelName = path.split(":", 2)[1];
+//			return "models/" + modelName + "/configurations";
+//		}
+//		return path;
+//	}
 
 	/**
 	 * Post a Collection of OpenReq JSON Requirements to Mallikas database
@@ -207,6 +269,40 @@ public class MillaController {
 
 		try {
 			response = rt.postForEntity(completeAddress, project, Project.class);
+
+		} catch (HttpClientErrorException e) {
+			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+		}
+		return response;
+	}
+	
+	/**
+	 * Post a Collection of updated (or new) OpenReq JSON Dependencies to Mallikas database
+	 * 
+	 * @param dependencies
+	 *            Collection<Dependency> received as a parameter, requirements to be
+	 *            updated
+	 * @return ResponseEntity<?>
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Post updated dependencies to Mallikas", notes = "Post a collection of updated dependencies to Mallikas database")
+	@ResponseBody
+	@PostMapping(value = "updateDependencies")
+	public ResponseEntity<?> postUpdatedDependenciesToMallikas(@RequestBody Collection<Dependency> dependencies)
+			throws IOException {
+
+		RestTemplate rt = new RestTemplate();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		System.out.println("postUpdatedDependencies called");
+		String completeAddress = mallikasAddress + "updateDependencies";
+
+		ResponseEntity<?> response = null;
+
+		try {
+			response = rt.postForEntity(completeAddress, dependencies, Collection.class);
 
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
@@ -368,18 +464,18 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(requirement, HttpStatus.FOUND);
 		return response;
 	}
-
+	
 	/**
 	 * Uses QtJiraImporter to get the issues of a selected project in OpenReq JSON
-	 * format and sends them to Mallikas (and eventually to Mulperi).
+	 * format and sends them to Mallikas database.
 	 * 
 	 * @param projectId,
 	 *            ID of the selected project
-	 * @return mulsonString to Mulperi (At the moment broken)
+	 * @return ResponseEntity if successful
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Import QT Jira", notes = "Generate a model from a project imported from Qt Jira (return an array of issues)", response = String.class)
-	@ApiResponses(value = { @ApiResponse(code = 201, message = "Success, returns the name/id of the generated model"),
+	@ApiOperation(value = "Import QT Jira", notes = "Import a project with its Jira issues and send it as OpenReq JSON requirements and dependencies to a database", response = String.class)
+	@ApiResponses(value = { @ApiResponse(code = 201, message = "Success, all requirements and dependencies downloaded"),
 			@ApiResponse(code = 400, message = "Failure, ex. malformed JSON"),
 			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs") })
 	@ResponseBody
@@ -390,19 +486,19 @@ public class MillaController {
 
 		int issueCount = projectIssues.getNumberOfIssues();
 		int divided = issueCount;
-		if (issueCount > 10000) {
+		if (issueCount > 10000) {  //this is necessary for large Qt Jira projects
 			divided = issueCount / 10;
 		}
 		int start = 1;
 		int end = divided;
 		
-		int epicCount = 0;
-		int subtaskCount = 0;
+//		int epicCount = 0; //these needed for counting epics and subtask relationships in projects
+//		int subtaskCount = 0; //Note! to use these, must uncomment lines in FormatTransformerService
 
 		List<String> requirementIds = new ArrayList<>();
 		List<JsonElement> projectIssuesAsJson;
 		try {
-			while (true) {
+			while (true) { //a loop needed for sending large projects in chunks to Mallikas
 				if (end >= issueCount + divided) {
 					break;
 				}
@@ -410,8 +506,8 @@ public class MillaController {
 				List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson, projectId);
 				Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId);
 				Collection<Dependency> dependencies = transformer.getDependencies();
-				epicCount = epicCount + transformer.getEpicCount();
-				subtaskCount = subtaskCount + transformer.getSubtaskCount();
+//				epicCount = epicCount + transformer.getEpicCount();
+//				subtaskCount = subtaskCount + transformer.getSubtaskCount();
 				requirementIds.addAll(transformer.getRequirementIds());
 				this.postRequirementsToMallikas(requirements);
 				this.postDependenciesToMallikas(dependencies);
@@ -427,19 +523,11 @@ public class MillaController {
 			Project project = transformer.createProject(projectId, requirementIds);
 			this.postProjectToMallikas(project);
 			
-			System.out.println("Epic count is " + epicCount);
-			System.out.println("Subtask count is " + subtaskCount);
+//			System.out.println("Epic count is " + epicCount);
+//			System.out.println("Subtask count is " + subtaskCount);
 			
-			//Just for testing
-//			String mulsonString = mallikasService.getAllRequirementsFromMallikas(mallikasAddress + "mallikas/all");
-			String mulsonString = mallikasService.getAllRequirementsWithClassifierFromMallikas("22527",
-					 mallikasAddress + "classifiers");
-			
-			if (mulsonString == null) {
-				mulsonString = "No mulsonString";
-			}
-
-			return this.postToMulperi(mulsonString, "mulson");
+			ResponseEntity<String> response = new ResponseEntity<>("All requirements and dependencies downloaded", HttpStatus.OK);
+			return response;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -448,6 +536,5 @@ public class MillaController {
 			return null;
 		}
 	}
-
 
 }

@@ -221,13 +221,6 @@ public class FormatTransformerService {
 		return milliseconds;
 	}
 
-	/**
-	 * Helper method for splitting a date and time String from the right place
-	 * 
-	 * @param word
-	 *            String to be split
-	 * @return the first part of the split String
-	 */
 	private String splitString(String word) {
 		String[] parts = word.split("\\+");
 		String part = parts[0];
@@ -380,6 +373,12 @@ public class FormatTransformerService {
 		case "closed":
 			req.setStatus(Requirement_status.COMPLETED);
 			break;
+//		case "resolved":
+//			req.setStatus(Requirement_status.COMPLETED); //?????????????????
+//			break;
+//		case "reopened":
+//			req.setStatus(Requirement_status.COMPLETED); //?????????????????
+//			break;
 		}
 	}
 

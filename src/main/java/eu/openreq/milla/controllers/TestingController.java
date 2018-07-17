@@ -31,20 +31,20 @@ public class TestingController {
 		return "exampleGUI";
 	}
 	
-	@ApiOperation(value = "Relay GET to Mulperi",
-		    notes = "Get a configuration from Mulperi")
-	@ResponseBody
-	@RequestMapping(value = "relay/{path}", method = RequestMethod.GET)
-	public ResponseEntity<?> getFromMulperi(@PathVariable("path") String path) {
-		
-		RestTemplate rt = new RestTemplate();
-		
-		String actualPath = millaController.getActualPath(path);
-		
-		String completeAddress = mulperiAddress + actualPath;
-		
-		return rt.getForEntity(completeAddress, String.class);
-	}
+//	@ApiOperation(value = "Relay GET to Mulperi",
+//		    notes = "Get a configuration from Mulperi")
+//	@ResponseBody
+//	@RequestMapping(value = "relay/{path}", method = RequestMethod.GET)
+//	public ResponseEntity<?> getFromMulperi(@PathVariable("path") String path) {
+//		
+//		RestTemplate rt = new RestTemplate();
+//		
+//		String actualPath = millaController.getActualPath(path);
+//		
+//		String completeAddress = mulperiAddress + actualPath;
+//		
+//		return rt.getForEntity(completeAddress, String.class);
+//	}
 	
 	
 //	/**
