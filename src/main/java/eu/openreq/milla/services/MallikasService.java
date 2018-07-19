@@ -6,11 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
+import eu.openreq.milla.models.json.Dependency;
 import eu.openreq.milla.models.json.Requirement;
 
 @Service
@@ -148,6 +156,82 @@ public class MallikasService {
 			e.printStackTrace();
 		}
 		return reqs;
+	}
+	
+	/**
+	 * Send updated dependencies as a String to Mallikas
+	 * @param dependencies
+	 * @param url
+	 * @return
+	 */
+	public String updateSelectedDependencies(String dependencies, String url) {
+		RestTemplate rt = new RestTemplate();	
+		Collection<Dependency> updatedDependencies = parseStringToDependencies(dependencies);
+
+		String response = null;
+
+		try {
+			response = rt.postForObject(url, updatedDependencies, String.class);
+			return response;
+
+		} catch (HttpClientErrorException e) {
+			return "Mallikas error:\n\n" + e.getResponseBodyAsString() + " "+ e.getStatusCode();
+		}
+	}
+	
+	/**
+	 * Send updated requirements as a String to Mallikas
+	 * @param requirements
+	 * @param url
+	 * @return
+	 */
+	public String updateSelectedRequirements(String requirements, String url) {
+		RestTemplate rt = new RestTemplate();	
+		Collection<Requirement> updatedRequirements = parseStringToRequirements(requirements);
+
+		String response = null;
+
+		try {
+			response = rt.postForObject(url, updatedRequirements, String.class);
+			System.out.println("Response is " + response);
+			return response;
+
+		} catch (HttpClientErrorException e) {
+			e.printStackTrace();
+			return "Mallikas error:\n\n" + e.getResponseBodyAsString() + " " + e.getStatusCode();
+		}
+	}
+
+	/**
+	 * Parse JSON String to Dependencies
+	 * @param dependencies
+	 * @return
+	 */
+	private Collection<Dependency> parseStringToDependencies(String dependencies) {
+		Gson gson = new Gson();
+		JsonParser parser = new JsonParser();
+		JsonElement dependencyElement = parser.parse(dependencies);
+		JsonArray dependenciesJSON = dependencyElement.getAsJsonArray();
+		
+		Collection<Dependency> updatedDependencies = gson.fromJson(dependenciesJSON, Collection.class);
+		
+		return updatedDependencies;
+	}
+	
+	/**
+	 * Parse JSON String to Requirements
+	 * @param requirements
+	 * @return
+	 */
+	private Collection<Requirement> parseStringToRequirements(String requirements) {
+		Gson gson = new Gson();
+		JsonParser parser = new JsonParser();
+		JsonElement reqElement = parser.parse(requirements);
+		JsonArray requirementsJSON = reqElement.getAsJsonArray();
+		
+		Collection<Requirement> updatedRequirements = gson.fromJson(requirementsJSON, Collection.class);
+		
+		return updatedRequirements;
 	}
 
 }

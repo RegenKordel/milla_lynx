@@ -28,7 +28,10 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.json.Dependency;
@@ -51,6 +54,9 @@ public class MillaController {
 
 	@Value("${milla.mallikasAddress}")
 	private String mallikasAddress;
+	
+	@Value("${milla.upcAddress}")
+	private String upcAddress;
 
 	@Autowired
 	FormatTransformerService transformer;
@@ -95,13 +101,13 @@ public class MillaController {
 	
 	
 	/**
-	 * Fetch Requirements that are in the selected Project
+	 * Fetch Requirements that are in the selected Project from Mallikas, and send to Mulperi
 	 * 
 	 * @param
 	 * @return ResponseEntity<?>
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Fetch requirements in the same project", notes = "Fetch all requirements in the same project from Mallikas database")
+	@ApiOperation(value = "Send requirements of the selected project to Mulperi", notes = "Fetch all requirements in the same project from Mallikas database and send requirements and dependencies to Mulperi")
 	@ResponseBody
 	@PostMapping(value = "sendProjectToMulperi")
 	public ResponseEntity<?> sendProjectToMulperi(@RequestBody String projectId) throws IOException {
@@ -113,13 +119,12 @@ public class MillaController {
 		String reqsInProject = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
 				completeAddress);
 
-		
 		if (reqsInProject == null) {
 			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
 		}
-		//ResponseEntity<String> response = new ResponseEntity<>(reqsInProject, HttpStatus.FOUND);
 		return this.postToMulperi(reqsInProject);
 	}
+	
 //	/**
 //	 * Post Requirements and Dependencies to Mulperi.
 //	 * 
@@ -280,7 +285,7 @@ public class MillaController {
 	 * Post a Collection of updated (or new) OpenReq JSON Dependencies to Mallikas database
 	 * 
 	 * @param dependencies
-	 *            Collection<Dependency> received as a parameter, requirements to be
+	 *            Collection<Dependency> received as a parameter, dependencies to be
 	 *            updated
 	 * @return ResponseEntity<?>
 	 * @throws IOException
@@ -288,25 +293,49 @@ public class MillaController {
 	@ApiOperation(value = "Post updated dependencies to Mallikas", notes = "Post a collection of updated dependencies to Mallikas database")
 	@ResponseBody
 	@PostMapping(value = "updateDependencies")
-	public ResponseEntity<?> postUpdatedDependenciesToMallikas(@RequestBody Collection<Dependency> dependencies)
+	public ResponseEntity<?> postUpdatedDependenciesToMallikas(@RequestBody String dependencies)
 			throws IOException {
-
-		RestTemplate rt = new RestTemplate();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		System.out.println("postUpdatedDependencies called");
 		String completeAddress = mallikasAddress + "updateDependencies";
-
-		ResponseEntity<?> response = null;
+		
+		String updated = null;
 
 		try {
-			response = rt.postForEntity(completeAddress, dependencies, Collection.class);
+			updated = mallikasService.updateSelectedDependencies(dependencies, completeAddress);
 
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
 		}
+		ResponseEntity<String> response = new ResponseEntity<>(updated, HttpStatus.OK);
+		return response;
+	}
+	
+	@ApiOperation(value = "Post updated requirements to Mallikas", notes = "Post a collection of updated requirements to Mallikas database")
+	@ResponseBody
+	@PostMapping(value = "updateRequirements")
+	public ResponseEntity<?> postUpdatedRequirementsToMallikas(@RequestBody String requirements)
+			throws IOException {
+	
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		System.out.println("postUpdatedRequirements called");
+		String completeAddress = mallikasAddress + "updateRequirements";
+
+		String updated = null;
+
+		try {
+			updated = mallikasService.updateSelectedRequirements(requirements, completeAddress);
+
+		} catch (HttpClientErrorException e) {
+			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+		}
+		
+		ResponseEntity<String> response = new ResponseEntity<>(updated, HttpStatus.OK);
 		return response;
 	}
 
@@ -535,6 +564,44 @@ public class MillaController {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	
+	/**
+	 * Post a Collection of OpenReq JSON Requirements to UPC for Similarity detection.
+	 * 
+	 * @param projectId
+	 * @return ResponseEntity<?>
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Post requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection")
+	@ResponseBody
+	@PostMapping(value = "detectSimilarity")
+	public ResponseEntity<?> postRequirementsToUPCSimilarityDetection(@RequestBody String projectId)
+			throws IOException {
+
+		RestTemplate rt = new RestTemplate();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		
+		String requirements = mallikasService.getAllRequirementsInProjectFromMallikas(projectId, mallikasAddress + "projectRequirements");
+
+		String completeAddress = upcAddress + "upc/similarity-detection/DB/AddReqs";
+		
+		ResponseEntity<?> response = null;
+
+		try {
+			response = rt.postForEntity(completeAddress, requirements, String.class); //at the moment not working, UPC will give error
+
+		} catch (HttpClientErrorException e) {
+			return new ResponseEntity<>("UPC error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+		}
+//		catch(Exception e) {
+//			e.printStackTrace();
+//			return new ResponseEntity<>("Error " + e.getMessage(), HttpStatus.BAD_REQUEST);
+//		}
+		return response;
 	}
 
 }
