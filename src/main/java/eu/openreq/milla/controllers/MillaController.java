@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -418,6 +419,54 @@ public class MillaController {
 			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
 		}
 		ResponseEntity<String> response = new ResponseEntity<>(reqsInComponent, HttpStatus.FOUND);
+		return response;
+	}
+	
+//	/**
+//	 * 
+//	 * @param type
+//	 * @return
+//	 * @throws IOException
+//	 */
+//	@ApiOperation(value = "Fetch requirements that have the selected requirement type from database", notes = "Requirement type should be given in all caps, e.g. BUG ")
+//	@ResponseBody
+//	@PostMapping(value = "requirementsWithType")
+//	public ResponseEntity<?> getRequirementsWithType(@RequestBody String type) throws IOException {
+//		System.out.println("getRequirementsWithType called");
+//		String completeAddress = mallikasAddress + "reqsWithType";
+//
+//		String reqsWithType = mallikasService.getAllRequirementsWithTypeFromMallikas(type, completeAddress);
+//
+//		System.out.println("Reqs found " + reqsWithType);
+//
+//		if (reqsWithType == null || reqsWithType.equals("")) {
+//			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
+//		}
+//		ResponseEntity<String> response = new ResponseEntity<>(reqsWithType, HttpStatus.FOUND);
+//		return response;
+//	}
+	
+	/**
+	 * Fetch a list of requirements according to their type and/or status from the database.
+	 * @param type
+	 * @return
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Fetch requirements that have the selected requirement type and/or status from database", notes = "Requirement type and status should be given in all caps, e.g. BUG, NEW ")
+	@ResponseBody
+	@PostMapping(value = "requirementsWithTypeAndStatus")
+	public ResponseEntity<?> getRequirementsWithTypeAndStatus(@RequestParam String type, @RequestParam String status) throws IOException {
+		System.out.println("getRequirementsWithType called");
+		String completeAddress = mallikasAddress + "reqsWithType";
+
+		String reqsWithType = mallikasService.getAllRequirementsWithTypeAndStatusFromMallikas(type, status, completeAddress);
+
+		System.out.println("Reqs found " + reqsWithType);
+
+		if (reqsWithType == null || reqsWithType.equals("")) {
+			return new ResponseEntity<>("Search failed, requirements not found \n\n", HttpStatus.NOT_FOUND);
+		}
+		ResponseEntity<String> response = new ResponseEntity<>(reqsWithType, HttpStatus.FOUND);
 		return response;
 	}
 

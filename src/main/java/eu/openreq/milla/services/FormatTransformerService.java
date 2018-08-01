@@ -331,6 +331,12 @@ public class FormatTransformerService {
 		case "task":
 			req.setRequirement_type(Requirement_type.TASK);
 			break;
+		case "technical task":
+			req.setRequirement_type(Requirement_type.TASK);
+			break;
+		case "change request":
+			req.setRequirement_type(Requirement_type.NON_FUNCTIONAL);
+			break;
 		case "user story":
 			req.setRequirement_type(Requirement_type.USER_STORY);
 			break;

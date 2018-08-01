@@ -20,6 +20,7 @@ import com.google.gson.JsonParser;
 
 import eu.openreq.milla.models.json.Dependency;
 import eu.openreq.milla.models.json.Requirement;
+import eu.openreq.milla.models.json.Requirement_type;
 
 @Service
 public class MallikasService {
@@ -157,6 +158,68 @@ public class MallikasService {
 		}
 		return reqs;
 	}
+	
+//	
+//	public String getAllRequirementsWithTypeFromMallikas(String type, String url) {
+//
+//		RestTemplate rt = new RestTemplate();	
+//		String reqs = null;
+//		
+//		try {	
+//			reqs = rt.postForObject(url, Requirement_type.valueOf(type), String.class);
+//			System.out.println("Requirements received " + reqs);
+//			
+//		} catch (HttpClientErrorException e) { //Probably a different exception here? 
+//			System.out.println("Error " + e);
+//			e.printStackTrace();
+//		}
+//		return reqs;
+//	}
+	
+	/**
+	 * Post the searched type and status to Mallikas
+	 * @param type
+	 * @param status
+	 * @param url
+	 * @return
+	 */
+	public String getAllRequirementsWithTypeAndStatusFromMallikas(String type, String status, String url) {
+
+		RestTemplate rt = new RestTemplate();	
+		String reqs = null;
+		
+		String whole = createTypeStatusString(type, status);
+		
+		try {	
+			reqs = rt.postForObject(url, whole, String.class);
+			System.out.println("Requirements received " + reqs);
+			
+		} catch (HttpClientErrorException e) { //Probably a different exception here? 
+			System.out.println("Error " + e);
+			e.printStackTrace();
+		}
+		return reqs;
+	}
+	
+	/**
+	 * Checks if the user wishes to exclude either type or status from the search (must write "No type" or "No status" to the requested input fields) 
+	 * @param type
+	 * @param status
+	 * @return
+	 */
+	private String createTypeStatusString(String type, String status) {
+		String type2 = type;
+		String status2 = status;
+		if(type.equalsIgnoreCase("No type")) {
+			type2="null";
+		}
+		if(status.equalsIgnoreCase("No status")) {
+			status2="null";
+		}
+		return type2+"+"+status2;
+	}
+	
+	
 	
 	/**
 	 * Send updated dependencies as a String to Mallikas
