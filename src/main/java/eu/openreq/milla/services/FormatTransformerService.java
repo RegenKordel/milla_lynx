@@ -497,6 +497,8 @@ public class FormatTransformerService {
 	public List<String> getRequirementIds() {
 		return requirementIds;
 	}
+	
+	
 
 	// Below old Mulson methods
 
