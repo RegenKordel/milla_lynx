@@ -95,7 +95,7 @@ public class Fields {
     @JsonProperty("aggregatetimespent")
     private Object aggregatetimespent;
     @JsonProperty("resolution")
-    private Object resolution;
+    private Resolution resolution;
     @JsonProperty("customfield_10027")
     private Customfield10027 customfield10027;
     @JsonProperty("customfield_10302")
@@ -282,12 +282,12 @@ public class Fields {
     }
 
     @JsonProperty("resolution")
-    public Object getResolution() {
+    public Resolution getResolution() {
         return resolution;
     }
 
     @JsonProperty("resolution")
-    public void setResolution(Object resolution) {
+    public void setResolution(Resolution resolution) {
         this.resolution = resolution;
     }
 

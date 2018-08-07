@@ -95,6 +95,14 @@ public class Requirement {
 	@Expose
 	private List<Classifier> classifierResults = null;
 	
+	/**
+	* RequirementParts of a requirement
+	* 
+	*/
+	@SerializedName("requirementParts")
+	@Expose
+	private List<RequirementPart> requirementParts = null;
+	
 	
 	public String getId() {
 		return id;
@@ -191,5 +199,16 @@ public class Requirement {
 	
 	public void setClassifierResults(List<Classifier> classifierResults) {
 		this.classifierResults = classifierResults;
+	}
+
+	public List<RequirementPart> getRequirementParts() {
+		if(requirementParts==null) {
+			requirementParts = new ArrayList<RequirementPart>();
+		}
+		return requirementParts;
+	}
+
+	public void setRequirementParts(List<RequirementPart> requirementParts) {
+		this.requirementParts = requirementParts;
 	}
 }

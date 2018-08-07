@@ -27,6 +27,7 @@ import eu.openreq.milla.models.json.Dependency_status;
 import eu.openreq.milla.models.json.Dependency_type;
 import eu.openreq.milla.models.json.Project;
 import eu.openreq.milla.models.json.Requirement;
+import eu.openreq.milla.models.json.RequirementPart;
 import eu.openreq.milla.models.json.Requirement_status;
 import eu.openreq.milla.models.json.Requirement_type;
 
@@ -141,6 +142,7 @@ public class FormatTransformerService {
 				addCommentsToReq(issue, req);
 				addDependencies(issue, req);
 				addClassifiers(issue, req);
+				addResolutionToRequirementParts(issue, req);
 
 				updateParentEpic(requirements, issue, req);
 
@@ -469,6 +471,31 @@ public class FormatTransformerService {
 				classifier.setCreated_at(new Date().getTime());
 				req.getClassifierResults().add(classifier);
 			}
+		}
+	}
+	
+	/**
+	 * Add information on the resolution of an issue to a RequirementPart object. If issue's resolution is null, create a new RequirementPart with the text "Unresolved"
+	 * @param issue
+	 * @param req
+	 */
+	private void addResolutionToRequirementParts(Issue issue, Requirement req) {		
+		if(issue.getFields().getResolution()!=null) {
+			RequirementPart reqPart = new RequirementPart();
+			reqPart.setId(req.getId()+"_RESOLUTION");
+			reqPart.setName("Resolution");
+			reqPart.setText(issue.getFields().getResolution().getName());
+			reqPart.setCreated_at(new Date().getTime());
+			req.getRequirementParts().add(reqPart);
+			
+		}
+		else {
+			RequirementPart reqPart = new RequirementPart();
+			reqPart.setId(req.getId()+"_RESOLUTION");
+			reqPart.setName("Resolution");
+			reqPart.setText("Unresolved");
+			reqPart.setCreated_at(new Date().getTime());
+			req.getRequirementParts().add(reqPart);
 		}
 	}
 
