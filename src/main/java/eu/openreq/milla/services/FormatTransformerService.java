@@ -137,7 +137,8 @@ public class FormatTransformerService {
 				setStatusForReq(req, issue.getFields().getStatus().getName());
 				setRequirementType(req, issue.getFields().getIssuetype().getName());
 
-				req.setCreated_at(new Date().getTime());
+				req.setCreated_at(setCreatedDate(issue.getFields().getCreated()));
+				req.setModified_at(setCreatedDate(issue.getFields().getUpdated()));
 
 				addCommentsToReq(issue, req);
 				addDependencies(issue, req);

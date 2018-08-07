@@ -201,7 +201,7 @@ public class MillaController {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		String completeAddress = mallikasAddress + "requirements";
+		String completeAddress = mallikasAddress + "updateRequirements";
 
 		Collection<Requirement> issueList = requirements;
 		ResponseEntity<?> response = null;
@@ -236,7 +236,7 @@ public class MillaController {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		System.out.println("postDependencies called");
-		String completeAddress = mallikasAddress + "dependencies";
+		String completeAddress = mallikasAddress + "updateDependencies";
 
 		Collection<Dependency> dependencyList = dependencies;
 		ResponseEntity<?> response = null;
