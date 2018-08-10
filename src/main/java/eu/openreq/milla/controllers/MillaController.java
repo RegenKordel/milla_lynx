@@ -64,6 +64,8 @@ public class MillaController {
 
 	@Autowired
 	MallikasService mallikasService;
+	
+	private int i = 1;
 
 	/**
 	 * Post Requirements and Dependencies to Mulperi.
@@ -79,7 +81,7 @@ public class MillaController {
 	public ResponseEntity<?> postToMulperi(@RequestBody String data)
 			throws IOException {
 
-		System.out.println("PostToMulperi");
+		System.out.println("PostToMulperi!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		RestTemplate rt = new RestTemplate();
 
 		HttpHeaders headers = new HttpHeaders();
@@ -113,7 +115,7 @@ public class MillaController {
 	@PostMapping(value = "sendProjectToMulperi")
 	public ResponseEntity<?> sendProjectToMulperi(@RequestBody String projectId) throws IOException {
 
-		System.out.println("getRequirementsProject called");
+		System.out.println("sendProjectToMulperi called");
 
 		String completeAddress = mallikasAddress + "projectRequirements";
 
@@ -359,7 +361,7 @@ public class MillaController {
 		String reqsInComponent = mallikasService.getAllRequirementsWithClassifierFromMallikas(componentId,
 				completeAddress);
 
-		System.out.println("Reqs found " + reqsInComponent);
+		//System.out.println("Reqs found " + reqsInComponent);
 
 		if (reqsInComponent == null) {
 			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
@@ -380,15 +382,15 @@ public class MillaController {
 	@PostMapping(value = "requirementsInProject")
 	public ResponseEntity<?> getRequirementsInProject(@RequestBody String projectId) throws IOException {
 
-		System.out.println("getRequirementsProject called");
+	//	System.out.println("getRequirementsProject called");
 
 		String completeAddress = mallikasAddress + "projectRequirements";
 
 		String reqsInProject = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
 				completeAddress);
-
-		System.out.println("Reqs found " + reqsInProject);
-
+		
+		//System.out.println("Reqs found " + i + " " + reqsInProject);
+		//i++;
 		if (reqsInProject == null) {
 			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
 		}
@@ -411,14 +413,14 @@ public class MillaController {
 		System.out.println("getRequirementsWithIds called");
 		String completeAddress = mallikasAddress + "selectedReqs";
 
-		String reqsInComponent = mallikasService.getSelectedRequirementsFromMallikas(ids, completeAddress);
+		String reqsWithIds = mallikasService.getSelectedRequirementsFromMallikas(ids, completeAddress);
 
-		System.out.println("Reqs found " + reqsInComponent);
+	//	System.out.println("Reqs found " + reqsInComponent);
 
-		if (reqsInComponent == null || reqsInComponent.equals("")) {
+		if (reqsWithIds == null || reqsWithIds.equals("")) {
 			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
 		}
-		ResponseEntity<String> response = new ResponseEntity<>(reqsInComponent, HttpStatus.FOUND);
+		ResponseEntity<String> response = new ResponseEntity<>(reqsWithIds, HttpStatus.FOUND);
 		return response;
 	}
 	
@@ -461,7 +463,7 @@ public class MillaController {
 
 		String reqsWithType = mallikasService.getAllRequirementsWithTypeAndStatusFromMallikas(type, status, completeAddress);
 
-		System.out.println("Reqs found " + reqsWithType);
+		//System.out.println("Reqs found " + reqsWithType);
 
 		if (reqsWithType == null || reqsWithType.equals("")) {
 			return new ResponseEntity<>("Search failed, requirements not found \n\n", HttpStatus.NOT_FOUND);
@@ -470,6 +472,31 @@ public class MillaController {
 		return response;
 	}
 
+	/**
+	 * Fetch a list of requirements according to their resolution value from the database.
+	 * @param resolution
+	 * @return
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Fetch requirements that have the selected resolution from database", notes = "Resolution can be e.g. Duplicate, Unresolved etc. ")
+	@ResponseBody
+	@PostMapping(value = "requirementsWithResolution")
+	public ResponseEntity<?> getRequirementsWithResolution(@RequestParam String resolution) throws IOException {
+		System.out.println("getRequirementsWithType called");
+		String completeAddress = mallikasAddress + "reqsWithResolution";
+
+		String reqsWithType = mallikasService.getAllRequirementsWithResolutionFromMallikas(resolution, completeAddress);
+
+	//	System.out.println("Reqs found " + reqsWithType);
+
+		if (reqsWithType == null || reqsWithType.equals("")) {
+			return new ResponseEntity<>("Search failed, requirements not found \n\n", HttpStatus.NOT_FOUND);
+		}
+		ResponseEntity<String> response = new ResponseEntity<>(reqsWithType, HttpStatus.FOUND);
+		return response;
+	}
+	
+	
 //	Not working properly at the moment, slows Milla down too much
 //
 //	/**

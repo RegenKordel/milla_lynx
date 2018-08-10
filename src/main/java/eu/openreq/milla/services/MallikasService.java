@@ -125,15 +125,17 @@ public class MallikasService {
 	public String getAllRequirementsInProjectFromMallikas(String projectId, String url) {
 		RestTemplate rt = new RestTemplate();	
 		String reqs = null;
-		
+		//System.out.println("In MallikasService getProjectRequirements");
 		try {
+		//	System.out.println("Here in try");
 			reqs = rt.postForObject(url, projectId, String.class);
-			System.out.println("Requirements received " + reqs);
+		//	System.out.println("Requirements from Project received " + reqs);
 			
 		} catch (HttpClientErrorException e) { //Probably a different exception here? 
 			System.out.println("Error " + e);
 			e.printStackTrace();
 		}
+	//	System.out.println("Here before return");
 		return reqs;
 	}
 	
@@ -192,6 +194,20 @@ public class MallikasService {
 		
 		try {	
 			reqs = rt.postForObject(url, whole, String.class);
+			System.out.println("Requirements received " + reqs);
+			
+		} catch (HttpClientErrorException e) { //Probably a different exception here? 
+			System.out.println("Error " + e);
+			e.printStackTrace();
+		}
+		return reqs;
+	}
+	
+	public String getAllRequirementsWithResolutionFromMallikas(String resolution, String url) {
+		RestTemplate rt = new RestTemplate();	
+		String reqs = null;
+		try {	
+			reqs = rt.postForObject(url, resolution, String.class);
 			System.out.println("Requirements received " + reqs);
 			
 		} catch (HttpClientErrorException e) { //Probably a different exception here? 

@@ -85,6 +85,7 @@ public class FormatTransformerService {
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
 			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
+		//	issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400").toString());
 			issues.add(issue);
 			element = null;
 			issue = null;
@@ -240,15 +241,21 @@ public class FormatTransformerService {
 	 * @param req
 	 */
 	private void addDependencies(Issue issue, Requirement req) {
-		if (issue.getFields().getIssuelinks() != null) {
+		if (issue.getFields().getIssuelinks() != null && !issue.getFields().getIssuelinks().isEmpty()) {
 			for (Issuelink link : issue.getFields().getIssuelinks()) {
 				// if (!"depends on".equals(link.getType().getOutward())) { //Is this necessary?
 				// continue;
 				// }
-				if (link.getOutwardIssue() == null || link.getOutwardIssue().getKey() == null) {
-					continue;
+//				if (link.getOutwardIssue() == null || link.getOutwardIssue().getKey() == null) {
+//					continue;
+//				}
+				if (link.getOutwardIssue() != null && link.getOutwardIssue().getKey() != null) {
+					createDependency(req.getId(), link.getOutwardIssue().getKey(), link.getType().getName());
 				}
-				createDependency(req.getId(), link.getOutwardIssue().getKey(), link.getType().getName());
+				if (link.getInwardIssue() != null && link.getInwardIssue().getKey() != null) {
+					createDependency(link.getInwardIssue().getKey(), req.getId(), link.getType().getName());
+				}
+			//	createDependency(req.getId(), link.getOutwardIssue().getKey(), link.getType().getName());
 			}
 		}
 	}
@@ -264,6 +271,7 @@ public class FormatTransformerService {
 	 *            String type of the Dependency
 	 */
 	private void createDependency(String reqFrom, String reqTo, String type) {
+		System.out.println("reqFrom is " + reqFrom);
 		Dependency dependency = new Dependency();
 		dependency.setFromId(reqFrom);
 		dependency.setToId(reqTo);
@@ -300,9 +308,24 @@ public class FormatTransformerService {
 		if (epicKeyObject.toString().equals("null")) {
 			return; // No parent
 		}
-		String epicKey = epicKeyObject.toString();
+		String epicKey = cleanEpicKey(epicKeyObject.toString());
+		System.out.println("EpicKey ToString " + epicKeyObject.toString());
 		createDependency(epicKey, req.getId(), "epic");
 
+	}
+	
+	private String cleanEpicKey(String epicKey) {
+		char [] chars = epicKey.toCharArray();
+	//	char [] newChars = new char[chars.length-2];
+		String newEpicKey = "";
+	//	if("\"".equals(chars[0]) && "\"".equals(chars[chars.length-1])) {
+			for(int i = 1; i < chars.length-1; i++) {
+				newEpicKey = newEpicKey + chars[i];
+			}
+	//	}
+	//	String newEpicKey = newChars.toString();
+		System.out.println("newEpicKey " + newEpicKey);
+		return newEpicKey;
 	}
 
 	/**
@@ -382,12 +405,12 @@ public class FormatTransformerService {
 		case "closed":
 			req.setStatus(Requirement_status.COMPLETED);
 			break;
-//		case "resolved":
-//			req.setStatus(Requirement_status.COMPLETED); //?????????????????
-//			break;
-//		case "reopened":
-//			req.setStatus(Requirement_status.COMPLETED); //?????????????????
-//			break;
+		case "resolved":
+			req.setStatus(Requirement_status.COMPLETED);
+			break;
+		case "reopened":
+			req.setStatus(Requirement_status.PENDING);
+			break;
 		}
 	}
 
@@ -480,24 +503,21 @@ public class FormatTransformerService {
 	 * @param issue
 	 * @param req
 	 */
-	private void addResolutionToRequirementParts(Issue issue, Requirement req) {		
+	private void addResolutionToRequirementParts(Issue issue, Requirement req) {
+		RequirementPart reqPart = new RequirementPart();
+		reqPart.setId(req.getId()+"_RESOLUTION");
+		reqPart.setName("Resolution");
+		
 		if(issue.getFields().getResolution()!=null) {
-			RequirementPart reqPart = new RequirementPart();
-			reqPart.setId(req.getId()+"_RESOLUTION");
-			reqPart.setName("Resolution");
 			reqPart.setText(issue.getFields().getResolution().getName());
-			reqPart.setCreated_at(new Date().getTime());
-			req.getRequirementParts().add(reqPart);
+			reqPart.setCreated_at(new Date().getTime()); //Here issue.getFields().getResolutionDate()? 
 			
 		}
 		else {
-			RequirementPart reqPart = new RequirementPart();
-			reqPart.setId(req.getId()+"_RESOLUTION");
-			reqPart.setName("Resolution");
 			reqPart.setText("Unresolved");
 			reqPart.setCreated_at(new Date().getTime());
-			req.getRequirementParts().add(reqPart);
 		}
+		req.getRequirementParts().add(reqPart);
 	}
 
 	/**
