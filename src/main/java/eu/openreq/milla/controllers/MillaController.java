@@ -8,16 +8,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,12 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.json.Dependency;
@@ -55,7 +46,7 @@ public class MillaController {
 
 	@Value("${milla.mallikasAddress}")
 	private String mallikasAddress;
-	
+
 	@Value("${milla.upcAddress}")
 	private String upcAddress;
 
@@ -64,8 +55,6 @@ public class MillaController {
 
 	@Autowired
 	MallikasService mallikasService;
-	
-	private int i = 1;
 
 	/**
 	 * Post Requirements and Dependencies to Mulperi.
@@ -78,15 +67,14 @@ public class MillaController {
 	@ApiOperation(value = "Relay POST to Mulperi (obsolete relay)", notes = "Post a model or configuration request to Mulperi")
 	@ResponseBody
 	@PostMapping(value = "data")
-	public ResponseEntity<?> postToMulperi(@RequestBody String data)
-			throws IOException {
+	public ResponseEntity<?> postToMulperi(@RequestBody String data) throws IOException {
 
 		RestTemplate rt = new RestTemplate();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
-		String actualPath = "models/requirementsToChoco"; 
+		String actualPath = "models/requirementsToChoco";
 
 		String completeAddress = mulperiAddress + actualPath;
 
@@ -100,10 +88,10 @@ public class MillaController {
 
 		return response;
 	}
-	
-	
+
 	/**
-	 * Fetch Requirements that are in the selected Project from Mallikas, and send to Mulperi
+	 * Fetch Requirements that are in the selected Project from Mallikas, and send
+	 * to Mulperi
 	 * 
 	 * @param
 	 * @return ResponseEntity<?>
@@ -118,15 +106,13 @@ public class MillaController {
 
 		String completeAddress = mallikasAddress + "projectRequirements";
 
-		String reqsInProject = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
-				completeAddress);
+		String reqsInProject = mallikasService.getAllRequirementsInProjectFromMallikas(projectId, completeAddress);
 
 		if (reqsInProject == null) {
 			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
 		}
 		return this.postToMulperi(reqsInProject);
 	}
-
 
 	/**
 	 * Post a Collection of OpenReq JSON Requirements to Mallikas database
@@ -181,7 +167,7 @@ public class MillaController {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		
+
 		String completeAddress = mallikasAddress + "updateDependencies";
 
 		Collection<Dependency> dependencyList = dependencies;
@@ -226,10 +212,12 @@ public class MillaController {
 		}
 		return response;
 	}
-	
-	//Might be unnecessary to have this and postUpdatedRequirementsToMallikas, but keeping them for now, might be useful with UPC
+
+	// Might be unnecessary to have this and postUpdatedRequirementsToMallikas, but
+	// keeping them for now, might be useful with UPC
 	/**
-	 * Post a Collection of updated (or new) OpenReq JSON Dependencies to Mallikas database
+	 * Post a Collection of updated (or new) OpenReq JSON Dependencies to Mallikas
+	 * database
 	 * 
 	 * @param dependencies
 	 *            Collection<Dependency> received as a parameter, dependencies to be
@@ -240,14 +228,13 @@ public class MillaController {
 	@ApiOperation(value = "Post updated dependencies to Mallikas", notes = "Post updated dependencies as a String list to Mallikas database")
 	@ResponseBody
 	@PostMapping(value = "updateDependencies")
-	public ResponseEntity<?> postUpdatedDependenciesToMallikas(@RequestBody String dependencies)
-			throws IOException {
+	public ResponseEntity<?> postUpdatedDependenciesToMallikas(@RequestBody String dependencies) throws IOException {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		String completeAddress = mallikasAddress + "updateDependencies";
-		
+
 		String updated = null;
 
 		try {
@@ -259,13 +246,12 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(updated, HttpStatus.OK);
 		return response;
 	}
-	
+
 	@ApiOperation(value = "Post updated requirements to Mallikas", notes = "Post updated requirements as a String list to Mallikas database")
 	@ResponseBody
 	@PostMapping(value = "updateRequirements")
-	public ResponseEntity<?> postUpdatedRequirementsToMallikas(@RequestBody String requirements)
-			throws IOException {
-	
+	public ResponseEntity<?> postUpdatedRequirementsToMallikas(@RequestBody String requirements) throws IOException {
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -279,7 +265,7 @@ public class MillaController {
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
 		}
-		
+
 		ResponseEntity<String> response = new ResponseEntity<>(updated, HttpStatus.OK);
 		return response;
 	}
@@ -307,7 +293,7 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(reqsInComponent, HttpStatus.FOUND);
 		return response;
 	}
-	
+
 	/**
 	 * Fetch Requirements that are in the selected Project
 	 * 
@@ -321,8 +307,7 @@ public class MillaController {
 	public ResponseEntity<?> getRequirementsInProject(@RequestBody String projectId) throws IOException {
 		String completeAddress = mallikasAddress + "projectRequirements";
 
-		String reqsInProject = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
-				completeAddress);
+		String reqsInProject = mallikasService.getAllRequirementsInProjectFromMallikas(projectId, completeAddress);
 
 		if (reqsInProject == null || reqsInProject.equals("")) {
 			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
@@ -353,10 +338,11 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(reqsWithIds, HttpStatus.FOUND);
 		return response;
 	}
-	
-	
+
 	/**
-	 * Fetch a list of requirements according to their type and/or status from the database.
+	 * Fetch a list of requirements according to their type and/or status from the
+	 * database.
+	 * 
 	 * @param type
 	 * @return
 	 * @throws IOException
@@ -364,11 +350,13 @@ public class MillaController {
 	@ApiOperation(value = "Fetch requirements that have the selected requirement type and/or status from database", notes = "Requirement type and status should be given in all caps, e.g. BUG, NEW ")
 	@ResponseBody
 	@PostMapping(value = "requirementsWithTypeAndStatus")
-	public ResponseEntity<?> getRequirementsWithTypeAndStatus(@RequestParam String type, @RequestParam String status) throws IOException {
+	public ResponseEntity<?> getRequirementsWithTypeAndStatus(@RequestParam String type, @RequestParam String status)
+			throws IOException {
 		String completeAddress = mallikasAddress + "reqsWithType";
 
-		String reqsWithType = mallikasService.getAllRequirementsWithTypeAndStatusFromMallikas(type, status, completeAddress);
-		
+		String reqsWithType = mallikasService.getAllRequirementsWithTypeAndStatusFromMallikas(type, status,
+				completeAddress);
+
 		if (reqsWithType == null || reqsWithType.equals("")) {
 			return new ResponseEntity<>("Search failed, requirements not found \n\n", HttpStatus.NOT_FOUND);
 		}
@@ -377,7 +365,9 @@ public class MillaController {
 	}
 
 	/**
-	 * Fetch a list of requirements according to their resolution value from the database.
+	 * Fetch a list of requirements according to their resolution value from the
+	 * database.
+	 * 
 	 * @param resolution
 	 * @return
 	 * @throws IOException
@@ -388,7 +378,8 @@ public class MillaController {
 	public ResponseEntity<?> getRequirementsWithResolution(@RequestParam String resolution) throws IOException {
 		String completeAddress = mallikasAddress + "reqsWithResolution";
 
-		String reqsWithResolution = mallikasService.getAllRequirementsWithResolutionFromMallikas(resolution, completeAddress);
+		String reqsWithResolution = mallikasService.getAllRequirementsWithResolutionFromMallikas(resolution,
+				completeAddress);
 
 		if (reqsWithResolution == null || reqsWithResolution.equals("")) {
 			return new ResponseEntity<>("Search failed, requirements not found \n\n", HttpStatus.NOT_FOUND);
@@ -396,7 +387,7 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(reqsWithResolution, HttpStatus.FOUND);
 		return response;
 	}
-	
+
 	/**
 	 * Fetch one Requirement and Requirements that depend on it from Mallikas
 	 * 
@@ -407,7 +398,7 @@ public class MillaController {
 	@ResponseBody
 	@PostMapping(value = "requirementAndDependents")
 	public ResponseEntity<?> getOneRequirementAndDependents(@RequestBody String id) throws IOException {
-		
+
 		String completeAddress = mallikasAddress + "dependents";
 		String requirement = mallikasService.getOneRequirementFromMallikas(completeAddress, id);
 
@@ -417,7 +408,7 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(requirement, HttpStatus.FOUND);
 		return response;
 	}
-	
+
 	/**
 	 * Uses QtJiraImporter to get the issues of a selected project in OpenReq JSON
 	 * format and sends them to Mallikas database.
@@ -439,19 +430,21 @@ public class MillaController {
 
 		int issueCount = projectIssues.getNumberOfIssues();
 		int divided = issueCount;
-		if (issueCount > 10000) {  //this is necessary for large Qt Jira projects
+		if (issueCount > 10000) { // this is necessary for large Qt Jira projects
 			divided = issueCount / 10;
 		}
 		int start = 1;
 		int end = divided;
-		
-//		int epicCount = 0; //these needed for counting epics and subtask relationships in projects
-//		int subtaskCount = 0; //Note! to use these, must uncomment lines in FormatTransformerService
+
+		// int epicCount = 0; //these needed for counting epics and subtask
+		// relationships in projects
+		// int subtaskCount = 0; //Note! to use these, must uncomment lines in
+		// FormatTransformerService
 
 		List<String> requirementIds = new ArrayList<>();
 		List<JsonElement> projectIssuesAsJson;
 		try {
-			while (true) { //a loop needed for sending large projects in chunks to Mallikas
+			while (true) { // a loop needed for sending large projects in chunks to Mallikas
 				if (end >= issueCount + divided) {
 					break;
 				}
@@ -459,8 +452,8 @@ public class MillaController {
 				List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson, projectId);
 				Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId);
 				Collection<Dependency> dependencies = transformer.getDependencies();
-//				epicCount = epicCount + transformer.getEpicCount();
-//				subtaskCount = subtaskCount + transformer.getSubtaskCount();
+				// epicCount = epicCount + transformer.getEpicCount();
+				// subtaskCount = subtaskCount + transformer.getSubtaskCount();
 				requirementIds.addAll(transformer.getRequirementIds());
 				this.postRequirementsToMallikas(requirements);
 				this.postDependenciesToMallikas(dependencies);
@@ -475,11 +468,12 @@ public class MillaController {
 
 			Project project = transformer.createProject(projectId, requirementIds);
 			this.postProjectToMallikas(project);
-			
-//			System.out.println("Epic count is " + epicCount);
-//			System.out.println("Subtask count is " + subtaskCount);
-			
-			ResponseEntity<String> response = new ResponseEntity<>("All requirements and dependencies downloaded", HttpStatus.OK);
+
+			// System.out.println("Epic count is " + epicCount);
+			// System.out.println("Subtask count is " + subtaskCount);
+
+			ResponseEntity<String> response = new ResponseEntity<>("All requirements and dependencies downloaded",
+					HttpStatus.OK);
 			return response;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -489,9 +483,9 @@ public class MillaController {
 		return new ResponseEntity<>("Download failed", HttpStatus.BAD_REQUEST);
 	}
 
-	
 	/**
-	 * Post a Collection of OpenReq JSON Requirements to UPC for Similarity detection.
+	 * Post a Collection of OpenReq JSON Requirements to UPC for Similarity
+	 * detection.
 	 * 
 	 * @param projectId
 	 * @return ResponseEntity<?>
@@ -507,29 +501,30 @@ public class MillaController {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		
-		String requirements = mallikasService.getAllRequirementsInProjectFromMallikas(projectId, mallikasAddress + "projectRequirements");
+
+		String requirements = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
+				mallikasAddress + "projectRequirements");
 
 		String completeAddress = upcAddress + "upc/similarity-detection/DB/AddReqs";
-		
+
 		ResponseEntity<?> response = null;
 
 		try {
-			response = rt.postForEntity(completeAddress, requirements, String.class); //at the moment not working with "requirements"
+			response = rt.postForEntity(completeAddress, requirements, String.class); // at the moment not working with
+																						// "requirements"
 
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("UPC error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
 		}
-//		catch(Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<>("Error " + e.getMessage(), HttpStatus.BAD_REQUEST);
-//		}
+		// catch(Exception e) { //This is here just for testing the responses from UPC
+		// e.printStackTrace();
+		// return new ResponseEntity<>("Error " + e.getMessage(),
+		// HttpStatus.BAD_REQUEST);
+		// }
 		return response;
 	}
-	
-	
-//	Probably works, String might get too large for Swagger
-//
+
+	// Probably works, String might get too large for Swagger
 	/**
 	 * Fetch all Requirements and Dependencies from Mallikas
 	 * 
@@ -554,27 +549,33 @@ public class MillaController {
 	}
 
 	// Probably not necessary
-//	/**
-//	 * Fetch one Requirement and its Dependencies from Mallikas
-//	 * 
-//	 * @return
-//	 * @throws IOException
-//	 */
-//	@ApiOperation(value = "Fetch one selected requirement from the database", notes = "Fetch selected requirement and its dependencies from Mallikas database")
-//	@ResponseBody
-//	@PostMapping(value = "oneRequirement")
-//	public ResponseEntity<?> getOneRequirement(@RequestBody String id) throws IOException {
-//
-//		System.out.println("getOneRequirement called");
-//		String completeAddress = mallikasAddress + "one";
-//
-//		String requirement = mallikasService.getOneRequirementFromMallikas(completeAddress, id);
-//
-//		if (requirement == null || requirement.equals("")) {
-//			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
-//		}
-//		ResponseEntity<String> response = new ResponseEntity<>(requirement, HttpStatus.FOUND);
-//		return response;
-//	}
+	// /**
+	// * Fetch one Requirement and its Dependencies from Mallikas
+	// *
+	// * @return
+	// * @throws IOException
+	// */
+	// @ApiOperation(value = "Fetch one selected requirement from the database",
+	// notes = "Fetch selected requirement and its dependencies from Mallikas
+	// database")
+	// @ResponseBody
+	// @PostMapping(value = "oneRequirement")
+	// public ResponseEntity<?> getOneRequirement(@RequestBody String id) throws
+	// IOException {
+	//
+	// System.out.println("getOneRequirement called");
+	// String completeAddress = mallikasAddress + "one";
+	//
+	// String requirement =
+	// mallikasService.getOneRequirementFromMallikas(completeAddress, id);
+	//
+	// if (requirement == null || requirement.equals("")) {
+	// return new ResponseEntity<>("Requirements not found \n\n",
+	// HttpStatus.NOT_FOUND);
+	// }
+	// ResponseEntity<String> response = new ResponseEntity<>(requirement,
+	// HttpStatus.FOUND);
+	// return response;
+	// }
 
 }
