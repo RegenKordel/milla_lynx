@@ -170,7 +170,7 @@ public class FormatTransformerService {
 	 *            that needs to have special characters removed
 	 * @return a fixed version of the name
 	 */
-	private String fixSpecialCharacters(String name) {
+	private String fixSpecialCharacters(String name) { //TODO this might not be necessary anymore but is left here for demo safety 
 		String fixedName = name;
 		if (name != null && !name.equals("")) {
 			fixedName = name.replaceAll("[^\\x20-\\x7e]", ""); // TODO This is a quick fix, must be modified into a
