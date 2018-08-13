@@ -31,6 +31,61 @@ public class TestingController {
 		return "exampleGUI";
 	}
 	
+//	/**
+//	 * Post Requirements and Dependencies to Mulperi.
+//	 * 
+//	 * @param data
+//	 * @param path
+//	 * @return
+//	 * @throws IOException
+//	 */
+//	@ApiOperation(value = "Relay POST to Mulperi (obsolete relay)", notes = "Post a model or configuration request to Mulperi")
+//	@ResponseBody
+//	@PostMapping(value = "relay/{path}")
+//	public ResponseEntity<?> postToMulperi(@RequestBody String data, @PathVariable("path") String path)
+//			throws IOException {
+//
+//		System.out.println("PostToMulperi");
+//		RestTemplate rt = new RestTemplate();
+//
+//		HttpHeaders headers = new HttpHeaders();
+//		headers.setContentType(MediaType.APPLICATION_JSON);
+//
+//		String actualPath = getActualPath(path);
+//
+//		String completeAddress = mulperiAddress + actualPath;
+//
+//		HttpEntity<String> entity = new HttpEntity<String>(data, headers);
+//		System.out.println("Data is " + data);
+//		ResponseEntity<?> response = null;
+//
+//		try {
+//			response = rt.postForEntity(completeAddress, entity, String.class);
+//		} catch (HttpClientErrorException e) {
+//			return new ResponseEntity<>("Mulperi error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+//		}
+//
+//		return response;
+//	}
+//
+//	/**
+//	 * Method for setting the actual path to Mulperi
+//	 * 
+//	 * @param path
+//	 * @return
+//	 */
+//	public String getActualPath(String path) { // Changed to public for TestingContoller
+//		if (path.equals("mulson"))
+//			return "models/mulson";
+//		if (path.equals("reqif"))
+//			return "models/reqif";
+//		if (path.contains("configure:")) {
+//			String modelName = path.split(":", 2)[1];
+//			return "models/" + modelName + "/configurations";
+//		}
+//		return path;
+//	}
+	
 //	@ApiOperation(value = "Relay GET to Mulperi",
 //		    notes = "Get a configuration from Mulperi")
 //	@ResponseBody

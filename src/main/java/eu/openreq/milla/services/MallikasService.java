@@ -1,14 +1,6 @@
 package eu.openreq.milla.services;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -20,7 +12,6 @@ import com.google.gson.JsonParser;
 
 import eu.openreq.milla.models.json.Dependency;
 import eu.openreq.milla.models.json.Requirement;
-import eu.openreq.milla.models.json.Requirement_type;
 
 @Service
 public class MallikasService {
@@ -38,10 +29,8 @@ public class MallikasService {
 		
 		try {
 			reqsAndDependencies=rt.getForObject(url, String.class);
-			System.out.println("Requirements received " + reqsAndDependencies);
 		}
 		catch (HttpClientErrorException e) { //Probably a different exception here? 
-			System.out.println("Error " + e);
 			e.printStackTrace();
 		}
 		
@@ -69,30 +58,7 @@ public class MallikasService {
 		}
 		return req;
 	}
-	
-	
-//	/**
-//	 * Send request to Mallikas to get a Requirement and all Requirements that depend on it (and it depends on)
-//	 * @param url the address in Mallikas
-//	 * @param id String identifier of the Requirement
-//	 * @return
-//	 */
-//	public String getOneRequirementAndDepedentsFromMallikas(String url, String id) {
-//	
-//		RestTemplate rt = new RestTemplate();	
-//		String reqAndDependants = null;
-//		
-//		try {
-//			reqAndDependants = rt.postForObject(url, id, String.class);	
-//			System.out.println("Requirement received " + reqAndDependants);
-//		}
-//		catch (HttpClientErrorException e) { //Probably a different exception here? 
-//			System.out.println("Error " + e);
-//			e.printStackTrace();
-//		}
-//		return reqAndDependants;
-//	}
-	
+		
 	/**
 	 * Send request to Mallikas to get a List of Requirements and their Dependecies as a String (based on a List of selected Requirement IDs) 
 	 * @param ids List<String> containing selected Requirement IDs
@@ -125,17 +91,12 @@ public class MallikasService {
 	public String getAllRequirementsInProjectFromMallikas(String projectId, String url) {
 		RestTemplate rt = new RestTemplate();	
 		String reqs = null;
-		//System.out.println("In MallikasService getProjectRequirements");
 		try {
-		//	System.out.println("Here in try");
-			reqs = rt.postForObject(url, projectId, String.class);
-		//	System.out.println("Requirements from Project received " + reqs);
-			
+			reqs = rt.postForObject(url, projectId, String.class);		
 		} catch (HttpClientErrorException e) { //Probably a different exception here? 
 			System.out.println("Error " + e);
 			e.printStackTrace();
 		}
-	//	System.out.println("Here before return");
 		return reqs;
 	}
 	
@@ -160,24 +121,7 @@ public class MallikasService {
 		}
 		return reqs;
 	}
-	
-//	
-//	public String getAllRequirementsWithTypeFromMallikas(String type, String url) {
-//
-//		RestTemplate rt = new RestTemplate();	
-//		String reqs = null;
-//		
-//		try {	
-//			reqs = rt.postForObject(url, Requirement_type.valueOf(type), String.class);
-//			System.out.println("Requirements received " + reqs);
-//			
-//		} catch (HttpClientErrorException e) { //Probably a different exception here? 
-//			System.out.println("Error " + e);
-//			e.printStackTrace();
-//		}
-//		return reqs;
-//	}
-	
+		
 	/**
 	 * Post the searched type and status to Mallikas
 	 * @param type
@@ -235,8 +179,6 @@ public class MallikasService {
 		return type2+"+"+status2;
 	}
 	
-	
-	
 	/**
 	 * Send updated dependencies as a String to Mallikas
 	 * @param dependencies
@@ -272,7 +214,6 @@ public class MallikasService {
 
 		try {
 			response = rt.postForObject(url, updatedRequirements, String.class);
-			System.out.println("Response is " + response);
 			return response;
 
 		} catch (HttpClientErrorException e) {

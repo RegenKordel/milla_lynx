@@ -85,7 +85,6 @@ public class FormatTransformerService {
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
 			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
-		//	issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400").toString());
 			issues.add(issue);
 			element = null;
 			issue = null;
@@ -132,7 +131,7 @@ public class FormatTransformerService {
 				int priority = Integer.parseInt(issue.getFields().getPriority().getId()); // Note! This might not be
 																							// actually a good idea, QT
 																							// priorities not numerical,
-																							// might still work
+																							// but might still work
 				req.setPriority(priority);
 
 				setStatusForReq(req, issue.getFields().getStatus().getName());
@@ -271,7 +270,6 @@ public class FormatTransformerService {
 	 *            String type of the Dependency
 	 */
 	private void createDependency(String reqFrom, String reqTo, String type) {
-		System.out.println("reqFrom is " + reqFrom);
 		Dependency dependency = new Dependency();
 		dependency.setFromId(reqFrom);
 		dependency.setToId(reqTo);
@@ -309,22 +307,21 @@ public class FormatTransformerService {
 			return; // No parent
 		}
 		String epicKey = cleanEpicKey(epicKeyObject.toString());
-		System.out.println("EpicKey ToString " + epicKeyObject.toString());
 		createDependency(epicKey, req.getId(), "epic");
 
 	}
 	
+	/**
+	 * Helper method for cleaning "" marks from issue keys that belong to epics (no idea why epic issues seem to have extra "" around them)
+	 * @param epicKey
+	 * @return
+	 */
 	private String cleanEpicKey(String epicKey) {
 		char [] chars = epicKey.toCharArray();
-	//	char [] newChars = new char[chars.length-2];
 		String newEpicKey = "";
-	//	if("\"".equals(chars[0]) && "\"".equals(chars[chars.length-1])) {
 			for(int i = 1; i < chars.length-1; i++) {
 				newEpicKey = newEpicKey + chars[i];
 			}
-	//	}
-	//	String newEpicKey = newChars.toString();
-		System.out.println("newEpicKey " + newEpicKey);
 		return newEpicKey;
 	}
 
@@ -411,6 +408,8 @@ public class FormatTransformerService {
 		case "reopened":
 			req.setStatus(Requirement_status.PENDING);
 			break;
+			
+			//Should have more types of statuses included?
 		}
 	}
 
