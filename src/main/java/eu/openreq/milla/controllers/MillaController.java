@@ -102,7 +102,7 @@ public class MillaController {
 	@PostMapping(value = "sendProjectToMulperi")
 	public ResponseEntity<?> sendProjectToMulperi(@RequestBody String projectId) throws IOException {
 
-		System.out.println("sendProjectToMulperi called");
+		//System.out.println("sendProjectToMulperi called");
 
 		String completeAddress = mallikasAddress + "projectRequirements";
 

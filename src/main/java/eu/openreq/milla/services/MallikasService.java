@@ -50,7 +50,6 @@ public class MallikasService {
 		
 		try {
 			req = rt.postForObject(url, id, String.class);	
-			System.out.println("Requirement received " + req);
 		}
 		catch (HttpClientErrorException e) { //Probably a different exception here? 
 			System.out.println("Error " + e);
@@ -72,7 +71,6 @@ public class MallikasService {
 		
 		try {
 			reqs= rt.postForObject(url, ids, String.class);
-			System.out.println("Selected requirements received " + reqs);
 		}
 		catch (HttpClientErrorException e) { //Probably a different exception here? 
 			System.out.println("Error " + e);
@@ -113,7 +111,6 @@ public class MallikasService {
 		
 		try {
 			reqs = rt.postForObject(url, classifierId, String.class);
-			System.out.println("Requirements received " + reqs);
 			
 		} catch (HttpClientErrorException e) { //Probably a different exception here? 
 			System.out.println("Error " + e);
@@ -138,7 +135,6 @@ public class MallikasService {
 		
 		try {	
 			reqs = rt.postForObject(url, whole, String.class);
-			System.out.println("Requirements received " + reqs);
 			
 		} catch (HttpClientErrorException e) { //Probably a different exception here? 
 			System.out.println("Error " + e);
@@ -152,7 +148,6 @@ public class MallikasService {
 		String reqs = null;
 		try {	
 			reqs = rt.postForObject(url, resolution, String.class);
-			System.out.println("Requirements received " + reqs);
 			
 		} catch (HttpClientErrorException e) { //Probably a different exception here? 
 			System.out.println("Error " + e);
