@@ -32,7 +32,7 @@ import eu.openreq.milla.models.json.Requirement_status;
 import eu.openreq.milla.models.json.Requirement_type;
 
 /**
- * Methods used to convert between formats
+ * Methods used to convert between formats (JsonElements to Jira Issues, and Issues to OpenReq Requirements)
  * 
  * @author iivorait
  * @author tlaurinen
@@ -71,7 +71,7 @@ public class FormatTransformerService {
 	 * @return a List of Issue objects
 	 * @throws IOException
 	 */
-	public List<Issue> convertJsonElementsToIssues(List<JsonElement> jsonElements, String projectId)
+	public List<Issue> convertJsonElementsToIssues(List<JsonElement> jsonElements)
 			throws IOException {
 
 		long start = System.nanoTime();
@@ -84,7 +84,7 @@ public class FormatTransformerService {
 
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
-			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
+			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400")); //For some reason customfield10400 will give null if not set here 
 			issues.add(issue);
 			element = null;
 			issue = null;
@@ -242,19 +242,12 @@ public class FormatTransformerService {
 	private void addDependencies(Issue issue, Requirement req) {
 		if (issue.getFields().getIssuelinks() != null && !issue.getFields().getIssuelinks().isEmpty()) {
 			for (Issuelink link : issue.getFields().getIssuelinks()) {
-				// if (!"depends on".equals(link.getType().getOutward())) { //Is this necessary?
-				// continue;
-				// }
-//				if (link.getOutwardIssue() == null || link.getOutwardIssue().getKey() == null) {
-//					continue;
-//				}
 				if (link.getOutwardIssue() != null && link.getOutwardIssue().getKey() != null) {
 					createDependency(req.getId(), link.getOutwardIssue().getKey(), link.getType().getName());
 				}
 				if (link.getInwardIssue() != null && link.getInwardIssue().getKey() != null) {
 					createDependency(link.getInwardIssue().getKey(), req.getId(), link.getType().getName());
 				}
-			//	createDependency(req.getId(), link.getOutwardIssue().getKey(), link.getType().getName());
 			}
 		}
 	}
@@ -271,8 +264,8 @@ public class FormatTransformerService {
 	 */
 	private void createDependency(String reqFrom, String reqTo, String type) {
 		Dependency dependency = new Dependency();
-		dependency.setFromId(reqFrom);
-		dependency.setToId(reqTo);
+		dependency.setFromid(reqFrom);
+		dependency.setToid(reqTo);
 		setDependencyType(dependency, type);
 		dependency.setId(reqFrom + "_" + reqTo + "_" + dependency.getDependency_type());
 		setStatusForDependency(dependency, "accepted");
