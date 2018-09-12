@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -20,6 +21,7 @@ import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.jira.Component;
 import eu.openreq.milla.models.jira.Issuelink;
 import eu.openreq.milla.models.jira.Subtask;
+import eu.openreq.milla.models.jira.FixVersion;
 import eu.openreq.milla.models.json.Classifier;
 import eu.openreq.milla.models.json.Comment;
 import eu.openreq.milla.models.json.Dependency;
@@ -144,6 +146,7 @@ public class FormatTransformerService {
 				addDependencies(issue, req);
 				addClassifiers(issue, req);
 				addResolutionToRequirementParts(issue, req);
+				addFixVersionsToRequirementParts(issue, req);
 
 				updateParentEpic(requirements, issue, req);
 
@@ -510,6 +513,106 @@ public class FormatTransformerService {
 			reqPart.setCreated_at(new Date().getTime());
 		}
 		req.getRequirementParts().add(reqPart);
+	}
+	
+	private void addFixVersionsToRequirementParts(Issue issue, Requirement req) {
+			FixVersion fixVersion = getLatestFixVersion(issue);
+			
+			if(fixVersion!=null) { try {
+				System.out.println("fixVersion " + fixVersion.getName() + " id is " + fixVersion.getId());
+				RequirementPart reqPart = new RequirementPart();
+				reqPart.setId(req.getId()+"_"+fixVersion.getId());
+				reqPart.setName("FixVersion_"+fixVersion.getName());
+				ObjectMapper mapper = new ObjectMapper();
+				String versionString = mapper.writeValueAsString(fixVersion);
+				reqPart.setText(versionString);
+				req.getRequirementParts().add(reqPart);
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+			}
+	}
+	
+	//This version has issues when the biggest id doesn't mean the latest version,
+	//should be checked and used the the other version below if possible
+	private FixVersion getLatestFixVersion(Issue issue) {
+		FixVersion fixVersion = null;
+		long latest = 0;
+		if(issue.getFields().getFixVersions()!=null) {
+			for(FixVersion fixVersion2 : issue.getFields().getFixVersions()) {
+				long versionNumber = Long.parseLong(fixVersion2.getId());
+				if(versionNumber>latest) {
+					latest = versionNumber;
+					fixVersion = fixVersion2;
+				}
+			}
+		}
+		return fixVersion;
+	}
+	
+//	private FixVersion getLatestFixVersion(Issue issue) {
+//		FixVersion fixVersion = null;
+//		long latest = 0;
+//		if(issue.getFields().getFixVersions()!=null) {
+//			for(FixVersion fixVersion2 : issue.getFields().getFixVersions()) {
+//				long versionNumber = versionNumberToLong(fixVersion2.getName());
+//				if(versionNumber>latest) {
+//					latest = versionNumber;
+//					fixVersion = fixVersion2;
+//				}
+//			}
+//		}
+//		return fixVersion;
+//	}
+//	
+	private long versionNumberToLong(String version) {
+		String[] parts = version.split("\\.");
+		String number = "";
+		parts[parts.length-1] = getLastPart(parts[parts.length-1]);
+		for (int i = 0; i < parts.length; i++) {
+			int part = Integer.parseInt(parts[i]);
+			if(i!=0) {
+				if(part<10) {
+					number += "00"+part;
+				}
+				else {
+					number +="0" +part;
+				}
+			}
+			else {
+				number += part;
+			}
+		}
+		if(parts.length<3) {
+			System.out.println("Here");
+			number+="000";
+		}
+		System.out.println("Parts.length " +parts.length);
+		System.out.println("Number is " + number);
+		
+		return Long.parseLong(number);
+	}
+	
+	private String getLastPart(String part) {
+		String last = "";
+		part.toLowerCase();
+		if(part.contains("alpha")) {
+			String[] parts = part.split("alpha");
+			last = parts[0].trim()+".1."+parts[1].trim();	
+		}
+		else if(part.contains("beta")) {
+			String[] parts = part.split("beta");
+			last = parts[0].trim()+".2."+parts[1].trim();	
+		}
+		else if(part.contains("rc")) {
+			String[] parts = part.split("rc");
+			last = parts[0].trim()+".3."+parts[1].trim();	
+		}
+		else {
+			last +=part;
+		}
+		return last;
 	}
 
 	/**

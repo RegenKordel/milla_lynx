@@ -156,6 +156,19 @@ public class MallikasService {
 		return reqs;
 	}
 	
+	public String getAllRequirementsWithDependencyTypeFromMallikas(String type, String url) {
+		RestTemplate rt = new RestTemplate();	
+		String reqs = null;
+		try {	
+			reqs = rt.postForObject(url, type, String.class);
+			
+		} catch (HttpClientErrorException e) { //Probably a different exception here? 
+			System.out.println("Error " + e);
+			e.printStackTrace();
+		}
+		return reqs;
+	}
+	
 	/**
 	 * Checks if the user wishes to exclude either type or status from the search (must write "No type" or "No status" to the requested input fields) 
 	 * @param type

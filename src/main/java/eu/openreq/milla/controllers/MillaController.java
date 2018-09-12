@@ -387,6 +387,32 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(reqsWithResolution, HttpStatus.FOUND);
 		return response;
 	}
+	
+	/**
+	 * Fetch a list of requirements according to their dependency type from the
+	 * database.
+	 * 
+	 * @param type
+	 * @return
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Fetch requirements that have the selected dependency type from database", notes = "Dependency type can be e.g. DUPLICATES, REQUIRES etc. ")
+	@ResponseBody
+	@PostMapping(value = "requirementsWithDependencyType")
+	public ResponseEntity<?> getRequirementsWithDependencyType(@RequestBody String type) throws IOException {
+		String completeAddress = mallikasAddress + "reqsWithDependencyType";
+		
+		String modifiedType = type.toUpperCase();
+
+		String reqsWithDependencyType = mallikasService.getAllRequirementsWithDependencyTypeFromMallikas(modifiedType,
+				completeAddress);
+
+		if (reqsWithDependencyType == null || reqsWithDependencyType.equals("")) {
+			return new ResponseEntity<>("Search failed, requirements not found \n\n", HttpStatus.NOT_FOUND);
+		}
+		ResponseEntity<String> response = new ResponseEntity<>(reqsWithDependencyType, HttpStatus.FOUND);
+		return response;
+	}
 
 	/**
 	 * Fetch one Requirement and Requirements that depend on it from Mallikas
@@ -482,127 +508,6 @@ public class MillaController {
 		}
 		return new ResponseEntity<>("Download failed", HttpStatus.BAD_REQUEST);
 	}
-
-	/**
-	 * Post a Collection of OpenReq JSON Requirements to UPC for Similarity
-	 * detection.
-	 * 
-	 * @param projectId
-	 * @return ResponseEntity<?>
-	 * @throws IOException
-	 */
-	@ApiOperation(value = "Post requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection")
-	@ResponseBody
-	@PostMapping(value = "detectSimilarity")
-	public ResponseEntity<?> postRequirementsToUPCSimilarityDetection(@RequestBody String projectId)
-			throws IOException {
-
-		RestTemplate rt = new RestTemplate();
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
-		String requirements = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
-				mallikasAddress + "projectRequirements");
-
-		String completeAddress = upcAddress + "upc/similarity-detection/DB/AddReqs";
-
-		ResponseEntity<?> response = null;
-
-		try {
-			response = rt.postForEntity(completeAddress, requirements, String.class); 
-
-		} catch (HttpClientErrorException e) {
-			return new ResponseEntity<>("UPC error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
-		}
-		// catch(Exception e) { //This is here just for testing the responses from UPC
-		// e.printStackTrace();
-		// return new ResponseEntity<>("Error " + e.getMessage(),
-		// HttpStatus.BAD_REQUEST);
-		// }
-		return response;
-	}
-
-	/**
-	 * Post a Collection of OpenReq JSON Requirements to UPC for Similarity
-	 * detection.
-	 * 
-	 * @param projectId
-	 * @return ResponseEntity<?>
-	 * @throws IOException
-	 */
-	@ApiOperation(value = "Post requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection")
-	@ResponseBody
-	@PostMapping(value = "detectSimilarityReqReq")
-	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqReq(@RequestBody String jsonString)
-			throws IOException {
-
-		RestTemplate rt = new RestTemplate();
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
-//		String requirements = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
-//				mallikasAddress + "projectRequirements");
-
-		String completeAddress = upcAddress + "upc/similarity-detection/ReqReq?req1=QTWB-24&req2=QTWB-32&component=DKPro";
-
-		ResponseEntity<?> response = null;
-
-		try {
-			response = rt.postForEntity(completeAddress, jsonString, String.class); 
-
-		} catch (HttpClientErrorException e) {
-			return new ResponseEntity<>("UPC error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
-		}
-		// catch(Exception e) { //This is here just for testing the responses from UPC
-		// e.printStackTrace();
-		// return new ResponseEntity<>("Error " + e.getMessage(),
-		// HttpStatus.BAD_REQUEST);
-		// }
-		return response;
-	}
-	
-	
-	/**
-	 * Post a Collection of OpenReq JSON Requirements to UPC for Similarity
-	 * detection.
-	 * 
-	 * @param projectId
-	 * @return ResponseEntity<?>
-	 * @throws IOException
-	 */
-	@ApiOperation(value = "Post requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection")
-	@ResponseBody
-	@PostMapping(value = "detectSimilarityProject")
-	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionProject(@RequestBody String jsonString)
-			throws IOException {
-
-		RestTemplate rt = new RestTemplate();
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
-//		String requirements = mallikasService.getAllRequirementsInProjectFromMallikas(projectId,
-//				mallikasAddress + "projectRequirements");
-
-		String completeAddress = upcAddress + "upc/similarity-detection/Project?project=QTWB&component=DKPro&threshold=0.3&num_elements=5";
-
-		ResponseEntity<?> response = null;
-
-		try {
-			response = rt.postForEntity(completeAddress, jsonString, String.class); 
-
-		} catch (HttpClientErrorException e) {
-			return new ResponseEntity<>("UPC error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
-		}
-		// catch(Exception e) { //This is here just for testing the responses from UPC
-		// e.printStackTrace();
-		// return new ResponseEntity<>("Error " + e.getMessage(),
-		// HttpStatus.BAD_REQUEST);
-		// }
-		return response;
-	}
 	
 	// Probably works, String might get too large for Swagger
 	/**
@@ -658,4 +563,43 @@ public class MillaController {
 	// return response;
 	// }
 
+	
+	
+
+	 /**
+	 * Fetch one Requirement and its Dependencies from Mallikas
+	 *
+	 * @return
+	 * @throws IOException
+	 */
+	 @ApiOperation(value = "Fetch one selected requirement from the database",
+	 notes = "Fetch selected requirement and its dependencies from Mallikas database")
+	 @ResponseBody
+	 @PostMapping(value = "oneRequirement")
+	 public ResponseEntity<?> getOneRequirement(@RequestBody String issueKey) throws
+	 IOException {
+		 
+	        RestTemplate template = new RestTemplate();
+	       String mulperiURL = "http://217.172.12.199:9202/models/findTransitiveClosureOfRequirement";
+	        
+	      // String mulperiURL = mulperiAddress + "/models/findTransitiveClosureOfRequirement";
+	        String requirement = null;
+	        System.out.println("Hi");
+	        try
+	        {
+	            requirement = template.postForObject(mulperiURL, issueKey, String.class);
+	            System.out.println(requirement);
+	       	 ResponseEntity<String> response = new ResponseEntity<>(requirement,
+	       	 HttpStatus.FOUND);
+	       	 return response;
+	        }
+	        catch(Exception e) {
+	        	e.printStackTrace();
+
+	       	 return new ResponseEntity<>("Requirements not found \n\n",
+	       	 HttpStatus.NOT_FOUND);
+	        }
+
+}
+	 
 }
