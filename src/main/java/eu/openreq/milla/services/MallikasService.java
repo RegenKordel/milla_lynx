@@ -208,6 +208,26 @@ public class MallikasService {
 		}
 	}
 	
+//	/**
+//	 * Send updated dependencies as a String to Mallikas
+//	 * @param dependencies
+//	 * @param url
+//	 * @return
+//	 */
+//	public String updateUPCDependencies(Collection<Dependency> dependencies, String url) {
+//		RestTemplate rt = new RestTemplate();	
+//
+//		String response = null;
+//
+//		try {
+//			response = rt.postForObject(url, dependencies, String.class);
+//			return response;
+//
+//		} catch (HttpClientErrorException e) {
+//			return "Mallikas error:\n\n" + e.getResponseBodyAsString() + " "+ e.getStatusCode();
+//		}
+//	}
+	
 	/**
 	 * Send updated requirements as a String to Mallikas
 	 * @param requirements

@@ -1,0 +1,40 @@
+package eu.openreq.milla.services;
+import java.util.List;
+
+import org.json.JSONException;
+
+import com.google.gson.Gson;
+
+import eu.openreq.milla.models.json.*;
+
+public class JSONParser {
+	static Gson gson = new Gson();
+	public static Project project;
+	public static Requirement requirement;
+	public static List<Project> projects;
+	public static List<Requirement> requirements;
+	public static List<Requirement> dependent_requirements;
+	public static List<Dependency> dependencies;
+	public static InputExtractor input;
+	
+	public static void parseToOpenReqObjects(String jsonString) 
+			throws JSONException {
+			input = gson.fromJson(jsonString, InputExtractor.class);
+			project = input.getProject();
+			projects = input.getProjects();
+			requirement = input.getRequirement();
+			requirements = input.getRequirements();
+			dependencies = input.getDependencies();
+			dependent_requirements = input.getDependentRequirements();
+			fixDependencyIds(dependencies);
+	}
+	
+	private static void fixDependencyIds(List<Dependency> dependencies) {
+		for(Dependency dependency : dependencies) {
+			if(dependency.getId()==null) {
+				dependency.setId(dependency.getFromid() + "_" + dependency.getToid() + "_" + dependency.getDependency_type());
+			}
+		}
+	}
+	
+}

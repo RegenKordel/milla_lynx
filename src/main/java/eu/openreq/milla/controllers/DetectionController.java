@@ -1,11 +1,15 @@
 package eu.openreq.milla.controllers;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,14 +17,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import eu.openreq.milla.services.MallikasService;
-import io.swagger.annotations.ApiOperation;
+import eu.openreq.milla.services.JSONParser;
+import io.swagger.annotations.ApiOperation; 
+
+import eu.openreq.milla.models.json.*;
 
 @SpringBootApplication
-@Controller
+@RestController
 public class DetectionController {
 
 	@Value("${milla.mallikasAddress}")
@@ -31,6 +39,9 @@ public class DetectionController {
 
 	@Autowired
 	MallikasService mallikasService;
+	
+	@Autowired
+	MillaController millaController;
 
 	/**
 	 * Post a Collection of OpenReq JSON Requirements to UPC for Similarity
@@ -74,13 +85,14 @@ public class DetectionController {
 	 * @param projectId
 	 * @return ResponseEntity<?>
 	 * @throws IOException
+	 * @throws JSONException 
 	 */
 	@ApiOperation(value = "Post two requirements to UPC Similarity Detection", notes = "Post requirements and dependencies as a String to UPC for Similarity Detection. Also requires ids of two requirements being compared, and the component (use DKPro)")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityReqReq")
 	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqReq(@RequestBody String jsonString,
 			@RequestParam String reqId1, @RequestParam String reqId2, @RequestParam String component)
-			throws IOException {
+			throws IOException{
 
 		RestTemplate rt = new RestTemplate();
 
@@ -90,15 +102,26 @@ public class DetectionController {
 		String completeAddress = upcAddress + "upc/similarity-detection/ReqReq?req1=" + reqId1 + "&req2=" + reqId2
 				+ "&component=" + component;
 
-		ResponseEntity<?> response = null;
+		String response = null;
+		
+		ResponseEntity<?> entity = null;
+		
 
 		try {
-			response = rt.postForEntity(completeAddress, jsonString, String.class);
+			response = rt.postForObject(completeAddress, jsonString, String.class);
+			if(response!=null) {
+				JSONParser.parseToOpenReqObjects(response);
+				List<Dependency> dependencies = JSONParser.dependencies;
+				entity = millaController.postDependenciesToMallikas(dependencies);
+			}
 
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("UPC error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		return response;
+		return entity;
 	}
 
 	/**
@@ -121,12 +144,13 @@ public class DetectionController {
 		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		String completeAddress = upcAddress
-				+ "upc/similarity-detection/Project?project="+ projectId + "&component=" + component + "&threshold="+threshold+"&num_elements="+elements;
+				+ "upc/similarity-detection/Project?project="+ projectId + "&component=" + component + "&threshold="+threshold + "&num_elements="+elements;
 
 		ResponseEntity<?> response = null;
 
 		try {
 			response = rt.postForEntity(completeAddress, jsonString, String.class);
+			
 
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("UPC error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
