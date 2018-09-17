@@ -566,6 +566,7 @@ public class FormatTransformerService {
 //		return fixVersion;
 //	}
 //	
+	//Not usable yet, waiting for decision on fixVersions, also differing length issue not solved
 	private long versionNumberToLong(String version) {
 		String[] parts = version.split("\\.");
 		String number = "";
@@ -594,6 +595,7 @@ public class FormatTransformerService {
 		return Long.parseLong(number);
 	}
 	
+	//Not usable yet, waiting for decision on fixVersions
 	private String getLastPart(String part) {
 		String last = "";
 		part.toLowerCase();

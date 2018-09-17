@@ -47,9 +47,6 @@ public class MillaController {
 	@Value("${milla.mallikasAddress}")
 	private String mallikasAddress;
 
-	@Value("${milla.upcAddress}")
-	private String upcAddress;
-
 	@Autowired
 	FormatTransformerService transformer;
 
@@ -532,74 +529,5 @@ public class MillaController {
 		ResponseEntity<String> response = new ResponseEntity<>(allRequirements, HttpStatus.FOUND);
 		return response;
 	}
-
-	// Probably not necessary
-	// /**
-	// * Fetch one Requirement and its Dependencies from Mallikas
-	// *
-	// * @return
-	// * @throws IOException
-	// */
-	// @ApiOperation(value = "Fetch one selected requirement from the database",
-	// notes = "Fetch selected requirement and its dependencies from Mallikas
-	// database")
-	// @ResponseBody
-	// @PostMapping(value = "oneRequirement")
-	// public ResponseEntity<?> getOneRequirement(@RequestBody String id) throws
-	// IOException {
-	//
-	// System.out.println("getOneRequirement called");
-	// String completeAddress = mallikasAddress + "one";
-	//
-	// String requirement =
-	// mallikasService.getOneRequirementFromMallikas(completeAddress, id);
-	//
-	// if (requirement == null || requirement.equals("")) {
-	// return new ResponseEntity<>("Requirements not found \n\n",
-	// HttpStatus.NOT_FOUND);
-	// }
-	// ResponseEntity<String> response = new ResponseEntity<>(requirement,
-	// HttpStatus.FOUND);
-	// return response;
-	// }
-
-	
-	
-
-	 /**
-	 * Fetch one Requirement and its Dependencies from Mallikas
-	 *
-	 * @return
-	 * @throws IOException
-	 */
-	 @ApiOperation(value = "Fetch one selected requirement from the database",
-	 notes = "Fetch selected requirement and its dependencies from Mallikas database")
-	 @ResponseBody
-	 @PostMapping(value = "oneRequirement")
-	 public ResponseEntity<?> getOneRequirement(@RequestBody String issueKey) throws
-	 IOException {
-		 
-	        RestTemplate template = new RestTemplate();
-	       String mulperiURL = "http://217.172.12.199:9202/models/findTransitiveClosureOfRequirement";
-	        
-	      // String mulperiURL = mulperiAddress + "/models/findTransitiveClosureOfRequirement";
-	        String requirement = null;
-	        System.out.println("Hi");
-	        try
-	        {
-	            requirement = template.postForObject(mulperiURL, issueKey, String.class);
-	            System.out.println(requirement);
-	       	 ResponseEntity<String> response = new ResponseEntity<>(requirement,
-	       	 HttpStatus.FOUND);
-	       	 return response;
-	        }
-	        catch(Exception e) {
-	        	e.printStackTrace();
-
-	       	 return new ResponseEntity<>("Requirements not found \n\n",
-	       	 HttpStatus.NOT_FOUND);
-	        }
-
-}
 	 
 }

@@ -29,10 +29,11 @@ public class JSONParser {
 			fixDependencyIds(dependencies);
 	}
 	
+	//Dependencies that come from UPC do not have IDs, so it is necessary to give them IDs before trying to save to the database
 	private static void fixDependencyIds(List<Dependency> dependencies) {
 		for(Dependency dependency : dependencies) {
 			if(dependency.getId()==null) {
-				dependency.setId(dependency.getFromid() + "_" + dependency.getToid() + "_" + dependency.getDependency_type());
+				dependency.setId(dependency.getFromid() + "_" + dependency.getToid() + "_" + dependency.getDependency_type() +"_UPC");
 			}
 		}
 	}
