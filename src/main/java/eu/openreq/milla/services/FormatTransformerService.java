@@ -519,7 +519,6 @@ public class FormatTransformerService {
 			FixVersion fixVersion = getLatestFixVersion(issue);
 			
 			if(fixVersion!=null) { try {
-				System.out.println("fixVersion " + fixVersion.getName() + " id is " + fixVersion.getId());
 				RequirementPart reqPart = new RequirementPart();
 				reqPart.setId(req.getId()+"_"+fixVersion.getId());
 				reqPart.setName("FixVersion_"+fixVersion.getName());
