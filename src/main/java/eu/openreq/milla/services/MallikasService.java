@@ -44,7 +44,6 @@ public class MallikasService {
 	 * @return
 	 */
 	public String getOneRequirementFromMallikas(String url, String id) {
-	
 		RestTemplate rt = new RestTemplate();	
 		String req = null;
 		

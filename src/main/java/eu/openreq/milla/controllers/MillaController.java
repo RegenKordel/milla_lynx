@@ -31,6 +31,7 @@ import eu.openreq.milla.models.json.Project;
 import eu.openreq.milla.models.json.Requirement;
 import eu.openreq.milla.services.FormatTransformerService;
 import eu.openreq.milla.services.MallikasService;
+import eu.openreq.milla.services.UpdateService;
 import eu.openreq.milla.qtjiraimporter.ProjectIssues;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -52,6 +53,9 @@ public class MillaController {
 
 	@Autowired
 	MallikasService mallikasService;
+	
+	@Autowired
+	UpdateService updateService;
 
 	/**
 	 * Post Requirements and Dependencies to Mulperi.
@@ -464,8 +468,10 @@ public class MillaController {
 		// int subtaskCount = 0; //Note! to use these, must uncomment lines in
 		// FormatTransformerService
 
+		long start1 = System.nanoTime();
+		
 		List<String> requirementIds = new ArrayList<>();
-		List<JsonElement> projectIssuesAsJson;
+		Collection<JsonElement> projectIssuesAsJson;
 		try {
 			while (true) { // a loop needed for sending large projects in chunks to Mallikas
 				if (end >= issueCount + divided) {
@@ -494,6 +500,11 @@ public class MillaController {
 
 			// System.out.println("Epic count is " + epicCount);
 			// System.out.println("Subtask count is " + subtaskCount);
+			
+			long end1 = System.nanoTime();
+			long durationSec = (end1 - start1) / 1000000000;
+			double durationMin = durationSec / 60.0;
+			System.out.println("Download done, it took " + durationSec + " second(s) or " + durationMin + " minute(s).");
 
 			ResponseEntity<String> response = new ResponseEntity<>("All requirements and dependencies downloaded",
 					HttpStatus.OK);
@@ -528,6 +539,34 @@ public class MillaController {
 		}
 		ResponseEntity<String> response = new ResponseEntity<>(allRequirements, HttpStatus.FOUND);
 		return response;
+	}
+	
+	
+	/**
+	 * Uses QtJiraImporter to get the latest updated issues of a selected project in OpenReq JSON
+	 * format and sends them to Mallikas database.
+	 * 
+	 * @param projectId,
+	 *            ID of the selected project
+	 * @return ResponseEntity if successful
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Import latest Updated issues from QT Jira", notes = "Import updated Jira issues in a project and send the issues as OpenReq JSON requirements and dependencies to a database", response = String.class)
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Success, all updated requirements and dependencies downloaded"),
+			@ApiResponse(code = 400, message = "Failure, ex. malformed JSON"),
+			@ApiResponse(code = 500, message = "Failure, ex. invalid URLs") })
+	@ResponseBody
+	@PostMapping(value = "qtjiraUpdated")
+	public ResponseEntity<?> importUpdatedFromQtJira(@RequestBody String projectId) throws IOException {
+		
+		try {
+			return updateService.getAllUpdatedIssues(projectId);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<>("Download failed", HttpStatus.BAD_REQUEST);
 	}
 	 
 }

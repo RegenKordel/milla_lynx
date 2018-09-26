@@ -6,8 +6,12 @@ import okhttp3.OkHttpClient;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  * This class gets all the issues of a project. Since the issues are enumerated
@@ -41,33 +45,67 @@ public class ProjectIssues {
 	 * @return List of JsonElements
 	 * @throws IOException
 	 */
-	public List<JsonElement> collectIssues(int start, int end) throws IOException {
+	public Collection<JsonElement> collectIssues(int start, int end) throws IOException {
 		OkHttpClient client = new OkHttpClient();
 		Run run = new Run();
 		Gson issueJSON = new Gson();
-
-	//	int j = 1;
-	//	int perc10 = end / 10;
-
+		
+		List<String> paths = new ArrayList<>();
 		for (int i = start; i <= end; i++) {
 			// access the issue JSONs
 			String requestURL = String.format(_PROJECT_ISSUES_URL, i);
-			String responseJSON = run.run(requestURL, client);
-			
-			if (responseJSON != null) {
-				JsonObject issueElement = issueJSON.fromJson(responseJSON, JsonElement.class).getAsJsonObject();
-				projectIssues.add(issueElement);
-				issueElement = null;
-			}
-//			if (i % perc10 == 0) {
-//				printProgress(i, j, perc10);
-//				j++;
-//			}
+			paths.add(requestURL);
 			requestURL = null;
-			responseJSON = null;
 		}
+
+		ConcurrentHashMap<String, JsonElement> issues = new ConcurrentHashMap<>();
+		ForkJoinPool customThreadPool = new ForkJoinPool(32);
+		try {
+			customThreadPool.submit(
+			        () -> paths.parallelStream().forEach((url) -> {
+			        	String responseJSON = "";
+						try {
+							responseJSON = run.run(url, client);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						if (responseJSON != null) {
+							JsonObject issueElement = issueJSON.fromJson(responseJSON, JsonElement.class).getAsJsonObject();
+							issues.put(url, issueElement);
+							issueElement = null;
+						}
+			        })
+			).get();
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		paths.clear();
+
+//	//	int j = 1;
+//	//	int perc10 = end / 10;
+//
+//		for (int i = start; i <= end; i++) {
+//			// access the issue JSONs
+//			String requestURL = String.format(_PROJECT_ISSUES_URL, i);
+//			String responseJSON = run.run(requestURL, client);
+//			
+//			if (responseJSON != null) {
+//				JsonObject issueElement = issueJSON.fromJson(responseJSON, JsonElement.class).getAsJsonObject();
+//				projectIssues.add(issueElement);
+//				issueElement = null;
+//			}
+////			if (i % perc10 == 0) {
+////				printProgress(i, j, perc10);
+////				j++;
+////			}
+//			requestURL = null;
+//			responseJSON = null;
+//		}
 		
-		return projectIssues;
+//		return projectIssues;
+		return issues.values();
 	
 	}
 

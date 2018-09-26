@@ -26,7 +26,9 @@ public class JSONParser {
 			requirements = input.getRequirements();
 			dependencies = input.getDependencies();
 			dependent_requirements = input.getDependentRequirements();
-			fixDependencyIds(dependencies);
+			if(dependencies!= null) {
+				fixDependencyIds(dependencies);
+			}
 	}
 	
 	//Dependencies that come from UPC do not have IDs, so it is necessary to give them IDs before trying to save to the database

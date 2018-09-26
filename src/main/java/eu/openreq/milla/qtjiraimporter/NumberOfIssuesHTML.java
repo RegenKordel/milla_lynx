@@ -15,7 +15,7 @@ public class NumberOfIssuesHTML
 
     public NumberOfIssuesHTML(String project)
     {
-        _URL = "https://bugreports.qt.io/projects/"+ project +"/issues/?filter=allissues";
+        _URL = "https://bugreports.qt.io/projects/"+ project +"/issues/?filter=allissues"; //A better way?: _URL = "https://bugreports.qt.io/rest/api/2/search?jql=project=" + project + "&orderBy=-created&maxResults=1";
         _project = project;
         _numberOfIssues = detectNumberOfIssues();
     }

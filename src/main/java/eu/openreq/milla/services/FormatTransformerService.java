@@ -73,16 +73,18 @@ public class FormatTransformerService {
 	 * @return a List of Issue objects
 	 * @throws IOException
 	 */
-	public List<Issue> convertJsonElementsToIssues(List<JsonElement> jsonElements)
+	public List<Issue> convertJsonElementsToIssues(Collection<JsonElement> jsonElements)
 			throws IOException {
 
+		System.out.println("jsonElements.size " + jsonElements.size());
 		long start = System.nanoTime();
 
 		Gson gson = new Gson();
 		List<Issue> issues = new ArrayList<>();
-
+		
+		List<JsonElement> elements = new ArrayList<>(jsonElements);
 		for (int i = 0; i < jsonElements.size(); i++) {
-			JsonElement element = jsonElements.get(i);
+			JsonElement element = elements.get(i);
 
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
@@ -109,7 +111,7 @@ public class FormatTransformerService {
 	 *            List of Jira Issues
 	 * @return a collection of Requirement objects
 	 */
-	public Collection<Requirement> convertIssuesToJson(List<Issue> issues, String projectId) throws Exception {
+	public Collection<Requirement> convertIssuesToJson(Collection<Issue> issues, String projectId) throws Exception {
 		dependencies = new ArrayList<>();
 		HashMap<String, Requirement> requirements = new HashMap<>();
 
@@ -191,7 +193,7 @@ public class FormatTransformerService {
 	 *            Requirement receiving the Comment
 	 */
 	private void addCommentsToReq(Issue issue, Requirement req) {
-		if (!issue.getFields().getComment().getComments().isEmpty()) {
+		if (issue.getFields().getComment()!= null && !issue.getFields().getComment().getComments().isEmpty()) {
 			for (Comments comment : issue.getFields().getComment().getComments()) {
 				Comment jsonComment = new Comment();
 				jsonComment.setId(comment.getId());
