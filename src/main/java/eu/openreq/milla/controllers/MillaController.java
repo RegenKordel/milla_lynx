@@ -524,13 +524,13 @@ public class MillaController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Fetch all requirements from the database", notes = "Fetch all requirements from Mallikas database (Note! In Swagger the string might get too large to be shown in the response field")
+	@ApiOperation(value = "Fetch all requirements (and dependencies) from the database", notes = "Fetch all requirements from Mallikas database (Note! In Swagger the string might get too large to be shown in the response field")
 	@ResponseBody
 	@RequestMapping(value = "allRequirements", method = RequestMethod.GET)
 	public ResponseEntity<?> getAllRequirements() throws IOException {
 
 		System.out.println("getAllRequirements called");
-		String completeAddress = mallikasAddress + "mallikas/all";
+		String completeAddress = mallikasAddress + "allRequirements";
 
 		String allRequirements = mallikasService.getAllRequirementsFromMallikas(completeAddress);
 

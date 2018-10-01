@@ -6,6 +6,7 @@ import java.util.*;
 
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -14,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import com.google.gson.JsonElement;
 
 import eu.openreq.milla.models.jira.Issue;
+import eu.openreq.milla.models.json.Dependency;
 import eu.openreq.milla.models.json.Requirement;
 import eu.openreq.milla.qtjiraimporter.UpdatedIssues;
 
@@ -30,6 +32,8 @@ public class UpdateService {
 	private MallikasService mallikasService;
 
 	private int start = 100;
+	
+	private Collection<Dependency> dependencies;
 
 	public UpdateService() {
 		transformer = new FormatTransformerService();
@@ -50,7 +54,10 @@ public class UpdateService {
 			int amount = getNumberOfUpdatedIssues(projectId);
 			updatedIssues.collectAllUpdatedIssues(projectId, amount);
 			Collection<Requirement> requirements = processJsonElementsToRequirements(updatedIssues.getProjectIssues(), projectId);
-			response = rt.postForEntity(mallikasAddress + "updateRequirements", requirements, Collection.class);
+			this.postRequirementsToMallikas(requirements);
+			this.postDependenciesToMallikas(dependencies);
+			
+			response = new ResponseEntity<>("All updated requirements and dependencies downloaded", HttpStatus.OK);
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
 		}
@@ -131,7 +138,33 @@ public class UpdateService {
 			String projectId) throws Exception {
 		List<Issue> issues = transformer.convertJsonElementsToIssues(elements);
 		Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId);
+		dependencies = transformer.getDependencies();
 		return requirements;
 	}
+	
+	private ResponseEntity<?> postRequirementsToMallikas(Collection<Requirement> requirements) {
+		RestTemplate rt = new RestTemplate();
+		ResponseEntity<?> response = null;
+		try {	
+			response = rt.postForEntity(mallikasAddress + "updateRequirements", requirements, Collection.class);
+		} catch (HttpClientErrorException e) {
+			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+		}
+		return response;
+		
+	}
+	
+	private ResponseEntity<?> postDependenciesToMallikas(Collection<Dependency> dependencies) {
+		RestTemplate rt = new RestTemplate();
+		ResponseEntity<?> response = null;
+		try {	
+			response = rt.postForEntity(mallikasAddress + "updateDependencies", dependencies, Collection.class);
+		} catch (HttpClientErrorException e) {
+			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+		}
+		return response;
+		
+	}
+	
 
 }
