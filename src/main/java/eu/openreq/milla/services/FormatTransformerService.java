@@ -140,11 +140,9 @@ public class FormatTransformerService {
 				}
 				requirements.put(req.getId(), req);
 				requirementIds.add(req.getId());
-				int priority = Integer.parseInt(issue.getFields().getPriority().getId()); // Note! This might not be
-																							// actually a good idea, QT
-																							// priorities not numerical,
-																							// but might still work
-				req.setPriority(priority);
+				int priority = Integer.parseInt(issue.getFields().getPriority().getId()); 
+				
+				setRightPriority(req, priority);
 
 				setStatusForReq(req, issue.getFields().getStatus().getName());
 				setRequirementType(req, issue.getFields().getIssuetype().getName());
@@ -189,6 +187,23 @@ public class FormatTransformerService {
 			fixedName = name.replaceAll("[^\\x20-\\x7e]", ""); // TODO This is a quick fix, must be modified into a
 		} // better version
 		return fixedName;
+	}
+	
+	/**
+	 * Qt priorities with ids 7 and 6 are in a "wrong" order, hence this fix
+	 * @param req
+	 * @param priority
+	 */
+	private void setRightPriority(Requirement req, int priority) {
+		if(priority==6) {
+			req.setPriority(7);
+		}
+		else if(priority==7) {
+			req.setPriority(6);
+		}
+		else {																		
+		req.setPriority(priority);
+		}
 	}
 
 	/**
