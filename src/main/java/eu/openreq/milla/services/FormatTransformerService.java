@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
@@ -51,6 +52,10 @@ public class FormatTransformerService {
 	 * List of Requirement IDs that are related to a Project
 	 */
 	private List<String> requirementIds;
+	
+	private FileService fileService;
+	
+	private Map<String, Integer> fixVersions;
 
 	private int epicCount;
 
@@ -62,6 +67,11 @@ public class FormatTransformerService {
 
 	public int getSubtaskCount() {
 		return subtaskCount;
+	}
+	
+	public void readFixVersionsToHashMap(String projectId) {
+		fileService = new FileService();
+		fixVersions = fileService.readFixVersionsFromFile(projectId);
 	}
 
 	/**
@@ -75,7 +85,6 @@ public class FormatTransformerService {
 	public List<Issue> convertJsonElementsToIssues(Collection<JsonElement> jsonElements)
 			throws IOException {
 
-		System.out.println("jsonElements.size " + jsonElements.size());
 		long start = System.nanoTime();
 
 		Gson gson = new Gson();
@@ -518,26 +527,6 @@ public class FormatTransformerService {
 		req.getRequirementParts().add(reqPart);
 		
 	}
-//	/**
-//	 * Assigns a Classifier (Component) to a Requirement based on the Component of
-//	 * an Issue
-//	 * 
-//	 * @param issue
-//	 *            Issue that has (a) Component(s)
-//	 * @param req
-//	 *            Requirement that needs Classifiers
-//	 */
-//	private void addClassifiers(Issue issue, Requirement req) {
-//		if (!issue.getFields().getComponents().isEmpty()) {
-//			for (Component component : issue.getFields().getComponents()) {
-//				Classifier classifier = new Classifier();
-//				classifier.setId(component.getId());
-//				classifier.setName(component.getName());
-//				classifier.setCreated_at(new Date().getTime());
-//				req.getClassifierResults().add(classifier);
-//			}
-//		}
-//	}
 	
 	/**
 	 * Add information on the resolution of an issue to a RequirementPart object. If issue's resolution is null, create a new RequirementPart with the text "Unresolved"
@@ -561,6 +550,11 @@ public class FormatTransformerService {
 		req.getRequirementParts().add(reqPart);
 	}
 	
+	/**
+	 * Adds only the latest fixVersion to a RequirementPart
+	 * @param issue
+	 * @param req
+	 */
 	private void addFixVersionsToRequirementParts(Issue issue, Requirement req) {
 			FixVersion fixVersion = getLatestFixVersion(issue);
 			
@@ -579,87 +573,29 @@ public class FormatTransformerService {
 			}
 	}
 	
-	//This version has issues when the biggest id doesn't mean the latest version,
-	//should be checked and used the the other version below if possible
+	/**
+	 * Searches the map fixVersions to determine the latest FixVersion 
+	 * @param issue
+	 * @return
+	 */
 	private FixVersion getLatestFixVersion(Issue issue) {
+		if(fixVersions==null) {
+			return null; 
+		}
 		FixVersion fixVersion = null;
 		long latest = 0;
+		int newest = fixVersions.size();
 		if(issue.getFields().getFixVersions()!=null) {
 			for(FixVersion fixVersion2 : issue.getFields().getFixVersions()) {
-				long versionNumber = Long.parseLong(fixVersion2.getId());
-				if(versionNumber>latest) {
-					latest = versionNumber;
-					fixVersion = fixVersion2;
+				if(fixVersions.containsKey(fixVersion2.getName())) {
+					if (newest>fixVersions.get(fixVersion2.getName())) {
+						newest = fixVersions.get(fixVersion2.getName());
+						fixVersion = fixVersion2;
+					}
 				}
 			}
 		}
 		return fixVersion;
-	}
-	
-//	private FixVersion getLatestFixVersion(Issue issue) {
-//		FixVersion fixVersion = null;
-//		long latest = 0;
-//		if(issue.getFields().getFixVersions()!=null) {
-//			for(FixVersion fixVersion2 : issue.getFields().getFixVersions()) {
-//				long versionNumber = versionNumberToLong(fixVersion2.getName());
-//				if(versionNumber>latest) {
-//					latest = versionNumber;
-//					fixVersion = fixVersion2;
-//				}
-//			}
-//		}
-//		return fixVersion;
-//	}
-//	
-	//Not usable yet, waiting for decision on fixVersions, also differing length issue not solved
-	private long versionNumberToLong(String version) {
-		String[] parts = version.split("\\.");
-		String number = "";
-		parts[parts.length-1] = getLastPart(parts[parts.length-1]);
-		for (int i = 0; i < parts.length; i++) {
-			int part = Integer.parseInt(parts[i]);
-			if(i!=0) {
-				if(part<10) {
-					number += "00"+part;
-				}
-				else {
-					number +="0" +part;
-				}
-			}
-			else {
-				number += part;
-			}
-		}
-		if(parts.length<3) {
-			System.out.println("Here");
-			number+="000";
-		}
-		System.out.println("Parts.length " +parts.length);
-		System.out.println("Number is " + number);
-		
-		return Long.parseLong(number);
-	}
-	
-	//Not usable yet, waiting for decision on fixVersions
-	private String getLastPart(String part) {
-		String last = "";
-		part.toLowerCase();
-		if(part.contains("alpha")) {
-			String[] parts = part.split("alpha");
-			last = parts[0].trim()+".1."+parts[1].trim();	
-		}
-		else if(part.contains("beta")) {
-			String[] parts = part.split("beta");
-			last = parts[0].trim()+".2."+parts[1].trim();	
-		}
-		else if(part.contains("rc")) {
-			String[] parts = part.split("rc");
-			last = parts[0].trim()+".3."+parts[1].trim();	
-		}
-		else {
-			last +=part;
-		}
-		return last;
 	}
 
 	/**

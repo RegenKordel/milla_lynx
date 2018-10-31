@@ -477,6 +477,8 @@ public class MillaController {
 		
 		List<String> requirementIds = new ArrayList<>();
 		Collection<JsonElement> projectIssuesAsJson;
+		
+		transformer.readFixVersionsToHashMap(projectId);
 		try {
 			while (true) { // a loop needed for sending large projects in chunks to Mallikas
 				if (end >= issueCount + divided) {
