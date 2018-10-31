@@ -76,7 +76,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "customfield_10402",
     "customfield_10403",
     "customfield_10404",
-    "duedate"
+    "duedate",
+    "customfield_11100"
 })
 public class Fields {
 
@@ -208,6 +209,9 @@ public class Fields {
     private Object customfield10404;
     @JsonProperty("duedate")
     private Object duedate;
+    @JsonProperty("customfield_11100")
+    private Platforms customfield11100;
+    
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -861,5 +865,13 @@ public class Fields {
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
     }
+
+	public Platforms getCustomfield11100() {
+		return customfield11100;
+	}
+
+	public void setCustomfield11100(Platforms customfield11100) {
+		this.customfield11100 = customfield11100;
+	}
 
 }
