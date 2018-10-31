@@ -140,7 +140,7 @@ public class Fields {
     @JsonProperty("aggregatetimeoriginalestimate")
     private Object aggregatetimeoriginalestimate;
     @JsonProperty("versions")
-    private List<Object> versions = null;
+    private List<Version> versions = null;
     @JsonProperty("issuelinks")
     private List<Issuelink> issuelinks = null;
     @JsonProperty("assignee")
@@ -506,12 +506,12 @@ public class Fields {
     }
 
     @JsonProperty("versions")
-    public List<Object> getVersions() {
+    public List<Version> getVersions() {
         return versions;
     }
 
     @JsonProperty("versions")
-    public void setVersions(List<Object> versions) {
+    public void setVersions(List<Version> versions) {
         this.versions = versions;
     }
 

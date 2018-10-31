@@ -12,6 +12,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -21,6 +22,7 @@ import eu.openreq.milla.models.jira.Comments;
 import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.jira.Issuelink;
 import eu.openreq.milla.models.jira.Subtask;
+import eu.openreq.milla.models.jira.Version;
 import eu.openreq.milla.models.jira.FixVersion;
 import eu.openreq.milla.models.json.Comment;
 import eu.openreq.milla.models.json.Dependency;
@@ -154,6 +156,10 @@ public class FormatTransformerService {
 				addDependencies(issue, req);
 				
 				addResolutionToRequirementParts(issue, req);
+				addEnvironmentToRequirementParts(issue, req);
+				addLabelsToRequirementParts(issue, req);
+				addVersionsToRequirementParts(issue, req);
+				addPlatformsToRequirementParts(issue, req);
 				addFixVersionsToRequirementParts(issue, req);
 
 				updateParentEpic(requirements, issue, req);
@@ -561,6 +567,98 @@ public class FormatTransformerService {
 		else {
 			reqPart.setText("Unresolved");
 			reqPart.setCreated_at(new Date().getTime());
+		}
+		req.getRequirementParts().add(reqPart);
+	}
+	
+	/**
+	 * @param issue
+	 * @param req
+	 */
+	private void addEnvironmentToRequirementParts(Issue issue, Requirement req) {
+		RequirementPart reqPart = new RequirementPart();
+		reqPart.setId(req.getId()+"_ENVIRONMENT");
+		reqPart.setName("Environment");
+		
+		if(issue.getFields().getEnvironment()!=null) {
+			ObjectMapper mapper = new ObjectMapper();
+			String environmentString;
+			try {
+				environmentString = mapper.writeValueAsString(issue.getFields().getEnvironment());
+			} catch (JsonProcessingException e) {
+				environmentString = "";
+				e.printStackTrace();
+			}
+			reqPart.setText(environmentString);
+		}
+		req.getRequirementParts().add(reqPart);
+	}
+	
+	/**
+	 * @param issue
+	 * @param req
+	 */
+	private void addLabelsToRequirementParts(Issue issue, Requirement req) {
+		RequirementPart reqPart = new RequirementPart();
+		reqPart.setId(req.getId()+"_LABELS");
+		reqPart.setName("Labels");
+		
+		if(issue.getFields().getLabels()!=null) {
+			ObjectMapper mapper = new ObjectMapper();
+			String labelString;
+			try {
+				labelString = mapper.writeValueAsString(issue.getFields().getLabels());
+			} catch (JsonProcessingException e) {
+				labelString = "";
+				e.printStackTrace();
+			}
+			reqPart.setText(labelString);
+		}
+		req.getRequirementParts().add(reqPart);
+	}		
+	
+	/**
+	 * @param issue
+	 * @param req
+	 */
+	private void addVersionsToRequirementParts(Issue issue, Requirement req) {
+		RequirementPart reqPart = new RequirementPart();
+		reqPart.setId(req.getId()+"_VERSIONS");
+		reqPart.setName("Versions");
+		
+		if(issue.getFields().getVersions()!=null) {
+			ObjectMapper mapper = new ObjectMapper();
+			String versionsString;
+			try {
+				versionsString = mapper.writeValueAsString(issue.getFields().getVersions());
+			} catch (JsonProcessingException e) {
+				versionsString = "";
+				e.printStackTrace();
+			}
+			reqPart.setText(versionsString);
+		}
+		req.getRequirementParts().add(reqPart);
+	}
+	
+	/**
+	 * @param issue
+	 * @param req
+	 */
+	private void addPlatformsToRequirementParts(Issue issue, Requirement req) {
+		RequirementPart reqPart = new RequirementPart();
+		reqPart.setId(req.getId()+"_PLATFORMS");
+		reqPart.setName("Platforms");
+		
+		if(issue.getFields().getCustomfield11100()!=null) {
+			ObjectMapper mapper = new ObjectMapper();
+			String platformsString;
+			try {
+				platformsString = mapper.writeValueAsString(issue.getFields().getCustomfield11100());
+			} catch (JsonProcessingException e) {
+				platformsString = "";
+				e.printStackTrace();
+			}
+			reqPart.setText(platformsString);
 		}
 		req.getRequirementParts().add(reqPart);
 	}
