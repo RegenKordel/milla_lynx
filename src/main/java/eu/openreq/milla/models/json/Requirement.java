@@ -87,13 +87,6 @@ public class Requirement {
 	@SerializedName("children")
 	@Expose
 	private List<Requirement> children = null;
-	/**
-	* The keywords or tags from the classification of a requirement
-	* 
-	*/
-	@SerializedName("classifierResults")
-	@Expose
-	private List<Classifier> classifierResults = null;
 	
 	/**
 	* RequirementParts of a requirement
@@ -188,17 +181,6 @@ public class Requirement {
 	
 	public void setChildren(List<Requirement> children) {
 		this.children = children;
-	}
-	
-	public List<Classifier> getClassifierResults() {
-		if(classifierResults==null) {
-			classifierResults= new ArrayList<Classifier>();
-		}
-		return classifierResults;
-	}
-	
-	public void setClassifierResults(List<Classifier> classifierResults) {
-		this.classifierResults = classifierResults;
 	}
 
 	public List<RequirementPart> getRequirementParts() {

@@ -27,6 +27,7 @@ import com.google.gson.JsonElement;
 
 import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.json.Dependency;
+import eu.openreq.milla.models.json.Person;
 import eu.openreq.milla.models.json.Project;
 import eu.openreq.milla.models.json.Requirement;
 import eu.openreq.milla.services.FormatTransformerService;
@@ -271,29 +272,29 @@ public class MillaController {
 		return response;
 	}
 
-	/**
-	 * Fetch Requirements related to the selected Component (OpenReq Classifier)
-	 * 
-	 * @param
-	 * @return ResponseEntity<?>
-	 * @throws IOException
-	 */
-	@ApiOperation(value = "Fetch requirements in the same component", notes = "Fetch all requirements in the same component from Mallikas database")
-	@ResponseBody
-	@PostMapping(value = "requirementsInComponent")
-	public ResponseEntity<?> getRequirementsInSameComponent(@RequestBody String componentId) throws IOException {
-
-		String completeAddress = mallikasAddress + "classifiers";
-
-		String reqsInComponent = mallikasService.getAllRequirementsWithClassifierFromMallikas(componentId,
-				completeAddress);
-
-		if (reqsInComponent == null) {
-			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
-		}
-		ResponseEntity<String> response = new ResponseEntity<>(reqsInComponent, HttpStatus.FOUND);
-		return response;
-	}
+//	/**
+//	 * Fetch Requirements related to the selected Component (OpenReq Classifier)
+//	 * 
+//	 * @param
+//	 * @return ResponseEntity<?>
+//	 * @throws IOException
+//	 */
+//	@ApiOperation(value = "Fetch requirements in the same component", notes = "Fetch all requirements in the same component from Mallikas database")
+//	@ResponseBody
+//	@PostMapping(value = "requirementsInComponent")
+//	public ResponseEntity<?> getRequirementsInSameComponent(@RequestBody String componentId) throws IOException {
+//
+//		String completeAddress = mallikasAddress + "classifiers";
+//
+//		String reqsInComponent = mallikasService.getAllRequirementsWithClassifierFromMallikas(componentId,
+//				completeAddress);
+//
+//		if (reqsInComponent == null) {
+//			return new ResponseEntity<>("Requirements not found \n\n", HttpStatus.NOT_FOUND);
+//		}
+//		ResponseEntity<String> response = new ResponseEntity<>(reqsInComponent, HttpStatus.FOUND);
+//		return response;
+//	}
 
 	/**
 	 * Fetch Requirements that are in the selected Project
@@ -454,6 +455,10 @@ public class MillaController {
 	public ResponseEntity<?> importFromQtJira(@RequestBody String projectId) throws IOException {
 
 		ProjectIssues projectIssues = new ProjectIssues(projectId);
+		
+		Person person = new Person();
+		person.setUsername("user_" + projectId);
+		person.setEmail("dummyEmail");
 
 		int issueCount = projectIssues.getNumberOfIssues();
 		int divided = issueCount;
@@ -479,7 +484,7 @@ public class MillaController {
 				}
 				projectIssuesAsJson = projectIssues.collectIssues(start, end);
 				List<Issue> issues = transformer.convertJsonElementsToIssues(projectIssuesAsJson);
-				Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId);
+				Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId, person);
 				Collection<Dependency> dependencies = transformer.getDependencies();
 				// epicCount = epicCount + transformer.getEpicCount();
 				// subtaskCount = subtaskCount + transformer.getSubtaskCount();
@@ -559,8 +564,12 @@ public class MillaController {
 	@PostMapping(value = "qtjiraUpdated")
 	public ResponseEntity<?> importUpdatedFromQtJira(@RequestBody String projectId) throws IOException {
 		
+		Person person = new Person();
+		person.setUsername("user_" + projectId);
+		person.setEmail("dummyEmail");
+		
 		try {
-			return updateService.getAllUpdatedIssues(projectId);
+			return updateService.getAllUpdatedIssues(projectId, person);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (Exception e) {

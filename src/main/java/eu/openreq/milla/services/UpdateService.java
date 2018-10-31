@@ -16,6 +16,7 @@ import com.google.gson.JsonElement;
 
 import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.json.Dependency;
+import eu.openreq.milla.models.json.Person;
 import eu.openreq.milla.models.json.Requirement;
 import eu.openreq.milla.qtjiraimporter.UpdatedIssues;
 
@@ -46,14 +47,14 @@ public class UpdateService {
 	 * @return
 	 * @throws Exception
 	 */
-	public ResponseEntity<?> getAllUpdatedIssues(String projectId) throws Exception {
+	public ResponseEntity<?> getAllUpdatedIssues(String projectId, Person person) throws Exception {
 		updatedIssues = new UpdatedIssues(projectId);
-		RestTemplate rt = new RestTemplate();
+		//RestTemplate rt = new RestTemplate();
 		ResponseEntity<?> response = null;
 		try {
-			int amount = getNumberOfUpdatedIssues(projectId);
+			int amount = getNumberOfUpdatedIssues(projectId, person);
 			updatedIssues.collectAllUpdatedIssues(projectId, amount);
-			Collection<Requirement> requirements = processJsonElementsToRequirements(updatedIssues.getProjectIssues(), projectId);
+			Collection<Requirement> requirements = processJsonElementsToRequirements(updatedIssues.getProjectIssues(), projectId, person);
 			this.postRequirementsToMallikas(requirements);
 			this.postDependenciesToMallikas(dependencies);
 			
@@ -70,14 +71,14 @@ public class UpdateService {
 	 * @return
 	 * @throws Exception
 	 */
-	public int getNumberOfUpdatedIssues(String projectId) throws Exception {
+	public int getNumberOfUpdatedIssues(String projectId, Person person) throws Exception {
 		int number = -1;
 		int sum = 0;
 		while (number != 0) {
 			JsonElement element = updatedIssues.getTheLatestUpdatedIssue(start);
 			List<JsonElement> elements = new ArrayList<>();
 			elements.add(element);
-			List<Requirement> reqs = new ArrayList(processJsonElementsToRequirements(elements, projectId));
+			List<Requirement> reqs = new ArrayList<Requirement>(processJsonElementsToRequirements(elements, projectId, person));
 			number = compareUpdatedIssueWithTheIssueInMallikas(reqs.get(0));
 			sum++;
 			System.out.println("Sum (how many times 100 updated issues must be fetched): " + sum);
@@ -135,9 +136,9 @@ public class UpdateService {
 	 * @throws Exception
 	 */
 	private Collection<Requirement> processJsonElementsToRequirements(Collection<JsonElement> elements,
-			String projectId) throws Exception {
+			String projectId, Person person) throws Exception {
 		List<Issue> issues = transformer.convertJsonElementsToIssues(elements);
-		Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId);
+		Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId, person);
 		dependencies = transformer.getDependencies();
 		return requirements;
 	}

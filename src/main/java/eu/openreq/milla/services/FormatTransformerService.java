@@ -18,15 +18,14 @@ import com.google.gson.JsonObject;
 
 import eu.openreq.milla.models.jira.Comments;
 import eu.openreq.milla.models.jira.Issue;
-import eu.openreq.milla.models.jira.Component;
 import eu.openreq.milla.models.jira.Issuelink;
 import eu.openreq.milla.models.jira.Subtask;
 import eu.openreq.milla.models.jira.FixVersion;
-import eu.openreq.milla.models.json.Classifier;
 import eu.openreq.milla.models.json.Comment;
 import eu.openreq.milla.models.json.Dependency;
 import eu.openreq.milla.models.json.Dependency_status;
 import eu.openreq.milla.models.json.Dependency_type;
+import eu.openreq.milla.models.json.Person;
 import eu.openreq.milla.models.json.Project;
 import eu.openreq.milla.models.json.Requirement;
 import eu.openreq.milla.models.json.RequirementPart;
@@ -111,7 +110,7 @@ public class FormatTransformerService {
 	 *            List of Jira Issues
 	 * @return a collection of Requirement objects
 	 */
-	public Collection<Requirement> convertIssuesToJson(Collection<Issue> issues, String projectId) throws Exception {
+	public Collection<Requirement> convertIssuesToJson(Collection<Issue> issues, String projectId, Person person) throws Exception {
 		dependencies = new ArrayList<>();
 		HashMap<String, Requirement> requirements = new HashMap<>();
 
@@ -144,9 +143,9 @@ public class FormatTransformerService {
 				req.setCreated_at(setCreatedDate(issue.getFields().getCreated()));
 				req.setModified_at(setCreatedDate(issue.getFields().getUpdated()));
 
-				addCommentsToReq(issue, req);
+				addCommentsToReq(issue, req, person);
 				addDependencies(issue, req);
-				addClassifiers(issue, req);
+				
 				addResolutionToRequirementParts(issue, req);
 				addFixVersionsToRequirementParts(issue, req);
 
@@ -192,13 +191,14 @@ public class FormatTransformerService {
 	 * @param req
 	 *            Requirement receiving the Comment
 	 */
-	private void addCommentsToReq(Issue issue, Requirement req) {
+	private void addCommentsToReq(Issue issue, Requirement req, Person person) {
 		if (issue.getFields().getComment()!= null && !issue.getFields().getComment().getComments().isEmpty()) {
 			for (Comments comment : issue.getFields().getComment().getComments()) {
 				Comment jsonComment = new Comment();
 				jsonComment.setId(comment.getId());
 				jsonComment.setText(comment.getBody());
-
+				jsonComment.setCommentDoneBy(person);
+			//	System.out.println(jsonComment.getCommentDoneBy().getUsername());
 				String date = String.valueOf(comment.getCreated());
 				long created = setCreatedDate(date);
 				jsonComment.setCreated_at(created);
@@ -340,7 +340,7 @@ public class FormatTransformerService {
 		case "epic":
 			req.setRequirement_type(Requirement_type.EPIC);
 			break;
-		case "initiative":
+		case "initiative":										//Not necessary?
 			req.setRequirement_type(Requirement_type.INITIATIVE);
 			break;
 		case "sub-task":
@@ -362,6 +362,10 @@ public class FormatTransformerService {
 			req.setRequirement_type(Requirement_type.USER_STORY);
 			break;
 		}
+		
+		if(type.toLowerCase().contains("task")) {
+			addExactTaskTypeToRequirementParts(req, type);
+		}
 	}
 
 	/**
@@ -377,25 +381,43 @@ public class FormatTransformerService {
 
 		switch (status.toLowerCase()) {
 		case "reported":
+			req.setStatus(Requirement_status.SUBMITTED); //SUBMITTED = Todo in Qt system
+			break;
+		case "reopened":
 			req.setStatus(Requirement_status.SUBMITTED);
+			break;
+		case "open":
+			req.setStatus(Requirement_status.SUBMITTED);
+			break;
+		case "todo":
+			req.setStatus(Requirement_status.SUBMITTED);
+			break;
+		case "accepted":
+			req.setStatus(Requirement_status.SUBMITTED);
+			break;
+		case "blocked":
+			req.setStatus(Requirement_status.DEFERRED); //DEFERRED = Stuck in Qt system
 			break;
 		case "need more info":
 			req.setStatus(Requirement_status.DEFERRED);
 			break;
-		case "open":
-			req.setStatus(Requirement_status.PENDING);
+		case "waiting for 3rd party":
+			req.setStatus(Requirement_status.DEFERRED);
+			break;
+		case "on hold":
+			req.setStatus(Requirement_status.DEFERRED);
 			break;
 		case "in progress":
-			req.setStatus(Requirement_status.NEW); // ?
-			break;
-		case "withdrawn":
-			req.setStatus(Requirement_status.REJECTED);
+			req.setStatus(Requirement_status.ACCEPTED); //ACCEPTED = In progress in Qt system
 			break;
 		case "implemented":
-			req.setStatus(Requirement_status.DRAFT);
+			req.setStatus(Requirement_status.ACCEPTED);
+			break;
+		case "withdrawn":
+			req.setStatus(Requirement_status.COMPLETED); //COMPLETED = Done in Qt system
 			break;
 		case "verified":
-			req.setStatus(Requirement_status.ACCEPTED);
+			req.setStatus(Requirement_status.COMPLETED);
 			break;
 		case "closed":
 			req.setStatus(Requirement_status.COMPLETED);
@@ -403,12 +425,15 @@ public class FormatTransformerService {
 		case "resolved":
 			req.setStatus(Requirement_status.COMPLETED);
 			break;
-		case "reopened":
-			req.setStatus(Requirement_status.PENDING);
+		case "rejected":
+			req.setStatus(Requirement_status.COMPLETED);
 			break;
-			
-			//Should have more types of statuses included?
+		case "done":
+			req.setStatus(Requirement_status.COMPLETED);
+			break;
 		}
+		
+		addExactStatusToRequirementParts(req, status);		
 	}
 
 	/**
@@ -474,26 +499,45 @@ public class FormatTransformerService {
 		}
 	}
 
-	/**
-	 * Assigns a Classifier (Component) to a Requirement based on the Component of
-	 * an Issue
-	 * 
-	 * @param issue
-	 *            Issue that has (a) Component(s)
-	 * @param req
-	 *            Requirement that needs Classifiers
-	 */
-	private void addClassifiers(Issue issue, Requirement req) {
-		if (!issue.getFields().getComponents().isEmpty()) {
-			for (Component component : issue.getFields().getComponents()) {
-				Classifier classifier = new Classifier();
-				classifier.setId(component.getId());
-				classifier.setName(component.getName());
-				classifier.setCreated_at(new Date().getTime());
-				req.getClassifierResults().add(classifier);
-			}
-		}
+	private void addExactStatusToRequirementParts(Requirement req, String status) {
+		RequirementPart reqPart = new RequirementPart();
+		reqPart.setId(req.getId()+"_STATUS");
+		reqPart.setName("Status");
+		reqPart.setText(status);
+		reqPart.setCreated_at(new Date().getTime());
+		req.getRequirementParts().add(reqPart);
+		
 	}
+	
+	private void addExactTaskTypeToRequirementParts(Requirement req, String taskType) {
+		RequirementPart reqPart = new RequirementPart();
+		reqPart.setId(req.getId()+"_TASK");
+		reqPart.setName("Task");
+		reqPart.setText(taskType);
+		reqPart.setCreated_at(new Date().getTime());
+		req.getRequirementParts().add(reqPart);
+		
+	}
+//	/**
+//	 * Assigns a Classifier (Component) to a Requirement based on the Component of
+//	 * an Issue
+//	 * 
+//	 * @param issue
+//	 *            Issue that has (a) Component(s)
+//	 * @param req
+//	 *            Requirement that needs Classifiers
+//	 */
+//	private void addClassifiers(Issue issue, Requirement req) {
+//		if (!issue.getFields().getComponents().isEmpty()) {
+//			for (Component component : issue.getFields().getComponents()) {
+//				Classifier classifier = new Classifier();
+//				classifier.setId(component.getId());
+//				classifier.setName(component.getName());
+//				classifier.setCreated_at(new Date().getTime());
+//				req.getClassifierResults().add(classifier);
+//			}
+//		}
+//	}
 	
 	/**
 	 * Add information on the resolution of an issue to a RequirementPart object. If issue's resolution is null, create a new RequirementPart with the text "Unresolved"

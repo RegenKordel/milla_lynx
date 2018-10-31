@@ -43,6 +43,13 @@ public class Comment {
 	@Expose
 	private long modified_at;
 	
+	/*
+	 * Person who did the comment
+	 */
+	@SerializedName("commentDoneBy")
+	@Expose
+	private Person commentDoneBy;
+	
 	public String getId() {
 		return id;
 	}
@@ -59,6 +66,14 @@ public class Comment {
 		this.text = text;
 	}
 	
+	public Person getCommentDoneBy() {
+		return commentDoneBy;
+	}
+
+	public void setCommentDoneBy(Person commentDoneBy) {
+		this.commentDoneBy = commentDoneBy;
+	}
+
 	public long getCreated_at() {
 		return created_at;
 	}

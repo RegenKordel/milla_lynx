@@ -97,26 +97,26 @@ public class MallikasService {
 		return reqs;
 	}
 	
-	/**
-	 * Send request to Mallikas to get a String (List of Requirements that share the same classifier (so they belong to the same Qt Jira component) and their Dependencies)
-	 * @param classifierId id of the Component/Classifier
-	 * @param url the address in Mallikas
-	 * @return String containing all requirements and their dependencies in the same component
-	 */
-	public String getAllRequirementsWithClassifierFromMallikas(String classifierId, String url) {
-
-		RestTemplate rt = new RestTemplate();	
-		String reqs = null;
-		
-		try {
-			reqs = rt.postForObject(url, classifierId, String.class);
-			
-		} catch (HttpClientErrorException e) { //Probably a different exception here? 
-			System.out.println("Error " + e);
-			e.printStackTrace();
-		}
-		return reqs;
-	}
+//	/**
+//	 * Send request to Mallikas to get a String (List of Requirements that share the same classifier (so they belong to the same Qt Jira component) and their Dependencies)
+//	 * @param classifierId id of the Component/Classifier
+//	 * @param url the address in Mallikas
+//	 * @return String containing all requirements and their dependencies in the same component
+//	 */
+//	public String getAllRequirementsWithClassifierFromMallikas(String classifierId, String url) {
+//
+//		RestTemplate rt = new RestTemplate();	
+//		String reqs = null;
+//		
+//		try {
+//			reqs = rt.postForObject(url, classifierId, String.class);
+//			
+//		} catch (HttpClientErrorException e) { //Probably a different exception here? 
+//			System.out.println("Error " + e);
+//			e.printStackTrace();
+//		}
+//		return reqs;
+//	}
 		
 	/**
 	 * Post the searched type and status to Mallikas

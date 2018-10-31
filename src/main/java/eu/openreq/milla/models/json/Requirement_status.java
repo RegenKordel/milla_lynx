@@ -24,5 +24,6 @@ public enum Requirement_status {
 	REJECTED,
 //	@SerializedName("recommended")
 	RECOMMENDED
+
 	
 }
