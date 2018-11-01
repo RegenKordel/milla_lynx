@@ -529,6 +529,11 @@ public class FormatTransformerService {
 		}
 	}
 
+	/**
+	 * The exact status of a Qt Jira Issue will be saved to RequirementParts
+	 * @param req
+	 * @param status
+	 */
 	private void addExactStatusToRequirementParts(Requirement req, String status) {
 		RequirementPart reqPart = new RequirementPart();
 		reqPart.setId(req.getId()+"_STATUS");
@@ -539,6 +544,11 @@ public class FormatTransformerService {
 		
 	}
 	
+	/**
+	 * Qt Jira Issues have three different task-types (task, technical task, sub-task), and this info will be saved to RequirementParts
+	 * @param req
+	 * @param taskType
+	 */
 	private void addExactTaskTypeToRequirementParts(Requirement req, String taskType) {
 		RequirementPart reqPart = new RequirementPart();
 		reqPart.setId(req.getId()+"_TASK");
@@ -572,6 +582,7 @@ public class FormatTransformerService {
 	}
 	
 	/**
+	 * 
 	 * @param issue
 	 * @param req
 	 */
@@ -594,7 +605,9 @@ public class FormatTransformerService {
 		req.getRequirementParts().add(reqPart);
 	}
 	
+	
 	/**
+	 * 
 	 * @param issue
 	 * @param req
 	 */
@@ -618,6 +631,7 @@ public class FormatTransformerService {
 	}		
 	
 	/**
+	 * 
 	 * @param issue
 	 * @param req
 	 */
@@ -641,6 +655,31 @@ public class FormatTransformerService {
 	}
 	
 	/**
+	 * 
+	 * @param issue
+	 * @param req
+	 */
+	private void addComponentsToRequirementParts(Issue issue, Requirement req) {
+		RequirementPart reqPart = new RequirementPart();
+		reqPart.setId(req.getId()+"_COMPONENTS");
+		reqPart.setName("Components");
+		
+		if(issue.getFields().getComponents()!=null) {
+			ObjectMapper mapper = new ObjectMapper();
+			String componentsString;
+			try {
+				componentsString = mapper.writeValueAsString(issue.getFields().getComponents());
+			} catch (JsonProcessingException e) {
+				componentsString = "";
+				e.printStackTrace();
+			}
+			reqPart.setText(componentsString);
+		}
+		req.getRequirementParts().add(reqPart);
+	}
+	
+	/**
+	 * 
 	 * @param issue
 	 * @param req
 	 */
@@ -673,7 +712,8 @@ public class FormatTransformerService {
 			
 			if(fixVersion!=null) { try {
 				RequirementPart reqPart = new RequirementPart();
-				reqPart.setId(req.getId()+"_"+fixVersion.getId());
+				int number = fixVersions.get(fixVersion.getName()); //This number tells the "release number (or id)" of the fix version
+				reqPart.setId(req.getId()+"_"+fixVersion.getId() + "_" + number);
 				reqPart.setName("FixVersion_"+fixVersion.getName());
 				ObjectMapper mapper = new ObjectMapper();
 				String versionString = mapper.writeValueAsString(fixVersion);
@@ -737,141 +777,4 @@ public class FormatTransformerService {
 		return requirementIds;
 	}
 	
-	
-
-	// Below old Mulson methods
-
-	// /**
-	// * Converts a List of Issue objects into Mulson Requirements
-	// *
-	// * @param issues
-	// * List of Issue objects
-	// * @return a collection of Requirement objects
-	// */
-	// public Collection<Requirement> convertIssuesToMulson(List<Issue> issues,
-	// String projectId) throws Exception {
-	// HashMap<String, Requirement> requirements = new HashMap<>();
-	// for (Issue issue : issues) {
-	// try {
-	// Requirement req = new Requirement();
-	// req.setRequirementId(issue.getKey().replace("-", "_")); // Kumbang doesn't
-	// like hyphens
-	// String name = fixSpecialCharacters(issue.getFields().getSummary());
-	// req.setName(name);
-	// requirements.put(req.getRequirementId(), req);
-	//
-	// addAttribute(req, "priority", issue.getFields().getPriority().getId());
-	// addAttribute(req, "status", issue.getFields().getStatus().getName());
-	//
-	// addRequiredRelationships(issue, req);
-	// updateParentEpic(requirements, issue, req);
-	//
-	// List<Subtask> subtasks = issue.getFields().getSubtasks();
-	// if (subtasks != null && !subtasks.isEmpty()) {
-	// for (Subtask subtask : subtasks) {
-	// addSubtask(requirements, req, subtask);
-	// }
-	// }
-	// } catch (Exception e) {
-	// System.out.println("Error " + e);
-	// // e.printStackTrace();
-	// }
-	// }
-	// return requirements.values();
-	// }
-
-	// private void addAttribute(Requirement req, String name, String value) {
-	// try {
-	// Attribute priority = new Attribute();
-	// priority.setName(name);
-	// ArrayList<String> priorities = new ArrayList<>();
-	// priorities.add(value.replace(" ", "_")); // Kumbang doesn't like spaces,
-	// either
-	// priority.setValues(priorities);
-	// // req.getAttributes().add(priority);
-	// } catch (Exception e) {
-	// System.out.println("No " + name);
-	// }
-	// }
-
-	// private void addSubtask(HashMap<String, Requirement> requirements,
-	// Requirement req, Subtask subtask) {
-	// Requirement req2 = new Requirement();
-	// req2.setRequirementId(subtask.getKey().replace("-", "_"));
-	// req2.setName(subtask.getFields().getSummary());
-	// requirements.put(req2.getRequirementId(), req2);
-	//
-	// addAttribute(req2, "priority", subtask.getFields().getPriority().getId());
-	// addAttribute(req2, "status", subtask.getFields().getStatus().getName());
-	//
-	// SubFeature subfeat = new SubFeature();
-	// ArrayList<String> types = new ArrayList<>();
-	// types.add(req2.getRequirementId());
-	// subfeat.setTypes(types);
-	// subfeat.setRole(req2.getRequirementId());
-	// subfeat.setCardinality("0-1");
-	//
-	// req.getSubfeatures().add(subfeat);
-	//
-	// // No issue links (requirements)?
-	// }
-
-	// private void updateParentEpic(HashMap<String, Requirement> requirements,
-	// Issue issue, Requirement req) {
-	// Object epicKeyObject = issue.getFields().getCustomfield10400();
-	// if (epicKeyObject == null) {
-	// return; // No parent
-	// }
-	// String epicKey = epicKeyObject.toString().replace("-", "_");
-	//
-	// Requirement epic = requirements.get(epicKey);
-	//
-	// if (epic == null) { // Parent not yet created
-	// epic = new Requirement();
-	// epic.setRequirementId(epicKey);
-	// epic.setName("Epic " + epicKey);
-	// requirements.put(epicKey, epic);
-	// }
-	//
-	// SubFeature subfeat = new SubFeature();
-	// ArrayList<String> types = new ArrayList<>();
-	// types.add(req.getRequirementId());
-	// subfeat.setTypes(types);
-	// subfeat.setRole(req.getRequirementId());
-	// subfeat.setCardinality("0-1");
-	//
-	// epic.getSubfeatures().add(subfeat);
-	// }
-	//
-	// private void addRequiredRelationships(Issue issue, Requirement req) {
-	// if (issue.getFields().getIssuelinks() != null) {
-	// for (Issuelink link : issue.getFields().getIssuelinks()) {
-	// if (!"depends on".equals(link.getType().getOutward())) {
-	// continue;
-	// }
-	// if (link.getOutwardIssue() == null || link.getOutwardIssue().getKey() ==
-	// null) {
-	// continue;
-	// }
-	// Relationship rel = new Relationship();
-	// req.getRelationships().add(rel);
-	// rel.setTargetId(link.getOutwardIssue().getKey().replace("-", "_"));
-	// rel.setType("requires");
-	// }
-	// }
-	// }
-	//
-	// private void addAttribute(Requirement req, String name, String value) {
-	// try {
-	// Attribute priority = new Attribute();
-	// priority.setName(name);
-	// ArrayList<String> priorities = new ArrayList<>();
-	// priorities.add(value.replace(" ", "_")); // Kumbang doesn't like spaces,
-	// either
-	// priority.setValues(priorities);
-	// req.getAttributes().add(priority);
-	// } catch (Exception e) {
-	// System.out.println("No " + name);
-	// }
-	// }
 }

@@ -29,7 +29,7 @@ public class FileService {
 		    }
 			Collections.reverse(fixVersions);
 
-			for (int i = fixVersions.size(); i >0; i--) {
+			for (int i = fixVersions.size()-1; i >=0; i--) {
 				versionsMap.put(fixVersions.get(i), i);
 			}
 		} catch (FileNotFoundException e) {
