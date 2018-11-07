@@ -36,7 +36,8 @@ import eu.openreq.milla.models.json.Requirement_status;
 import eu.openreq.milla.models.json.Requirement_type;
 
 /**
- * Methods used to convert between formats (JsonElements to Jira Issues, and Issues to OpenReq Requirements)
+ * Methods used to convert between formats (JsonElements to Jira Issues, and
+ * Issues to OpenReq Requirements)
  * 
  * @author iivorait
  * @author tlaurinen
@@ -54,9 +55,9 @@ public class FormatTransformerService {
 	 * List of Requirement IDs that are related to a Project
 	 */
 	private List<String> requirementIds;
-	
+
 	private FileService fileService;
-	
+
 	private Map<String, Integer> fixVersions;
 
 	private int epicCount;
@@ -70,7 +71,7 @@ public class FormatTransformerService {
 	public int getSubtaskCount() {
 		return subtaskCount;
 	}
-	
+
 	public void readFixVersionsToHashMap(String projectId) {
 		fileService = new FileService();
 		fixVersions = fileService.readFixVersionsFromFile(projectId);
@@ -84,21 +85,30 @@ public class FormatTransformerService {
 	 * @return a List of Issue objects
 	 * @throws IOException
 	 */
-	public List<Issue> convertJsonElementsToIssues(Collection<JsonElement> jsonElements)
-			throws IOException {
+	public List<Issue> convertJsonElementsToIssues(Collection<JsonElement> jsonElements) throws IOException {
 
 		long start = System.nanoTime();
 
 		Gson gson = new Gson();
 		List<Issue> issues = new ArrayList<>();
-		
+
 		List<JsonElement> elements = new ArrayList<>(jsonElements);
 		for (int i = 0; i < jsonElements.size(); i++) {
 			JsonElement element = elements.get(i);
 
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
-			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400")); //For some reason customfield10400 will give null if not set here 
+			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400")); // For
+																													// some
+																													// reason
+																													// customfield10400
+																													// will
+																													// give
+																													// null
+																													// if
+																													// not
+																													// set
+																													// here
 			issues.add(issue);
 			element = null;
 			issue = null;
@@ -121,7 +131,8 @@ public class FormatTransformerService {
 	 *            List of Jira Issues
 	 * @return a collection of Requirement objects
 	 */
-	public Collection<Requirement> convertIssuesToJson(Collection<Issue> issues, String projectId, Person person) throws Exception {
+	public Collection<Requirement> convertIssuesToJson(Collection<Issue> issues, String projectId, Person person)
+			throws Exception {
 		dependencies = new ArrayList<>();
 		HashMap<String, Requirement> requirements = new HashMap<>();
 
@@ -142,8 +153,8 @@ public class FormatTransformerService {
 				}
 				requirements.put(req.getId(), req);
 				requirementIds.add(req.getId());
-				int priority = Integer.parseInt(issue.getFields().getPriority().getId()); 
-				
+				int priority = Integer.parseInt(issue.getFields().getPriority().getId());
+
 				setRightPriority(req, priority);
 
 				setStatusForReq(req, issue.getFields().getStatus().getName());
@@ -154,7 +165,7 @@ public class FormatTransformerService {
 
 				addCommentsToReq(issue, req, person);
 				addDependencies(issue, req);
-				
+
 				addResolutionToRequirementParts(issue, req);
 				addEnvironmentToRequirementParts(issue, req);
 				addLabelsToRequirementParts(issue, req);
@@ -187,28 +198,28 @@ public class FormatTransformerService {
 	 *            that needs to have special characters removed
 	 * @return a fixed version of the name
 	 */
-	private String fixSpecialCharacters(String name) { //TODO this might not be necessary anymore but is left here for demo safety 
+	private String fixSpecialCharacters(String name) { // TODO this might not be necessary anymore but is left here for
+														// demo safety
 		String fixedName = name;
 		if (name != null && !name.equals("")) {
 			fixedName = name.replaceAll("[^\\x20-\\x7e]", ""); // TODO This is a quick fix, must be modified into a
 		} // better version
 		return fixedName;
 	}
-	
+
 	/**
 	 * Qt priorities with ids 7 and 6 are in a "wrong" order, hence this fix
+	 * 
 	 * @param req
 	 * @param priority
 	 */
 	private void setRightPriority(Requirement req, int priority) {
-		if(priority==6) {
+		if (priority == 6) {
 			req.setPriority(7);
-		}
-		else if(priority==7) {
+		} else if (priority == 7) {
 			req.setPriority(6);
-		}
-		else {																		
-		req.setPriority(priority);
+		} else {
+			req.setPriority(priority);
 		}
 	}
 
@@ -222,13 +233,13 @@ public class FormatTransformerService {
 	 *            Requirement receiving the Comment
 	 */
 	private void addCommentsToReq(Issue issue, Requirement req, Person person) {
-		if (issue.getFields().getComment()!= null && !issue.getFields().getComment().getComments().isEmpty()) {
+		if (issue.getFields().getComment() != null && !issue.getFields().getComment().getComments().isEmpty()) {
 			for (Comments comment : issue.getFields().getComment().getComments()) {
 				Comment jsonComment = new Comment();
 				jsonComment.setId(comment.getId());
 				jsonComment.setText(comment.getBody());
 				jsonComment.setCommentDoneBy(person);
-			//	System.out.println(jsonComment.getCommentDoneBy().getUsername());
+				// System.out.println(jsonComment.getCommentDoneBy().getUsername());
 				String date = String.valueOf(comment.getCreated());
 				long created = setCreatedDate(date);
 				jsonComment.setCreated_at(created);
@@ -323,8 +334,8 @@ public class FormatTransformerService {
 
 	/**
 	 * Jira Issues know their parents (Epics)
-	 * (issue.getFields().getCustomfield10400()), and this method creates a Dependency
-	 * between an Epic and its "child" (Dependency_type Decomposition).
+	 * (issue.getFields().getCustomfield10400()), and this method creates a
+	 * Dependency between an Epic and its "child" (Dependency_type Decomposition).
 	 * 
 	 * @param requirements
 	 * @param issue
@@ -339,18 +350,20 @@ public class FormatTransformerService {
 		createDependency(epicKey, req.getId(), "epic");
 
 	}
-	
+
 	/**
-	 * Helper method for cleaning "" marks from issue keys that belong to epics (no idea why epic issues seem to have extra "" around them)
+	 * Helper method for cleaning "" marks from issue keys that belong to epics (no
+	 * idea why epic issues seem to have extra "" around them)
+	 * 
 	 * @param epicKey
 	 * @return
 	 */
 	private String cleanEpicKey(String epicKey) {
-		char [] chars = epicKey.toCharArray();
+		char[] chars = epicKey.toCharArray();
 		String newEpicKey = "";
-			for(int i = 1; i < chars.length-1; i++) {
-				newEpicKey = newEpicKey + chars[i];
-			}
+		for (int i = 1; i < chars.length - 1; i++) {
+			newEpicKey = newEpicKey + chars[i];
+		}
 		return newEpicKey;
 	}
 
@@ -371,7 +384,7 @@ public class FormatTransformerService {
 		case "epic":
 			req.setRequirement_type(Requirement_type.EPIC);
 			break;
-		case "initiative":										//Not necessary?
+		case "initiative": // Not necessary?
 			req.setRequirement_type(Requirement_type.INITIATIVE);
 			break;
 		case "sub-task":
@@ -393,8 +406,8 @@ public class FormatTransformerService {
 			req.setRequirement_type(Requirement_type.USER_STORY);
 			break;
 		}
-		
-		if(type.toLowerCase().contains("task")) {
+
+		if (type.toLowerCase().contains("task")) {
 			addExactTaskTypeToRequirementParts(req, type);
 		}
 	}
@@ -412,7 +425,7 @@ public class FormatTransformerService {
 
 		switch (status.toLowerCase()) {
 		case "reported":
-			req.setStatus(Requirement_status.SUBMITTED); //SUBMITTED = Todo in Qt system
+			req.setStatus(Requirement_status.SUBMITTED); // SUBMITTED = Todo in Qt system
 			break;
 		case "reopened":
 			req.setStatus(Requirement_status.SUBMITTED);
@@ -427,7 +440,7 @@ public class FormatTransformerService {
 			req.setStatus(Requirement_status.SUBMITTED);
 			break;
 		case "blocked":
-			req.setStatus(Requirement_status.DEFERRED); //DEFERRED = Stuck in Qt system
+			req.setStatus(Requirement_status.DEFERRED); // DEFERRED = Stuck in Qt system
 			break;
 		case "need more info":
 			req.setStatus(Requirement_status.DEFERRED);
@@ -439,13 +452,13 @@ public class FormatTransformerService {
 			req.setStatus(Requirement_status.DEFERRED);
 			break;
 		case "in progress":
-			req.setStatus(Requirement_status.ACCEPTED); //ACCEPTED = In progress in Qt system
+			req.setStatus(Requirement_status.ACCEPTED); // ACCEPTED = In progress in Qt system
 			break;
 		case "implemented":
 			req.setStatus(Requirement_status.ACCEPTED);
 			break;
 		case "withdrawn":
-			req.setStatus(Requirement_status.COMPLETED); //COMPLETED = Done in Qt system
+			req.setStatus(Requirement_status.COMPLETED); // COMPLETED = Done in Qt system
 			break;
 		case "verified":
 			req.setStatus(Requirement_status.COMPLETED);
@@ -463,8 +476,8 @@ public class FormatTransformerService {
 			req.setStatus(Requirement_status.COMPLETED);
 			break;
 		}
-		
-		addExactStatusToRequirementParts(req, status);		
+
+		addExactStatusToRequirementParts(req, status);
 	}
 
 	/**
@@ -532,56 +545,61 @@ public class FormatTransformerService {
 
 	/**
 	 * The exact status of a Qt Jira Issue will be saved to RequirementParts
+	 * 
 	 * @param req
 	 * @param status
 	 */
 	private void addExactStatusToRequirementParts(Requirement req, String status) {
 		RequirementPart reqPart = new RequirementPart();
-		reqPart.setId(req.getId()+"_STATUS");
+		reqPart.setId(req.getId() + "_STATUS");
 		reqPart.setName("Status");
 		reqPart.setText(status);
 		reqPart.setCreated_at(new Date().getTime());
 		req.getRequirementParts().add(reqPart);
-		
+
 	}
-	
+
 	/**
-	 * Qt Jira Issues have three different task-types (task, technical task, sub-task), and this info will be saved to RequirementParts
+	 * Qt Jira Issues have three different task-types (task, technical task,
+	 * sub-task), and this info will be saved to RequirementParts
+	 * 
 	 * @param req
 	 * @param taskType
 	 */
 	private void addExactTaskTypeToRequirementParts(Requirement req, String taskType) {
 		RequirementPart reqPart = new RequirementPart();
-		reqPart.setId(req.getId()+"_TASK");
+		reqPart.setId(req.getId() + "_TASK");
 		reqPart.setName("Task");
 		reqPart.setText(taskType);
 		reqPart.setCreated_at(new Date().getTime());
 		req.getRequirementParts().add(reqPart);
-		
+
 	}
-	
+
 	/**
-	 * Add information on the resolution of an issue to a RequirementPart object. If issue's resolution is null, create a new RequirementPart with the text "Unresolved"
+	 * Add information on the resolution of an issue to a RequirementPart object. If
+	 * issue's resolution is null, create a new RequirementPart with the text
+	 * "Unresolved"
+	 * 
 	 * @param issue
 	 * @param req
 	 */
 	private void addResolutionToRequirementParts(Issue issue, Requirement req) {
 		RequirementPart reqPart = new RequirementPart();
-		reqPart.setId(req.getId()+"_RESOLUTION");
+		reqPart.setId(req.getId() + "_RESOLUTION");
 		reqPart.setName("Resolution");
-		
-		if(issue.getFields().getResolution()!=null) {
+
+		if (issue.getFields().getResolution() != null) {
 			reqPart.setText(issue.getFields().getResolution().getName());
-			reqPart.setCreated_at(new Date().getTime()); //Here issue.getFields().getResolutionDate()? 
-			
-		}
-		else {
+			reqPart.setCreated_at(new Date().getTime()); // Here issue.getFields().getResolutionDate()?
+
+		} else {
 			reqPart.setText("Unresolved");
 			reqPart.setCreated_at(new Date().getTime());
 		}
 		req.getRequirementParts().add(reqPart);
 	}
-	
+
 	/**
 	 * 
 	 * @param issue
@@ -589,10 +607,10 @@ public class FormatTransformerService {
 	 */
 	private void addEnvironmentToRequirementParts(Issue issue, Requirement req) {
 		RequirementPart reqPart = new RequirementPart();
-		reqPart.setId(req.getId()+"_ENVIRONMENT");
+		reqPart.setId(req.getId() + "_ENVIRONMENT");
 		reqPart.setName("Environment");
-		
-		if(issue.getFields().getEnvironment()!=null) {
+
+		if (issue.getFields().getEnvironment() != null) {
 			ObjectMapper mapper = new ObjectMapper();
 			String environmentString;
 			try {
@@ -605,8 +623,7 @@ public class FormatTransformerService {
 		}
 		req.getRequirementParts().add(reqPart);
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param issue
@@ -614,10 +631,10 @@ public class FormatTransformerService {
 	 */
 	private void addLabelsToRequirementParts(Issue issue, Requirement req) {
 		RequirementPart reqPart = new RequirementPart();
-		reqPart.setId(req.getId()+"_LABELS");
+		reqPart.setId(req.getId() + "_LABELS");
 		reqPart.setName("Labels");
-		
-		if(issue.getFields().getLabels()!=null) {
+
+		if (issue.getFields().getLabels() != null) {
 			ObjectMapper mapper = new ObjectMapper();
 			String labelString;
 			try {
@@ -629,8 +646,8 @@ public class FormatTransformerService {
 			reqPart.setText(labelString);
 		}
 		req.getRequirementParts().add(reqPart);
-	}		
-	
+	}
+
 	/**
 	 * 
 	 * @param issue
@@ -638,10 +655,10 @@ public class FormatTransformerService {
 	 */
 	private void addVersionsToRequirementParts(Issue issue, Requirement req) {
 		RequirementPart reqPart = new RequirementPart();
-		reqPart.setId(req.getId()+"_VERSIONS");
+		reqPart.setId(req.getId() + "_VERSIONS");
 		reqPart.setName("Versions");
-		
-		if(issue.getFields().getVersions()!=null) {
+
+		if (issue.getFields().getVersions() != null) {
 			ObjectMapper mapper = new ObjectMapper();
 			String versionsString;
 			try {
@@ -654,7 +671,7 @@ public class FormatTransformerService {
 		}
 		req.getRequirementParts().add(reqPart);
 	}
-	
+
 	/**
 	 * 
 	 * @param issue
@@ -662,10 +679,10 @@ public class FormatTransformerService {
 	 */
 	private void addComponentsToRequirementParts(Issue issue, Requirement req) {
 		RequirementPart reqPart = new RequirementPart();
-		reqPart.setId(req.getId()+"_COMPONENTS");
+		reqPart.setId(req.getId() + "_COMPONENTS");
 		reqPart.setName("Components");
-		
-		if(issue.getFields().getComponents()!=null) {
+
+		if (issue.getFields().getComponents() != null) {
 			ObjectMapper mapper = new ObjectMapper();
 			String componentsString;
 			try {
@@ -678,7 +695,7 @@ public class FormatTransformerService {
 		}
 		req.getRequirementParts().add(reqPart);
 	}
-	
+
 	/**
 	 * 
 	 * @param issue
@@ -686,10 +703,10 @@ public class FormatTransformerService {
 	 */
 	private void addPlatformsToRequirementParts(Issue issue, Requirement req) {
 		RequirementPart reqPart = new RequirementPart();
-		reqPart.setId(req.getId()+"_PLATFORMS");
+		reqPart.setId(req.getId() + "_PLATFORMS");
 		reqPart.setName("Platforms");
-		
-		if(issue.getFields().getCustomfield11100()!=null) {
+
+		if (issue.getFields().getCustomfield11100() != null) {
 			ObjectMapper mapper = new ObjectMapper();
 			String platformsString;
 			try {
@@ -702,47 +719,55 @@ public class FormatTransformerService {
 		}
 		req.getRequirementParts().add(reqPart);
 	}
-	
+
 	/**
 	 * Adds only the latest fixVersion to a RequirementPart
+	 * 
 	 * @param issue
 	 * @param req
 	 */
 	private void addFixVersionsToRequirementParts(Issue issue, Requirement req) {
-			FixVersion fixVersion = getLatestFixVersion(issue);
-			
-			if(fixVersion!=null) { try {
-				RequirementPart reqPart = new RequirementPart();
-				int number = fixVersions.get(fixVersion.getName()); //This number tells the "release number (or id)" of the fix version
-				reqPart.setId(req.getId()+"_"+fixVersion.getId() + "_" + number);
-				reqPart.setName("FixVersion");
+		FixVersion fixVersion = getLatestFixVersion(issue);
+		RequirementPart reqPart = new RequirementPart();
+		reqPart.setName("FixVersion");
+		if (fixVersion != null) {
+			try {
+
+				int number = fixVersions.get(fixVersion.getName()); // This number tells the "release number (or id)" of
+																	// the fix version
+				reqPart.setId(req.getId() + "_" + fixVersion.getId() + "_" + number);
+				// reqPart.setName("FixVersion");
 				ObjectMapper mapper = new ObjectMapper();
 				String versionString = mapper.writeValueAsString(fixVersion);
 				reqPart.setText(versionString);
-				req.getRequirementParts().add(reqPart);
-			}
-			catch(Exception e) {
+//				req.getRequirementParts().add(reqPart);
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			}
+		} else {
+			reqPart.setId(req.getId() + "_FixVersion");
+			reqPart.setText("No FixVersion");
+		}
+		req.getRequirementParts().add(reqPart);
 	}
-	
+
 	/**
-	 * Searches the map fixVersions to determine the latest FixVersion 
+	 * Searches the map fixVersions to determine the latest FixVersion
+	 * 
 	 * @param issue
 	 * @return
 	 */
 	private FixVersion getLatestFixVersion(Issue issue) {
-		if(fixVersions==null) {
-			return null; 
+		if (fixVersions == null) {
+			return null;
 		}
 		FixVersion fixVersion = null;
 		long latest = 0;
 		int newest = fixVersions.size();
-		if(issue.getFields().getFixVersions()!=null) {
-			for(FixVersion fixVersion2 : issue.getFields().getFixVersions()) {
-				if(fixVersions.containsKey(fixVersion2.getName())) {
-					if (newest>fixVersions.get(fixVersion2.getName())) {
+		if (issue.getFields().getFixVersions() != null) {
+			for (FixVersion fixVersion2 : issue.getFields().getFixVersions()) {
+				if (fixVersions.containsKey(fixVersion2.getName())) {
+					if (newest > fixVersions.get(fixVersion2.getName())) {
 						newest = fixVersions.get(fixVersion2.getName());
 						fixVersion = fixVersion2;
 					}
@@ -777,5 +802,5 @@ public class FormatTransformerService {
 	public List<String> getRequirementIds() {
 		return requirementIds;
 	}
-	
+
 }
