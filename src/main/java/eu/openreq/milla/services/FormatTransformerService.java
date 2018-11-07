@@ -161,7 +161,7 @@ public class FormatTransformerService {
 				addVersionsToRequirementParts(issue, req);
 				addPlatformsToRequirementParts(issue, req);
 				addFixVersionsToRequirementParts(issue, req);
-
+				addComponentsToRequirementParts(issue, req);
 				updateParentEpic(requirements, issue, req);
 
 				List<Subtask> subtasks = issue.getFields().getSubtasks();
