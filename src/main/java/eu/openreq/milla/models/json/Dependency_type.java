@@ -1,26 +1,66 @@
 package eu.openreq.milla.models.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 
 public enum Dependency_type {
 
-//	@SerializedName("contributes")
+	
+	@SerializedName(value="contributes", alternate= {"CONTRIBUTES"})
 	CONTRIBUTES,
-//	@SerializedName("damages")
+	@SerializedName(value="damages", alternate= {"DAMAGES"})
 	DAMAGES,
-//	@SerializedName("refines")
+	@SerializedName(value="refines", alternate= {"REFINES"})
 	REFINES,
-//	@SerializedName("requires")
+	@SerializedName(value="requires", alternate= {"REQUIRES"})
 	REQUIRES,
-//	@SerializedName("incompatible")
+	@SerializedName(value="incompatible", alternate= {"INCOMPATIBLE"})
 	INCOMPATIBLE,
-//	@SerializedName("decomposition")
+	@SerializedName(value="decomposition", alternate= {"DECOMPOSITION"})
 	DECOMPOSITION,
-//	@SerializedName("similar")
+	@SerializedName(value="similar", alternate= {"SIMILAR"})
 	SIMILAR,
-//	@SerializedName("duplicates")
+	@SerializedName(value="duplicates", alternate= {"DUPLICATES"})
 	DUPLICATES,
-//	@SerializedName("replaces")
+	@SerializedName(value="replaces", alternate= {"REPLACES"})
 	REPLACES
+	
+//	@SerializedName("contributes")
+//	CONTRIBUTES,
+//	@SerializedName("damages")
+//	DAMAGES,
+//	@SerializedName("refines")
+//	REFINES,
+//	@SerializedName("requires")
+//	REQUIRES,
+//	@SerializedName("incompatible")
+//	INCOMPATIBLE,
+//	@SerializedName("decomposition")
+//	DECOMPOSITION,
+//	@SerializedName("similar")
+//	SIMILAR,
+//	@SerializedName("duplicates")
+//	DUPLICATES,
+//	@SerializedName("replaces")
+//	REPLACES
+	
+//	@JsonProperty("contributes")
+//	CONTRIBUTES,
+//	@JsonProperty("damages")
+//	DAMAGES,
+//	@JsonProperty("refines")
+//	REFINES,
+//	@JsonProperty("requires")
+//	REQUIRES,
+//	@JsonProperty("incompatible")
+//	INCOMPATIBLE,
+//	@JsonProperty("decomposition")
+//	DECOMPOSITION,
+//	@JsonProperty("similar")
+//	SIMILAR,
+//	@JsonProperty("duplicates")
+//	DUPLICATES,
+//	@JsonProperty("replaces")
+//	REPLACES
 
 }

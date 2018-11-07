@@ -1,29 +1,74 @@
 package eu.openreq.milla.models.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 
 public enum Requirement_status {
 
-//	@SerializedName("submitted")
+	@SerializedName(value="submitted", alternate= {"SUBMITTED"})
 	SUBMITTED,
-//	@SerializedName("pending")
+	@SerializedName(value="pending", alternate= {"PENDING"})
 	PENDING,
-//	@SerializedName("accepted")
+	@SerializedName(value="accepted", alternate= {"ACCEPTED"})
 	ACCEPTED,
-//	@SerializedName("draft")
+	@SerializedName(value="draft", alternate= {"DRAFT"})
 	DRAFT,
-//	@SerializedName("deferred")
+	@SerializedName(value="deferred", alternate= {"DEFERRED"})
 	DEFERRED,
-//	@SerializedName("new")
+	@SerializedName(value="new", alternate= {"NEW"})
 	NEW,
-//	@SerializedName("planned")
+	@SerializedName(value="planned", alternate= {"PLANNED"})
 	PLANNED,
-//	@SerializedName("completed")
+	@SerializedName(value="completed", alternate= {"COMPLETED"})
 	COMPLETED,
-//	@SerializedName("rejected")
+	@SerializedName(value="rejected", alternate= {"REJECTED"})
 	REJECTED,
+	@SerializedName(value="recommended", alternate= {"RECOMMENDED"})
+	RECOMMENDED,
+	@SerializedName(value="in_progress", alternate= {"IN_PROGRESS"})
+	IN_PROGRESS
+	
+//	@SerializedName("submitted")
+//	SUBMITTED,
+//	@SerializedName("pending")
+//	PENDING,
+//	@SerializedName("accepted")
+//	ACCEPTED,
+//	@SerializedName("draft")
+//	DRAFT,
+//	@SerializedName("deferred")
+//	DEFERRED,
+//	@SerializedName("new")
+//	NEW,
+//	@SerializedName("planned")
+//	PLANNED,
+//	@SerializedName("completed")
+//	COMPLETED,
+//	@SerializedName("rejected")
+//	REJECTED,
 //	@SerializedName("recommended")
-	RECOMMENDED
+//	RECOMMENDED
+	
+//	@JsonProperty("submitted")
+//	SUBMITTED,
+//	@JsonProperty("pending")
+//	PENDING,
+//	@JsonProperty("accepted")
+//	ACCEPTED,
+//	@JsonProperty("draft")
+//	DRAFT,
+//	@JsonProperty("deferred")
+//	DEFERRED,
+//	@JsonProperty("new")
+//	NEW,
+//	@JsonProperty("planned")
+//	PLANNED,
+//	@JsonProperty("completed")
+//	COMPLETED,
+//	@JsonProperty("rejected")
+//	REJECTED,
+//	@JsonProperty("recommended")
+//	RECOMMENDED
 
 	
 }
