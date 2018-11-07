@@ -326,7 +326,7 @@ public class MillaController {
 	 * @return ResponseEntity<?>
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Fetch selected requirements from the database", notes = "Fetch selected requirements (ids as a String list) from Mallikas database")
+	@ApiOperation(value = "Fetch selected requirements from the database", notes = "Fetch selected requirements (ids as a String array, e.g. [\"QTWB-1\", \"QTWB-2\"]) from Mallikas database")
 	@ResponseBody
 	@PostMapping(value = "requirementsWithIds")
 	public ResponseEntity<?> getRequirementsWithIds(@RequestBody Collection<String> ids) throws IOException {

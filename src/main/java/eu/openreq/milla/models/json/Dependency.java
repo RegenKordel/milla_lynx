@@ -1,5 +1,7 @@
 package eu.openreq.milla.models.json;
 
+import java.util.List;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -58,6 +60,10 @@ public class Dependency {
 	@Expose
 	private String toid;
 	
+	@SerializedName("description")
+	@Expose
+	private List<String> description;
+	
 	/**
 	* Creation timestamp
 	* (Required)
@@ -115,6 +121,14 @@ public class Dependency {
 		this.toid = toId;
 	}
 	
+	public List<String> getDescription() {
+		return description;
+	}
+
+	public void setDescription(List<String> description) {
+		this.description = description;
+	}
+
 	public long getCreated_at() {
 		return created_at;
 	}

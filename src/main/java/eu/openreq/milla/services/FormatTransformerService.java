@@ -305,6 +305,7 @@ public class FormatTransformerService {
 		dependency.setId(reqFrom + "_" + reqTo + "_" + dependency.getDependency_type());
 		setStatusForDependency(dependency, "accepted");
 		dependency.setCreated_at(new Date().getTime());
+		dependency.setDescription(new ArrayList<String>());
 		dependencies.add(dependency);
 	}
 
@@ -322,7 +323,7 @@ public class FormatTransformerService {
 
 	/**
 	 * Jira Issues know their parents (Epics)
-	 * (issue.getFields().getCustomfield10400()), and this method creates a Dendency
+	 * (issue.getFields().getCustomfield10400()), and this method creates a Dependency
 	 * between an Epic and its "child" (Dependency_type Decomposition).
 	 * 
 	 * @param requirements
@@ -714,7 +715,7 @@ public class FormatTransformerService {
 				RequirementPart reqPart = new RequirementPart();
 				int number = fixVersions.get(fixVersion.getName()); //This number tells the "release number (or id)" of the fix version
 				reqPart.setId(req.getId()+"_"+fixVersion.getId() + "_" + number);
-				reqPart.setName("FixVersion_"+fixVersion.getName());
+				reqPart.setName("FixVersion");
 				ObjectMapper mapper = new ObjectMapper();
 				String versionString = mapper.writeValueAsString(fixVersion);
 				reqPart.setText(versionString);
