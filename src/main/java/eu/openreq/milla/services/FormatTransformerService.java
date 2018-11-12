@@ -764,7 +764,7 @@ public class FormatTransformerService {
 		FixVersion fixVersion = null;
 		long latest = 0;
 		int newest = fixVersions.size();
-		if (issue.getFields().getFixVersions() != null) {
+		if (issue.getFields().getFixVersions() != null && !issue.getFields().getFixVersions().isEmpty()) {
 			for (FixVersion fixVersion2 : issue.getFields().getFixVersions()) {
 				if (fixVersions.containsKey(fixVersion2.getName())) {
 					if (newest > fixVersions.get(fixVersion2.getName())) {
