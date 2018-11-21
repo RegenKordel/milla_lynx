@@ -866,10 +866,12 @@ public class Fields {
         this.additionalProperties.put(name, value);
     }
 
+    @JsonProperty("customfield_11100")
 	public Platforms getCustomfield11100() {
 		return customfield11100;
 	}
 
+    @JsonProperty("customfield_11100")
 	public void setCustomfield11100(Platforms customfield11100) {
 		this.customfield11100 = customfield11100;
 	}

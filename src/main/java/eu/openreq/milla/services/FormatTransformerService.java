@@ -15,12 +15,16 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import eu.openreq.milla.models.jira.Comments;
+import eu.openreq.milla.models.jira.Component;
 import eu.openreq.milla.models.jira.Issue;
 import eu.openreq.milla.models.jira.Issuelink;
+import eu.openreq.milla.models.jira.Platform;
+import eu.openreq.milla.models.jira.Platforms;
 import eu.openreq.milla.models.jira.Subtask;
 import eu.openreq.milla.models.jira.Version;
 import eu.openreq.milla.models.jira.FixVersion;
@@ -98,17 +102,24 @@ public class FormatTransformerService {
 
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
-			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400")); // For
-																													// some
-																													// reason
-																													// customfield10400
-																													// will
-																													// give
-																													// null
-																													// if
-																													// not
-																													// set
-																													// here
+			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400")); 
+			
+			if(issueJSON.getAsJsonObject("fields").get("customfield_11100")!=null && !issueJSON.getAsJsonObject("fields").get("customfield_11100").isJsonNull() ) {
+			JsonArray array = gson.fromJson(issueJSON.getAsJsonObject("fields").get("customfield_11100"), JsonArray.class);
+			List<Platform> plats = new ArrayList<Platform>();
+			for(JsonElement elem : array) {
+				JsonObject platJSON = elem.getAsJsonObject();
+				Platform platform = gson.fromJson(platJSON, Platform.class);
+				plats.add(platform);
+			}
+			Platform[] plats2 = new Platform[plats.size()];
+			for(int j = 0; j < plats.size(); j++) {
+				plats2[j] = plats.get(j);
+			}
+			Platforms platforms = new Platforms();
+			platforms.setplatforms(plats2);
+			issue.getFields().setCustomfield11100(platforms);
+			}
 			issues.add(issue);
 			element = null;
 			issue = null;
@@ -615,6 +626,7 @@ public class FormatTransformerService {
 			String environmentString;
 			try {
 				environmentString = mapper.writeValueAsString(issue.getFields().getEnvironment());
+			//	System.out.println(environmentString);
 			} catch (JsonProcessingException e) {
 				environmentString = "";
 				e.printStackTrace();
@@ -658,11 +670,19 @@ public class FormatTransformerService {
 		reqPart.setId(req.getId() + "_VERSIONS");
 		reqPart.setName("Versions");
 
-		if (issue.getFields().getVersions() != null) {
+		if (issue.getFields().getVersions() != null && !issue.getFields().getVersions().isEmpty()) {
+			List<Version> versions = issue.getFields().getVersions();
+			List<String> names = new ArrayList<String>();
+			for(Version version : versions) {
+				names.add(version.getName());
+			}
+		//	System.out.println(issue.getFields().getVersions().get(0).getName());
 			ObjectMapper mapper = new ObjectMapper();
 			String versionsString;
 			try {
-				versionsString = mapper.writeValueAsString(issue.getFields().getVersions());
+				versionsString = mapper.writeValueAsString(names);
+				//System.out.println(versionsString);
+				//versionsString = mapper.writeValueAsString(issue.getFields().getVersions());
 			} catch (JsonProcessingException e) {
 				versionsString = "";
 				e.printStackTrace();
@@ -682,11 +702,18 @@ public class FormatTransformerService {
 		reqPart.setId(req.getId() + "_COMPONENTS");
 		reqPart.setName("Components");
 
-		if (issue.getFields().getComponents() != null) {
+		if (issue.getFields().getComponents() != null && !issue.getFields().getComponents().isEmpty()) {
+			List<Component> components = issue.getFields().getComponents();
+			List<String> names = new ArrayList<String>();
+			for(Component component : components) {
+				names.add(component.getName());
+			}
 			ObjectMapper mapper = new ObjectMapper();
 			String componentsString;
 			try {
-				componentsString = mapper.writeValueAsString(issue.getFields().getComponents());
+			//	componentsString = mapper.writeValueAsString(issue.getFields().getComponents());
+				componentsString = mapper.writeValueAsString(names);
+			//	System.out.println(componentsString);
 			} catch (JsonProcessingException e) {
 				componentsString = "";
 				e.printStackTrace();
@@ -705,12 +732,25 @@ public class FormatTransformerService {
 		RequirementPart reqPart = new RequirementPart();
 		reqPart.setId(req.getId() + "_PLATFORMS");
 		reqPart.setName("Platforms");
+		//System.out.println("Issue is " + issue.getKey());
+		//System.out.println("issue.getFields().getCustomfield11100() " + issue.getFields().getCustomfield11100());
 
 		if (issue.getFields().getCustomfield11100() != null) {
+			//System.out.println(issue.getFields().getCustomfield11100());
 			ObjectMapper mapper = new ObjectMapper();
+		//	Gson gson = new Gson();
+			Platforms platforms = issue.getFields().getCustomfield11100(); //(issue.getFields().getCustomfield11100())
+			List<String> labels = new ArrayList<String>();
+			for(Platform platform : platforms.getplatforms()) {
+				labels.add(platform.getLabel());
+			}
+		//	System.out.println(labels.get(0));
+	//		JsonObject element = gson.toJson(issue.getFields().getCustomfield11100());
 			String platformsString;
 			try {
-				platformsString = mapper.writeValueAsString(issue.getFields().getCustomfield11100());
+				platformsString = mapper.writeValueAsString(labels);
+				//System.out.println("platformsString" + platformsString);
+				//platformsString =  issue.getFields().getCustomfield11100().toString(); //(issue.getFields().getCustomfield11100());
 			} catch (JsonProcessingException e) {
 				platformsString = "";
 				e.printStackTrace();
@@ -737,8 +777,9 @@ public class FormatTransformerService {
 																	// the fix version
 				reqPart.setId(req.getId() + "_" + fixVersion.getId() + "_" + number);
 				// reqPart.setName("FixVersion");
-				ObjectMapper mapper = new ObjectMapper();
-				String versionString = mapper.writeValueAsString(fixVersion);
+			//	ObjectMapper mapper = new ObjectMapper();
+			//	String versionString = mapper.writeValueAsString(fixVersion.getDescription());
+				String versionString = fixVersion.getDescription();
 				reqPart.setText(versionString);
 //				req.getRequirementParts().add(reqPart);
 			} catch (Exception e) {
