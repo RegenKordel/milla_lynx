@@ -28,7 +28,6 @@ import io.swagger.annotations.ApiOperation;
 
 import eu.openreq.milla.models.json.*;
 
-//@PropertySource(value = "application.properties", encoding="UTF-8")
 @SpringBootApplication
 @RestController
 public class DetectionController {
@@ -127,8 +126,6 @@ public class DetectionController {
 			throws IOException {
 		String completeAddress = upcSimilarityAddress
 				+ "upc/similarity-detection/Project?component=" + component + "&num_elements="+elements + "&project="+ projectId  + "&threshold="+threshold;
-		//System.out.println(completeAddress);
-		//Project?component=DKPro&num_elements=100&project=QTWB&threshold=0.3
 		ResponseEntity<?> entity = receiveDependenciesAndSendToMallikas(projectId, completeAddress);
 		return entity;
 	}
@@ -167,20 +164,15 @@ public class DetectionController {
 		RestTemplate rt = new RestTemplate();
 		String response = null;
 		ResponseEntity<?> entity = null;
-		//System.out.println("url"+url);
 		try {
 			String jsonString = getProjectRequirementsFromMallikas(projectId, mallikasAddress + "projectRequirements");
 			if(jsonString!=null) {
-				//System.out.println("url here"+url);
-				//System.out.println(jsonString);
-				//http://217.172.12.199:9404/upc/similarity-detection/Project?component=DKPro&num_elements=100&project=QTWB&threshold=0.3
 				HttpHeaders headers = new HttpHeaders();
-				headers.setContentType(MediaType.APPLICATION_JSON);
-				headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+				headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+				headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
 				
 				HttpEntity<String> entity2 = new HttpEntity<String>(jsonString, headers);
 				response = rt.postForObject(url, entity2, String.class);
-				//response = rt.postForObject(url, jsonString, String.class);
 			if(response!=null) {
 				JSONParser.parseToOpenReqObjects(response);
 				List<Dependency> dependencies = JSONParser.dependencies;

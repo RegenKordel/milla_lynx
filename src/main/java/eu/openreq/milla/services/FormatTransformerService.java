@@ -507,7 +507,7 @@ public class FormatTransformerService {
 			dependency.setDependency_type(Dependency_type.REQUIRES);
 			break;
 		case "relates":
-			dependency.setDependency_type(Dependency_type.SIMILAR);
+			dependency.setDependency_type(Dependency_type.CONTRIBUTES);
 			break;
 		case "duplicate":
 			dependency.setDependency_type(Dependency_type.DUPLICATES);
