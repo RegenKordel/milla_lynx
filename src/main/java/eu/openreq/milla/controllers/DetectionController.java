@@ -1,12 +1,15 @@
 package eu.openreq.milla.controllers;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,11 +70,13 @@ public class DetectionController {
 				mallikasAddress + "projectRequirements");
 
 		String completeAddress = upcSimilarityAddress + "upc/similarity-detection/DB/AddReqs";
+		
+		HttpEntity<String> entity = new HttpEntity<String>(requirements, headers);
 
 		ResponseEntity<?> response = null;
 
 		try {
-			response = rt.postForEntity(completeAddress, requirements, String.class);
+			response = rt.postForEntity(completeAddress, entity, String.class);
 
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("UPC error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
@@ -117,12 +122,10 @@ public class DetectionController {
 	@ApiOperation(value = "Post a project to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires project id, component (e.g. DKPro), threshold (e.g. 0.3) and number of element (e.g. 5)")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityProject")
-	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionProject(@RequestParam String projectId, @RequestParam String component, @RequestParam String threshold, @RequestParam String elements)
+	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionProject(@RequestParam String component, @RequestParam String elements, @RequestParam String projectId, @RequestParam String threshold)
 			throws IOException {
-
 		String completeAddress = upcSimilarityAddress
-				+ "upc/similarity-detection/Project?project="+ projectId + "&component=" + component + "&threshold="+threshold + "&num_elements="+elements;
-
+				+ "upc/similarity-detection/Project?component=" + component + "&num_elements="+elements + "&project="+ projectId  + "&threshold="+threshold;
 		ResponseEntity<?> entity = receiveDependenciesAndSendToMallikas(projectId, completeAddress);
 		return entity;
 	}
@@ -161,11 +164,15 @@ public class DetectionController {
 		RestTemplate rt = new RestTemplate();
 		String response = null;
 		ResponseEntity<?> entity = null;
-
 		try {
 			String jsonString = getProjectRequirementsFromMallikas(projectId, mallikasAddress + "projectRequirements");
 			if(jsonString!=null) {
-			response = rt.postForObject(url, jsonString, String.class);
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
+				headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
+				
+				HttpEntity<String> entity2 = new HttpEntity<String>(jsonString, headers);
+				response = rt.postForObject(url, entity2, String.class);
 			if(response!=null) {
 				JSONParser.parseToOpenReqObjects(response);
 				List<Dependency> dependencies = JSONParser.dependencies;

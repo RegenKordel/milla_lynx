@@ -35,7 +35,7 @@ public class JSONParser {
 	private static void fixDependencyIds(List<Dependency> dependencies) {
 		for(Dependency dependency : dependencies) {
 			if(dependency.getId()==null) {
-				dependency.setId(dependency.getFromid() + "_" + dependency.getToid() + "_" + dependency.getDependency_type() +"_UPC");
+				dependency.setId(dependency.getFromid() + "_" + dependency.getToid() + "_" + dependency.getDependency_type());
 			}
 		}
 	}
