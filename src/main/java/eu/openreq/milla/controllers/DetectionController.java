@@ -94,7 +94,7 @@ public class DetectionController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post two requirements to UPC Similarity Detection", notes = "Post requirements and dependencies as a String to UPC for Similarity Detection. Also requires ids of two requirements being compared, and the component (use DKPro)")
+	@ApiOperation(value = "Post two requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires ids of two requirements being compared, and the component (use DKPro)")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityReqReq")
 	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqReq(@RequestParam String projectId,
@@ -103,6 +103,28 @@ public class DetectionController {
 
 		String completeAddress = upcSimilarityAddress + "upc/similarity-detection/ReqReq?req1=" + reqId1 + "&req2=" + reqId2
 				+ "&component=" + component;
+
+		ResponseEntity<?> entity = receiveDependenciesAndSendToMallikas(projectId, completeAddress);
+		return entity;
+	}
+	
+	/**
+	 * 
+	 * @param component
+	 * @param elements
+	 * @param projectId
+	 * @param reqId
+	 * @param threshold
+	 * @return
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Post a requirement and a project to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires the id of the requirement being compared to other requirements in the project, and the component (e.g. DKPro)")
+	@ResponseBody
+	@PostMapping(value = "detectSimilarityReqProject")
+	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqProject(@RequestParam String component, @RequestParam String elements, @RequestParam String projectId, @RequestParam String reqId, @RequestParam String threshold)
+			throws IOException{
+
+		String completeAddress = upcSimilarityAddress + "upc/similarity-detection/ReqProject?component=" + component + "&num_elements="+elements + "&project="+ projectId  + "&req=" + reqId+ "&threshold="+threshold;
 
 		ResponseEntity<?> entity = receiveDependenciesAndSendToMallikas(projectId, completeAddress);
 		return entity;
