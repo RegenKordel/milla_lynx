@@ -94,15 +94,14 @@ public class DetectionController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post two requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires ids of two requirements being compared, and the component (use DKPro)")
+	@ApiOperation(value = "Post two requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires ids of two requirements being compared, compare (Name-Text-Comments), and the component (use DKPro)")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityReqReq")
-	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqReq(@RequestParam String projectId,
+	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqReq(@RequestParam String compare, @RequestParam String projectId,
 			@RequestParam String reqId1, @RequestParam String reqId2, @RequestParam String component)
 			throws IOException{
 
-		String completeAddress = upcSimilarityAddress + "upc/similarity-detection/ReqReq?req1=" + reqId1 + "&req2=" + reqId2
-				+ "&component=" + component;
+		String completeAddress = upcSimilarityAddress + "upc/similarity-detection/ReqReq?compare=" +compare+ "&component=" + component +"req1=" + reqId1 + "&req2=" + reqId2;
 
 		ResponseEntity<?> entity = receiveDependenciesAndSendToMallikas(projectId, completeAddress);
 		return entity;
@@ -118,13 +117,13 @@ public class DetectionController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post a requirement and a project to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires the id of the requirement being compared to other requirements in the project, and the component (e.g. DKPro)")
+	@ApiOperation(value = "Post a requirement and a project to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires the id of the requirement being compared to other requirements in the project, compare (Name-Text-Comments), and the component (e.g. DKPro)")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityReqProject")
-	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqProject(@RequestParam String component, @RequestParam String elements, @RequestParam String projectId, @RequestParam String reqId, @RequestParam String threshold)
+	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqProject(@RequestParam String compare, @RequestParam String component, @RequestParam String elements, @RequestParam String projectId, @RequestParam String reqId, @RequestParam String threshold)
 			throws IOException{
 
-		String completeAddress = upcSimilarityAddress + "upc/similarity-detection/ReqProject?component=" + component + "&num_elements="+elements + "&project="+ projectId  + "&req=" + reqId+ "&threshold="+threshold;
+		String completeAddress = upcSimilarityAddress + "upc/similarity-detection/ReqProject?compare=" + compare +"&component=" + component + "&num_elements="+elements + "&project="+ projectId  + "&req=" + reqId+ "&threshold="+threshold;
 
 		ResponseEntity<?> entity = receiveDependenciesAndSendToMallikas(projectId, completeAddress);
 		return entity;
@@ -141,13 +140,13 @@ public class DetectionController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post a project to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires project id, component (e.g. DKPro), threshold (e.g. 0.3) and number of element (e.g. 5)")
+	@ApiOperation(value = "Post a project to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires project id, component (e.g. DKPro), compare (Name-Text-Comments), threshold (e.g. 0.3) and number of element (e.g. 5)")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityProject")
-	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionProject(@RequestParam String component, @RequestParam String elements, @RequestParam String projectId, @RequestParam String threshold)
+	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionProject(@RequestParam String compare, @RequestParam String component, @RequestParam String elements, @RequestParam String projectId, @RequestParam String threshold)
 			throws IOException {
 		String completeAddress = upcSimilarityAddress
-				+ "upc/similarity-detection/Project?component=" + component + "&num_elements="+elements + "&project="+ projectId  + "&threshold="+threshold;
+				+ "upc/similarity-detection/Project?compare=" + compare +"&component="  + component + "&num_elements="+elements + "&project="+ projectId  + "&threshold="+threshold;
 		ResponseEntity<?> entity = receiveDependenciesAndSendToMallikas(projectId, completeAddress);
 		return entity;
 	}
