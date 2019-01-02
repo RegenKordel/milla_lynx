@@ -461,6 +461,9 @@ public class MillaController {
 		person.setEmail("dummyEmail");
 
 		int issueCount = projectIssues.getNumberOfIssues();
+		if(issueCount<=0) {
+			return new ResponseEntity<>("No issues found, download failed", HttpStatus.BAD_REQUEST);
+		}
 		int divided = issueCount;
 		if (issueCount > 10000) { // this is necessary for large Qt Jira projects
 			divided = issueCount / 10;
