@@ -316,19 +316,19 @@ public class FormatTransformerService {
 	 *            String id of the Requirement from
 	 * @param reqTo
 	 *            String id of the Requirement to
-	 * @param type
-	 *            String type of the Dependency
+	 * @param jiraType
+	 *            String type of the Dependency in Jira
 	 */
-	private void createDependency(String reqFrom, String reqTo, String type) {
+	private void createDependency(String reqFrom, String reqTo, String jiraType) {
 		Dependency dependency = new Dependency();
 		dependency.setFromid(reqFrom);
 		dependency.setToid(reqTo);
-		setDependencyType(dependency, type);
+		setDependencyType(dependency, jiraType);
 		dependency.setId(reqFrom + "_" + reqTo + "_" + dependency.getDependency_type());
 		setStatusForDependency(dependency, "accepted");
 		dependency.setCreated_at(new Date().getTime());
 		ArrayList<String> descriptions = new ArrayList<String>();
-		descriptions.add(type);
+		descriptions.add(jiraType);
 		dependency.setDescription(descriptions);
 		dependencies.add(dependency);
 	}
@@ -499,12 +499,12 @@ public class FormatTransformerService {
 	 * 
 	 * @param dependency
 	 *            Dependency needing a Dependency_type
-	 * @param type
+	 * @param jiraType
 	 *            String received from an IssueLink
 	 */
-	private void setDependencyType(Dependency dependency, String type) {
+	private void setDependencyType(Dependency dependency, String jiraType) {
 
-		switch (type.toLowerCase()) {
+		switch (jiraType.toLowerCase()) {
 		case "dependency":
 			dependency.setDependency_type(Dependency_type.REQUIRES);
 			break;
