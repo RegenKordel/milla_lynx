@@ -55,7 +55,11 @@ public class DetectionController {
 	 * @return ResponseEntity<?>
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection")
+	@ApiOperation(value = "Cache requirements for UPC Similarity Detection", 
+			notes = "<b>Functionality</b>: Post all requirements and dependencies in a project as a String to UPC services in order to be cached for similarity detection purposes. <br>"
+					+ "<b>Precondition</b>: Project has been cached in Mallikas.<br>"
+					+ "<b>Postcondition</b>: After successfully caching requirements in UPC service, similarity detection can be carried out.<br>"
+					+ "<b>Exception</b>: Not needed for DKPro.<br>")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityAddReqs")
 	public ResponseEntity<?> postRequirementsToUPCSimilarityDetection(@RequestBody String projectId)
@@ -161,7 +165,12 @@ public class DetectionController {
 	 * @return ResponseEntity<?>
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post a project to UPC Cross-Reference Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Cross-Reference Detection. Requires projectId")
+	@ApiOperation(value = "Detect cross references in a project using UPC Cross-Reference Detection", 
+			notes = "<b>Functionality</b>: Post all requirements and dependencies in a project as a String to UPC for Cross-Reference Detection. Requires projectId <br>"
+					+ "<b>Precondition</b>: Project has been cached in Mallikas.<br>"
+					+ "<b>Postcondition</b>: After successfully detection, detected cross references are stored in Mallikas as proposed dependencies.<br>")
+
+	
 	@ResponseBody
 	@PostMapping(value = "detectCrossReferenceProject")
 	public ResponseEntity<?> postRequirementsToUPCCrossReferenceDetectionProject(@RequestParam String projectId)
