@@ -734,25 +734,17 @@ public class FormatTransformerService {
 		RequirementPart reqPart = new RequirementPart();
 		reqPart.setId(req.getId() + "_PLATFORMS");
 		reqPart.setName("Platforms");
-		//System.out.println("Issue is " + issue.getKey());
-		//System.out.println("issue.getFields().getCustomfield11100() " + issue.getFields().getCustomfield11100());
 
 		if (issue.getFields().getCustomfield11100() != null) {
-			//System.out.println(issue.getFields().getCustomfield11100());
 			ObjectMapper mapper = new ObjectMapper();
-		//	Gson gson = new Gson();
-			Platforms platforms = issue.getFields().getCustomfield11100(); //(issue.getFields().getCustomfield11100())
+			Platforms platforms = issue.getFields().getCustomfield11100();
 			List<String> labels = new ArrayList<String>();
 			for(Platform platform : platforms.getplatforms()) {
 				labels.add(platform.getLabel());
 			}
-		//	System.out.println(labels.get(0));
-	//		JsonObject element = gson.toJson(issue.getFields().getCustomfield11100());
 			String platformsString;
 			try {
 				platformsString = mapper.writeValueAsString(labels);
-				//System.out.println("platformsString" + platformsString);
-				//platformsString =  issue.getFields().getCustomfield11100().toString(); //(issue.getFields().getCustomfield11100());
 			} catch (JsonProcessingException e) {
 				platformsString = "";
 				e.printStackTrace();
