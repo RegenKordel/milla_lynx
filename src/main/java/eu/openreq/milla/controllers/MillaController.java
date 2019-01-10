@@ -70,7 +70,7 @@ public class MillaController {
 			notes = "Post a model or configuration request to Mulperi")
 	@ResponseBody
 	@PostMapping(value = "data")
-	public ResponseEntity<?> postToMulperi(@RequestBody String data) throws IOException {
+	private ResponseEntity<?> postToMulperi(@RequestBody String data) throws IOException {
 
 		RestTemplate rt = new RestTemplate();
 
@@ -136,7 +136,7 @@ public class MillaController {
 			notes = "An array of requirements to Mallikas database")
 	@ResponseBody
 	@PostMapping(value = "requirements")
-	public ResponseEntity<?> postRequirementsToMallikas(@RequestBody Collection<Requirement> requirements)
+	private ResponseEntity<?> postRequirementsToMallikas(@RequestBody Collection<Requirement> requirements)
 			throws IOException {
 
 		RestTemplate rt = new RestTemplate();
@@ -175,7 +175,7 @@ public class MillaController {
 					+ "<br>dependencies: An array of dependencies in OpenReq JSON format (no requirement or project). ")
 	@ResponseBody
 	@PostMapping(value = "dependencies")
-	public ResponseEntity<?> postDependenciesToMallikas(@RequestBody Collection<Dependency> dependencies)
+	private ResponseEntity<?> postDependenciesToMallikas(@RequestBody Collection<Dependency> dependencies)
 			throws IOException {
 
 		RestTemplate rt = new RestTemplate();
@@ -205,18 +205,17 @@ public class MillaController {
 	 * @return ResponseEntity<?>
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "TBD IS RIGHT Store a project including its requirements and rependencies in Mallikas", 
+	@ApiOperation(value = "Store a project in Mallikas", 
 			notes = "<br><b>Functionality</b>: Add or update a project in Mallikas"
 			+ "The project is in OpenReq JSON format. "
 			+ "If the projects already exist in Mallikas, the existing data is updated."
 			+ "<br><b>Precondition</b>: The project has been cached in Mallikas and contains a set of requirements.<br>"
 			+ "<b>Postcondition</b>: The dependencies are added or updated to the existing requirements in Mallikas. If a dependency exist, it is updated."
 			+ "<b>Exception</b>: Storing existing project does not remove anything from Mallikas even if, e.g., a requirement has been removed from the project."
-			+ "<br><b>Prarameter: </b>"
-			+ "<br>dependencies: An array of dependencies in OpenReq JSON format (no requirement or project). ")
+			+ "<br><b>Prarameter: </b>")
 @ResponseBody
 	@PostMapping(value = "project")
-	public ResponseEntity<?> postProjectToMallikas(@RequestBody Project project) throws IOException {
+	private ResponseEntity<?> postProjectToMallikas(@RequestBody Project project) throws IOException {
 
 		RestTemplate rt = new RestTemplate();
 
