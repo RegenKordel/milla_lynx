@@ -175,7 +175,7 @@ public class MillaController {
 					+ "<br>dependencies: An array of dependencies in OpenReq JSON format (no requirement or project). ")
 	@ResponseBody
 	@PostMapping(value = "dependencies")
-	private ResponseEntity<?> postDependenciesToMallikas(@RequestBody Collection<Dependency> dependencies)
+	public ResponseEntity<?> postDependenciesToMallikas(@RequestBody Collection<Dependency> dependencies)
 			throws IOException {
 
 		RestTemplate rt = new RestTemplate();

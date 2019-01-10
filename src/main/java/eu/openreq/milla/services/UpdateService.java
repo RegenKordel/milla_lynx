@@ -34,6 +34,8 @@ public class UpdateService {
 
 	private int start = 100;
 	
+	private List<String> reqIds;
+	
 	private Collection<Dependency> dependencies;
 
 	public UpdateService() {
@@ -58,6 +60,7 @@ public class UpdateService {
 			Collection<Requirement> requirements = processJsonElementsToRequirements(updatedIssues.getProjectIssues(), projectId, person);
 			this.postRequirementsToMallikas(requirements);
 			this.postDependenciesToMallikas(dependencies);
+		//	this.postReqIdsToMallikas(reqIds, projectId);
 			
 			response = new ResponseEntity<>("All updated requirements and dependencies downloaded", HttpStatus.OK);
 		} catch (HttpClientErrorException e) {
@@ -140,6 +143,7 @@ public class UpdateService {
 			String projectId, Person person) throws Exception {
 		List<Issue> issues = transformer.convertJsonElementsToIssues(elements);
 		Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId, person);
+	//	reqIds = transformer.getRequirementIds();
 		dependencies = transformer.getDependencies();
 		return requirements;
 	}
@@ -161,6 +165,18 @@ public class UpdateService {
 		ResponseEntity<?> response = null;
 		try {	
 			response = rt.postForEntity(mallikasAddress + "updateDependencies", dependencies, Collection.class);
+		} catch (HttpClientErrorException e) {
+			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
+		}
+		return response;
+		
+	}
+	
+	private ResponseEntity<?> postReqIdsToMallikas(Collection<String> reqIds, String projectId) {
+		RestTemplate rt = new RestTemplate();
+		ResponseEntity<?> response = null;
+		try {	
+			response = rt.postForEntity(mallikasAddress + "updateProjectSpecifiedRequirements/"+projectId, reqIds, Collection.class);
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
 		}
