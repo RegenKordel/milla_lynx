@@ -316,18 +316,20 @@ public class FormatTransformerService {
 	 *            String id of the Requirement from
 	 * @param reqTo
 	 *            String id of the Requirement to
-	 * @param type
-	 *            String type of the Dependency
+	 * @param jiraType
+	 *            String type of the Dependency in Jira
 	 */
-	private void createDependency(String reqFrom, String reqTo, String type) {
+	private void createDependency(String reqFrom, String reqTo, String jiraType) {
 		Dependency dependency = new Dependency();
 		dependency.setFromid(reqFrom);
 		dependency.setToid(reqTo);
-		setDependencyType(dependency, type);
+		setDependencyType(dependency, jiraType);
 		dependency.setId(reqFrom + "_" + reqTo + "_" + dependency.getDependency_type());
 		setStatusForDependency(dependency, "accepted");
 		dependency.setCreated_at(new Date().getTime());
-		dependency.setDescription(new ArrayList<String>());
+		ArrayList<String> descriptions = new ArrayList<String>();
+		descriptions.add(jiraType);
+		dependency.setDescription(descriptions);
 		dependencies.add(dependency);
 	}
 
@@ -497,12 +499,12 @@ public class FormatTransformerService {
 	 * 
 	 * @param dependency
 	 *            Dependency needing a Dependency_type
-	 * @param type
+	 * @param jiraType
 	 *            String received from an IssueLink
 	 */
-	private void setDependencyType(Dependency dependency, String type) {
+	private void setDependencyType(Dependency dependency, String jiraType) {
 
-		switch (type.toLowerCase()) {
+		switch (jiraType.toLowerCase()) {
 		case "dependency":
 			dependency.setDependency_type(Dependency_type.REQUIRES);
 			break;
@@ -732,25 +734,17 @@ public class FormatTransformerService {
 		RequirementPart reqPart = new RequirementPart();
 		reqPart.setId(req.getId() + "_PLATFORMS");
 		reqPart.setName("Platforms");
-		//System.out.println("Issue is " + issue.getKey());
-		//System.out.println("issue.getFields().getCustomfield11100() " + issue.getFields().getCustomfield11100());
 
 		if (issue.getFields().getCustomfield11100() != null) {
-			//System.out.println(issue.getFields().getCustomfield11100());
 			ObjectMapper mapper = new ObjectMapper();
-		//	Gson gson = new Gson();
-			Platforms platforms = issue.getFields().getCustomfield11100(); //(issue.getFields().getCustomfield11100())
+			Platforms platforms = issue.getFields().getCustomfield11100();
 			List<String> labels = new ArrayList<String>();
 			for(Platform platform : platforms.getplatforms()) {
 				labels.add(platform.getLabel());
 			}
-		//	System.out.println(labels.get(0));
-	//		JsonObject element = gson.toJson(issue.getFields().getCustomfield11100());
 			String platformsString;
 			try {
 				platformsString = mapper.writeValueAsString(labels);
-				//System.out.println("platformsString" + platformsString);
-				//platformsString =  issue.getFields().getCustomfield11100().toString(); //(issue.getFields().getCustomfield11100());
 			} catch (JsonProcessingException e) {
 				platformsString = "";
 				e.printStackTrace();

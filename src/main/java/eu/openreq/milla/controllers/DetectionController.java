@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import eu.openreq.milla.services.MallikasService;
 import eu.openreq.milla.services.JSONParser;
 import io.swagger.annotations.ApiOperation; 
-
+//import io.swagger.annotations.*;
 import eu.openreq.milla.models.json.*;
 
 @SpringBootApplication
@@ -55,7 +55,13 @@ public class DetectionController {
 	 * @return ResponseEntity<?>
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection")
+	@ApiOperation(value = "Cache requirements for UPC dependency Detection", 
+			notes = "<b>Functionality</b>: Post all requirements and dependencies in a project as a String to UPC services in order to be cached for dependency detection purposes. <br>"
+					+ "<b>Precondition</b>: The project has been cached in Mallikas.<br>"
+					+ "<b>Postcondition</b>: After successfully caching requirements in UPC service, similarity detection can be carried out.<br>"
+					+ "<b>Exception</b>: Not needed for DKPro."
+					+ "<br><b>Prarameter: </b>"
+					+ "<br>projectId: The project id in Mallikas (e.g., QTWB).")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityAddReqs")
 	public ResponseEntity<?> postRequirementsToUPCSimilarityDetection(@RequestBody String projectId)
@@ -94,7 +100,17 @@ public class DetectionController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post two requirements to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires ids of two requirements being compared, compare (Name-Text-Comments), and the component (use DKPro)")
+	@ApiOperation(value = "Detect similarity between two requirements using UPC Similarity Detection",  
+	notes = "<b>Functionality</b>: All requirements of a given project are posted to UPC Similarity Detection in order to detect similarity between two specified requirements to each other."
+	+ "<br><b>Precondition</b>: The project has been cached in Mallikas. TBD: Does this need caching?"
+	+ "<br><b>Postcondition</b>: TBD Does this store to Mallikas: After successfully detection, the potially detected similarity, given that it is above the treshold, is stored in Mallikas using the similarity dependency type and proposed status."
+	+ "<br><b>Notes:TBD: FIXME This is inefficient method since entire project is fetched from mallikas</b> ."
+	+ "<br><b>Parameters:</b>"
+	+ "<br>compare: what fields are taken into accoung in comparison (Name-Text-Comments-All)."
+	+ "<br>component: The component or algorithm used for comparison (e.g. DKPro)."
+	+ "<br>projectId: The project id in Mallikas (e.g., QTWB)."
+	+ "<br>reqId1: The id of the requirement that is compared to other requirement (reqId2) in the project."
+	+ "<br>reqId2: The id of the requirement that is compared to other requirement (reqId1) in the project.")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityReqReq")
 	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqReq(@RequestParam String compare, @RequestParam String projectId,
@@ -117,8 +133,18 @@ public class DetectionController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post a requirement and a project to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires the id of the requirement being compared to other requirements in the project, compare (Name-Text-Comments), and the component (e.g. DKPro)")
-	@ResponseBody
+	@ApiOperation(value = "Detect similarity of one requirement againsta all other requirements of a project using UPC Similarity Detection",  
+			notes = "<b>Functionality</b>: All requirements of a given project are posted to UPC Similarity Detection in order to detect similarity between one specified requirements in to project to all other requirements. "
+			+ "<br><b>Precondition</b>: The project has been cached in Mallikas. For other than DKPro, the project needs to be cache in UPC, see \"detectSimilarityAddReqs\""
+			+ "<br><b>Postcondition</b>: After successfully detection, the detected new similarities are stored in Mallikas using the similarity dependency type and proposed status."
+			+ "<br><b>Parameters:</b>"
+			+ "<br>compare: what fields are taken into accoung in comparison (Name-Text-Comments-All)."
+			+ "<br>component: The component or algorithm used for comparison (e.g. DKPro)."
+			+ "<br>elements: the maximum number of detected dependencies (e.g. 5)."
+			+ "<br>projectId: The project id in Mallikas."
+			+ "<br>reqId: The id of the requirement that is compared to other requirements in the project."
+			+ "<br>threshold: The minimum score for similarity detection (e.g. 0.3).")
+@ResponseBody
 	@PostMapping(value = "detectSimilarityReqProject")
 	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionReqProject(@RequestParam String compare, @RequestParam String component, @RequestParam String elements, @RequestParam String projectId, @RequestParam String reqId, @RequestParam String threshold)
 			throws IOException{
@@ -140,7 +166,16 @@ public class DetectionController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post a project to UPC Similarity Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Similarity Detection. Also requires project id, component (e.g. DKPro), compare (Name-Text-Comments), threshold (e.g. 0.3) and number of element (e.g. 5)")
+	@ApiOperation(value = "Detect similarity between all requirements of a project using UPC Similarity Detection", 
+			notes = "<b>Functionality</b>: All requirements of a given project are posted  to UPC Similarity Detection in order to detect similarity between all requirements. "
+					+ "<br><b>Precondition</b>: The project has been cached in Mallikas."
+					+ "<br><b>Postcondition</b>: After successfully detection, the detected new similarities are stored in Mallikas using the similarity dependency type and proposed status."
+					+ "<br><b>Parameters:</b>"
+					+ "<br>compare: What fields of a requirement are taken into accoung in comparison (Name-Text-Comments-All)."
+					+ "<br>component: The component or algorithm used for comparison (e.g. DKPro)."
+					+ "<br>elements: The maximum number of detected dependencies (e.g. 5)."
+					+ "<br>projectId: The project id in Mallikas."
+					+ "<br>threshold: The minimum score for similarity (e.g. 0.3).")
 	@ResponseBody
 	@PostMapping(value = "detectSimilarityProject")
 	public ResponseEntity<?> postRequirementsToUPCSimilarityDetectionProject(@RequestParam String compare, @RequestParam String component, @RequestParam String elements, @RequestParam String projectId, @RequestParam String threshold)
@@ -161,10 +196,15 @@ public class DetectionController {
 	 * @return ResponseEntity<?>
 	 * @throws IOException
 	 */
-	@ApiOperation(value = "Post a project to UPC Cross-Reference Detection", notes = "Post requirements and dependencies in a project as a String to UPC for Cross-Reference Detection. Requires projectId")
+	@ApiOperation(value = "Detect cross-references in all requirements of a project using UPC Cross-Reference Detection", 
+			notes = "<b>Functionality</b>: Post all requirements and dependencies in a project as a String to UPC for Cross-Reference Detection. Requires projectId <br>"
+					+ "<b>Precondition</b>: The project has been cached in Mallikas.<br>"
+					+ "<b>Postcondition</b>: After successfully detection, detected cross references are stored in Mallikas as proposed dependencies."
+					+ "<br><b>Prarameter: </b>"
+					+ "<br>projectId: The project id in Mallikas (e.g., QTWB).")
 	@ResponseBody
 	@PostMapping(value = "detectCrossReferenceProject")
-	public ResponseEntity<?> postRequirementsToUPCCrossReferenceDetectionProject(@RequestParam String projectId)
+	public ResponseEntity<?> postRequirementsToUPCCrossReferenceDetectionProject(@RequestParam String projectId )
 			throws IOException {
 
 		String completeAddress = upcCrossReferenceAddress

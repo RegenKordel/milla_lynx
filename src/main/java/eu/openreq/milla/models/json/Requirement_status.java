@@ -15,8 +15,8 @@ public enum Requirement_status {
 	DRAFT,
 	@SerializedName(value="deferred", alternate= {"DEFERRED"})
 	DEFERRED,
-	@SerializedName(value="new", alternate= {"NEW"})
-	NEW,
+	@SerializedName(value="open", alternate= {"OPEN"})
+	OPEN,
 	@SerializedName(value="planned", alternate= {"PLANNED"})
 	PLANNED,
 	@SerializedName(value="completed", alternate= {"COMPLETED"})
