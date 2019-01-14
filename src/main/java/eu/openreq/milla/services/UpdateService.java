@@ -60,7 +60,7 @@ public class UpdateService {
 			Collection<Requirement> requirements = processJsonElementsToRequirements(updatedIssues.getProjectIssues(), projectId, person);
 			this.postRequirementsToMallikas(requirements);
 			this.postDependenciesToMallikas(dependencies);
-		//	this.postReqIdsToMallikas(reqIds, projectId);
+			this.postReqIdsToMallikas(reqIds, projectId);
 			
 			response = new ResponseEntity<>("All updated requirements and dependencies downloaded", HttpStatus.OK);
 		} catch (HttpClientErrorException e) {
@@ -125,7 +125,6 @@ public class UpdateService {
 				Requirement oldReq = receivedReqs.get(0);
 				return oldReq;
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -143,7 +142,7 @@ public class UpdateService {
 			String projectId, Person person) throws Exception {
 		List<Issue> issues = transformer.convertJsonElementsToIssues(elements);
 		Collection<Requirement> requirements = transformer.convertIssuesToJson(issues, projectId, person);
-	//	reqIds = transformer.getRequirementIds();
+		reqIds = transformer.getRequirementIds();
 		dependencies = transformer.getDependencies();
 		return requirements;
 	}
@@ -172,11 +171,20 @@ public class UpdateService {
 		
 	}
 	
+	/**
+	 * Post the ids of the updated requirements to Mallikas so that the Project object can be updated. 
+	 * @param reqIds
+	 * @param projectId
+	 * @return
+	 */
 	private ResponseEntity<?> postReqIdsToMallikas(Collection<String> reqIds, String projectId) {
 		RestTemplate rt = new RestTemplate();
 		ResponseEntity<?> response = null;
+		Map<String, Collection> updatedReqs = new HashMap<String, Collection>();
+		updatedReqs.put(projectId, reqIds);
+		
 		try {	
-			response = rt.postForEntity(mallikasAddress + "updateProjectSpecifiedRequirements/"+projectId, reqIds, Collection.class);
+			response = rt.postForEntity(mallikasAddress + "updateProjectSpecifiedRequirements/"+projectId, updatedReqs, Map.class);
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("Mallikas error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
 		}
