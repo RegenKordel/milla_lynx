@@ -102,23 +102,11 @@ public class FormatTransformerService {
 
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
-			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400")); 
-			
-			if(issueJSON.getAsJsonObject("fields").get("customfield_11100")!=null && !issueJSON.getAsJsonObject("fields").get("customfield_11100").isJsonNull() ) {
-			JsonArray array = gson.fromJson(issueJSON.getAsJsonObject("fields").get("customfield_11100"), JsonArray.class);
-			List<Platform> plats = new ArrayList<Platform>();
-			for(JsonElement elem : array) {
-				JsonObject platJSON = elem.getAsJsonObject();
-				Platform platform = gson.fromJson(platJSON, Platform.class);
-				plats.add(platform);
-			}
-			Platform[] plats2 = new Platform[plats.size()];
-			for(int j = 0; j < plats.size(); j++) {
-				plats2[j] = plats.get(j);
-			}
-			Platforms platforms = new Platforms();
-			platforms.setplatforms(plats2);
-			issue.getFields().setCustomfield11100(platforms);
+			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
+
+			if (issueJSON.getAsJsonObject("fields").get("customfield_11100") != null
+					&& !issueJSON.getAsJsonObject("fields").get("customfield_11100").isJsonNull()) {
+				addPlatformsToIssue(gson, issueJSON, issue);
 			}
 			issues.add(issue);
 			element = null;
@@ -130,6 +118,30 @@ public class FormatTransformerService {
 		System.out.println("Lists done, it took " + durationSec + " second(s) or " + durationMin + " minute(s).");
 
 		return issues;
+	}
+	
+	/**
+	 * Issue's Platforms do not serialize properly without adding them explicitly to issue's fields
+	 * @param gson
+	 * @param issueJSON
+	 * @param issue
+	 */
+	private void addPlatformsToIssue(Gson gson, JsonObject issueJSON, Issue issue) {
+		JsonArray array = gson.fromJson(issueJSON.getAsJsonObject("fields").get("customfield_11100"),
+				JsonArray.class);
+		List<Platform> plats = new ArrayList<Platform>();
+		for (JsonElement elem : array) {
+			JsonObject platJSON = elem.getAsJsonObject();
+			Platform platform = gson.fromJson(platJSON, Platform.class);
+			plats.add(platform);
+		}
+		Platform[] plats2 = new Platform[plats.size()];
+		for (int j = 0; j < plats.size(); j++) {
+			plats2[j] = plats.get(j);
+		}
+		Platforms platforms = new Platforms();
+		platforms.setplatforms(plats2);
+		issue.getFields().setCustomfield11100(platforms);
 	}
 
 	/**
@@ -155,7 +167,7 @@ public class FormatTransformerService {
 		for (Issue issue : issues) {
 			try {
 				Requirement req = new Requirement();
-				req.setId(issue.getKey()); // Murmeli doesn't mind hyphens, hopefully?
+				req.setId(issue.getKey());
 				String name = fixSpecialCharacters(issue.getFields().getSummary());
 				req.setName(name);
 				String text = fixSpecialCharacters(issue.getFields().getDescription());
@@ -177,21 +189,10 @@ public class FormatTransformerService {
 				addCommentsToReq(issue, req, person);
 				addDependencies(issue, req);
 
-				addResolutionToRequirementParts(issue, req);
-				addEnvironmentToRequirementParts(issue, req);
-				addLabelsToRequirementParts(issue, req);
-				addVersionsToRequirementParts(issue, req);
-				addPlatformsToRequirementParts(issue, req);
-				addFixVersionsToRequirementParts(issue, req);
-				addComponentsToRequirementParts(issue, req);
+				addAllRequirementParts(issue, req);
 				updateParentEpic(requirements, issue, req);
-
-				List<Subtask> subtasks = issue.getFields().getSubtasks();
-				if (subtasks != null && !subtasks.isEmpty()) {
-					for (Subtask subtask : subtasks) {
-						addSubtask(req, subtask);
-					}
-				}
+				
+				manageSubtasks(issue, req);
 			} catch (Exception e) {
 				// System.out.println("Error in requirement creation: " + e);
 				e.printStackTrace();
@@ -199,6 +200,37 @@ public class FormatTransformerService {
 		}
 
 		return requirements.values();
+	}
+
+	/**
+	 * Add information stored in RequirementParts to the requirements
+	 * RequirementParts-list
+	 * 
+	 * @param issue
+	 * @param req
+	 */
+	private void addAllRequirementParts(Issue issue, Requirement req) {
+		addResolutionToRequirementParts(issue, req);
+		addEnvironmentToRequirementParts(issue, req);
+		addLabelsToRequirementParts(issue, req);
+		addVersionsToRequirementParts(issue, req);
+		addPlatformsToRequirementParts(issue, req);
+		addFixVersionsToRequirementParts(issue, req);
+		addComponentsToRequirementParts(issue, req);
+	}
+	
+	/**
+	 * Add information on issue's subtasks to requirement's dependencies
+	 * @param issue
+	 * @param req
+	 */
+	private void manageSubtasks(Issue issue, Requirement req) {
+		List<Subtask> subtasks = issue.getFields().getSubtasks();
+		if (subtasks != null && !subtasks.isEmpty()) {
+			for (Subtask subtask : subtasks) {
+				addSubtask(req, subtask);
+			}
+		}
 	}
 
 	/**
@@ -250,7 +282,6 @@ public class FormatTransformerService {
 				jsonComment.setId(comment.getId());
 				jsonComment.setText(comment.getBody());
 				jsonComment.setCommentDoneBy(person);
-				// System.out.println(jsonComment.getCommentDoneBy().getUsername());
 				String date = String.valueOf(comment.getCreated());
 				long created = setCreatedDate(date);
 				jsonComment.setCreated_at(created);
@@ -628,7 +659,6 @@ public class FormatTransformerService {
 			String environmentString;
 			try {
 				environmentString = mapper.writeValueAsString(issue.getFields().getEnvironment());
-			//	System.out.println(environmentString);
 			} catch (JsonProcessingException e) {
 				environmentString = "";
 				e.printStackTrace();
@@ -675,16 +705,13 @@ public class FormatTransformerService {
 		if (issue.getFields().getVersions() != null && !issue.getFields().getVersions().isEmpty()) {
 			List<Version> versions = issue.getFields().getVersions();
 			List<String> names = new ArrayList<String>();
-			for(Version version : versions) {
+			for (Version version : versions) {
 				names.add(version.getName());
 			}
-		//	System.out.println(issue.getFields().getVersions().get(0).getName());
 			ObjectMapper mapper = new ObjectMapper();
 			String versionsString;
 			try {
 				versionsString = mapper.writeValueAsString(names);
-				//System.out.println(versionsString);
-				//versionsString = mapper.writeValueAsString(issue.getFields().getVersions());
 			} catch (JsonProcessingException e) {
 				versionsString = "";
 				e.printStackTrace();
@@ -707,15 +734,13 @@ public class FormatTransformerService {
 		if (issue.getFields().getComponents() != null && !issue.getFields().getComponents().isEmpty()) {
 			List<Component> components = issue.getFields().getComponents();
 			List<String> names = new ArrayList<String>();
-			for(Component component : components) {
+			for (Component component : components) {
 				names.add(component.getName());
 			}
 			ObjectMapper mapper = new ObjectMapper();
 			String componentsString;
 			try {
-			//	componentsString = mapper.writeValueAsString(issue.getFields().getComponents());
 				componentsString = mapper.writeValueAsString(names);
-			//	System.out.println(componentsString);
 			} catch (JsonProcessingException e) {
 				componentsString = "";
 				e.printStackTrace();
@@ -739,7 +764,7 @@ public class FormatTransformerService {
 			ObjectMapper mapper = new ObjectMapper();
 			Platforms platforms = issue.getFields().getCustomfield11100();
 			List<String> labels = new ArrayList<String>();
-			for(Platform platform : platforms.getplatforms()) {
+			for (Platform platform : platforms.getplatforms()) {
 				labels.add(platform.getLabel());
 			}
 			String platformsString;
@@ -770,12 +795,8 @@ public class FormatTransformerService {
 				int number = fixVersions.get(fixVersion.getName()); // This number tells the "release number (or id)" of
 																	// the fix version
 				reqPart.setId(req.getId() + "_" + fixVersion.getId() + "_" + number);
-				// reqPart.setName("FixVersion");
-			//	ObjectMapper mapper = new ObjectMapper();
-			//	String versionString = mapper.writeValueAsString(fixVersion.getDescription());
 				String versionString = fixVersion.getDescription();
 				reqPart.setText(versionString);
-//				req.getRequirementParts().add(reqPart);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
