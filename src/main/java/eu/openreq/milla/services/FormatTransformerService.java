@@ -102,22 +102,31 @@ public class FormatTransformerService {
 
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
-			issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
-
-			if (issueJSON.getAsJsonObject("fields").get("customfield_11100") != null
-					&& !issueJSON.getAsJsonObject("fields").get("customfield_11100").isJsonNull()) {
-				addPlatformsToIssue(gson, issueJSON, issue);
-			}
-			issues.add(issue);
+			addFieldsToIssue(issues, issue, gson, issueJSON);
+			
 			element = null;
 			issue = null;
 		}
 		long end = System.nanoTime();
-		long durationSec = (end - start) / 1000000000;
-		double durationMin = durationSec / 60.0;
-		System.out.println("Lists done, it took " + durationSec + " second(s) or " + durationMin + " minute(s).");
+		printProgress(start, end);
 
 		return issues;
+	}
+	
+	/**
+	 * Adds certain customfields to Jira Issue, without this the fields would be null
+	 * @param issue
+	 * @param gson
+	 * @param issueJSON
+	 */
+	private void addFieldsToIssue(List<Issue> issues, Issue issue, Gson gson, JsonObject issueJSON) {
+		issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
+
+		if (issueJSON.getAsJsonObject("fields").get("customfield_11100") != null
+				&& !issueJSON.getAsJsonObject("fields").get("customfield_11100").isJsonNull()) {
+			addPlatformsToIssue(gson, issueJSON, issue);
+		}
+		issues.add(issue);
 	}
 	
 	/**
@@ -144,6 +153,13 @@ public class FormatTransformerService {
 		issue.getFields().setCustomfield11100(platforms);
 	}
 
+	
+	private void printProgress(long start, long end) {
+		long durationSec = (end - start) / 1000000000;
+		double durationMin = durationSec / 60.0;
+		System.out.println("Lists done, it took " + durationSec + " second(s) or " + durationMin + " minute(s).");
+	}
+	
 	/**
 	 * Converts a List of Jira Issues into OpenReq Json Requirements, and creates a
 	 * List of Requirement Ids (as Strings) that will be given to a Project.
@@ -168,23 +184,16 @@ public class FormatTransformerService {
 			try {
 				Requirement req = new Requirement();
 				req.setId(issue.getKey());
-				String name = fixSpecialCharacters(issue.getFields().getSummary());
-				req.setName(name);
-				String text = fixSpecialCharacters(issue.getFields().getDescription());
-				if (text != null && !text.equals("")) {
-					req.setText(text);
-				}
+				setNameAndTextForReq(issue, req);
+				
 				requirements.put(req.getId(), req);
 				requirementIds.add(req.getId());
-				int priority = Integer.parseInt(issue.getFields().getPriority().getId());
 
-				setRightPriority(req, priority);
-
+				setPriorityForReq(issue, req);
 				setStatusForReq(req, issue.getFields().getStatus().getName());
 				setRequirementType(req, issue.getFields().getIssuetype().getName());
 
-				req.setCreated_at(setCreatedDate(issue.getFields().getCreated()));
-				req.setModified_at(setCreatedDate(issue.getFields().getUpdated()));
+				setDatesToReq(issue, req);
 
 				addCommentsToReq(issue, req, person);
 				addDependencies(issue, req);
@@ -194,12 +203,30 @@ public class FormatTransformerService {
 				
 				manageSubtasks(issue, req);
 			} catch (Exception e) {
-				// System.out.println("Error in requirement creation: " + e);
 				e.printStackTrace();
 			}
 		}
 
 		return requirements.values();
+	}
+	
+	private void setPriorityForReq(Issue issue, Requirement req) {
+		int priority = Integer.parseInt(issue.getFields().getPriority().getId());
+		setRightPriority(req, priority);
+	}
+	
+	private void setNameAndTextForReq(Issue issue, Requirement req) {
+		String name = fixSpecialCharacters(issue.getFields().getSummary());
+		req.setName(name);
+		String text = fixSpecialCharacters(issue.getFields().getDescription());
+		if (text != null && !text.equals("")) {
+			req.setText(text);
+		}
+	}
+	
+	private void setDatesToReq(Issue issue, Requirement req) {
+		req.setCreated_at(setCreatedDate(issue.getFields().getCreated()));
+		req.setModified_at(setCreatedDate(issue.getFields().getUpdated()));
 	}
 
 	/**

@@ -63,12 +63,6 @@ public class FormatTransformerServiceTest {
     	assertEquals(true, true);
     }
     
-//    @Test
-//    public void testFixSpecialCharactersRemovesRSymbol() {
-//    	String name = "registered®";
-//    	assertEquals(true, true);
-//    }
-    
     @Test
     public void creatingAProjectWorks() {
     	String projectId = "TestProject1";

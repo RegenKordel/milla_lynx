@@ -111,8 +111,6 @@ public class MillaController {
 	@PostMapping(value = "sendProjectToMulperi")
 	public ResponseEntity<?> sendProjectToMulperi(@RequestBody String projectId) throws IOException {
 
-		//System.out.println("sendProjectToMulperi called");
-
 		String completeAddress = mallikasAddress + "projectRequirements";
 
 		String reqsInProject = mallikasService.getAllRequirementsInProjectFromMallikas(projectId, completeAddress);
@@ -140,9 +138,6 @@ public class MillaController {
 			throws IOException {
 
 		RestTemplate rt = new RestTemplate();
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		String completeAddress = mallikasAddress + "updateRequirements";
 
@@ -180,9 +175,6 @@ public class MillaController {
 
 		RestTemplate rt = new RestTemplate();
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
 		String completeAddress = mallikasAddress + "updateDependencies";
 
 		Collection<Dependency> dependencyList = dependencies;
@@ -219,9 +211,6 @@ public class MillaController {
 
 		RestTemplate rt = new RestTemplate();
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
 		String completeAddress = mallikasAddress + "project";
 
 		ResponseEntity<?> response = null;
@@ -252,9 +241,6 @@ public class MillaController {
 	@PostMapping(value = "updateDependencies")
 	public ResponseEntity<?> postUpdatedDependenciesToMallikas(@RequestBody String dependencies) throws IOException {
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
 		String completeAddress = mallikasAddress + "updateDependencies";
 
 		String updated = null;
@@ -273,9 +259,6 @@ public class MillaController {
 	@ResponseBody
 	@PostMapping(value = "updateRequirements")
 	public ResponseEntity<?> postUpdatedRequirementsToMallikas(@RequestBody String requirements) throws IOException {
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
 
 		String completeAddress = mallikasAddress + "updateRequirements";
 
@@ -421,7 +404,7 @@ public class MillaController {
 	public ResponseEntity<?> getRequirementsWithResolution(@RequestParam String resolution) throws IOException {
 		String completeAddress = mallikasAddress + "reqsWithResolution";
 
-		String reqsWithResolution = mallikasService.getAllRequirementsWithResolutionFromMallikas(resolution,
+		String reqsWithResolution = mallikasService.getAllRequirementsWithSearchedStringFromMallikas(resolution,
 				completeAddress);
 
 		if (reqsWithResolution == null || reqsWithResolution.equals("")) {
@@ -452,7 +435,7 @@ public class MillaController {
 		
 		String modifiedType = type.toUpperCase();
 
-		String reqsWithDependencyType = mallikasService.getAllRequirementsWithDependencyTypeFromMallikas(modifiedType,
+		String reqsWithDependencyType = mallikasService.getAllRequirementsWithSearchedStringFromMallikas(modifiedType,
 				completeAddress);
 
 		if (reqsWithDependencyType == null || reqsWithDependencyType.equals("")) {
@@ -588,7 +571,7 @@ public class MillaController {
 		return new ResponseEntity<>("Download failed", HttpStatus.BAD_REQUEST);
 	}
 	
-	// Probably works, String might get too large for Swagger
+	// String might get too large for Swagger
 	/**
 	 * Fetch all Requirements and Dependencies from Mallikas
 	 * 

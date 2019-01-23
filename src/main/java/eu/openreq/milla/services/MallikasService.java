@@ -30,7 +30,7 @@ public class MallikasService {
 		try {
 			reqsAndDependencies=rt.getForObject(url, String.class);
 		}
-		catch (HttpClientErrorException e) { //Probably a different exception here? 
+		catch (HttpClientErrorException e) {
 			e.printStackTrace();
 		}
 		
@@ -50,7 +50,7 @@ public class MallikasService {
 		try {
 			req = rt.postForObject(url, id, String.class);	
 		}
-		catch (HttpClientErrorException e) { //Probably a different exception here? 
+		catch (HttpClientErrorException e) {
 			System.out.println("Error " + e);
 			e.printStackTrace();
 		}
@@ -65,13 +65,13 @@ public class MallikasService {
 	 */
 	public String getSelectedRequirementsFromMallikas(Collection<String> ids, String url) {
 		
-		RestTemplate rt = new RestTemplate();	//Same line of code in every method, perhaps create a constructor?
+		RestTemplate rt = new RestTemplate();
 		String reqs = null;
 		
 		try {
 			reqs= rt.postForObject(url, ids, String.class);
 		}
-		catch (HttpClientErrorException e) { //Probably a different exception here? 
+		catch (HttpClientErrorException e) { 
 			System.out.println("Error " + e);
 			e.printStackTrace();
 		}
@@ -90,33 +90,12 @@ public class MallikasService {
 		String reqs = null;
 		try {
 			reqs = rt.postForObject(url, projectId, String.class);		
-		} catch (HttpClientErrorException e) { //Probably a different exception here? 
+		} catch (HttpClientErrorException e) {
 			System.out.println("Error " + e);
 			e.printStackTrace();
 		}
 		return reqs;
 	}
-	
-//	/**
-//	 * Send request to Mallikas to get a String (List of Requirements that share the same classifier (so they belong to the same Qt Jira component) and their Dependencies)
-//	 * @param classifierId id of the Component/Classifier
-//	 * @param url the address in Mallikas
-//	 * @return String containing all requirements and their dependencies in the same component
-//	 */
-//	public String getAllRequirementsWithClassifierFromMallikas(String classifierId, String url) {
-//
-//		RestTemplate rt = new RestTemplate();	
-//		String reqs = null;
-//		
-//		try {
-//			reqs = rt.postForObject(url, classifierId, String.class);
-//			
-//		} catch (HttpClientErrorException e) { //Probably a different exception here? 
-//			System.out.println("Error " + e);
-//			e.printStackTrace();
-//		}
-//		return reqs;
-//	}
 		
 	/**
 	 * Post the searched type and status to Mallikas
@@ -135,33 +114,26 @@ public class MallikasService {
 		try {	
 			reqs = rt.postForObject(url, whole, String.class);
 			
-		} catch (HttpClientErrorException e) { //Probably a different exception here? 
+		} catch (HttpClientErrorException e) {
 			System.out.println("Error " + e);
 			e.printStackTrace();
 		}
 		return reqs;
 	}
-	
-	public String getAllRequirementsWithResolutionFromMallikas(String resolution, String url) {
+
+	/**
+	 * Can be used to search requirements with a certain Resolution or Dependency type
+	 * @param searched
+	 * @param url
+	 * @return
+	 */
+	public String getAllRequirementsWithSearchedStringFromMallikas(String searched, String url) {
 		RestTemplate rt = new RestTemplate();	
 		String reqs = null;
 		try {	
-			reqs = rt.postForObject(url, resolution, String.class);
+			reqs = rt.postForObject(url, searched, String.class);
 			
-		} catch (HttpClientErrorException e) { //Probably a different exception here? 
-			System.out.println("Error " + e);
-			e.printStackTrace();
-		}
-		return reqs;
-	}
-	
-	public String getAllRequirementsWithDependencyTypeFromMallikas(String type, String url) {
-		RestTemplate rt = new RestTemplate();	
-		String reqs = null;
-		try {	
-			reqs = rt.postForObject(url, type, String.class);
-			
-		} catch (HttpClientErrorException e) { //Probably a different exception here? 
+		} catch (HttpClientErrorException e) {
 			System.out.println("Error " + e);
 			e.printStackTrace();
 		}
