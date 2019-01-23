@@ -21,9 +21,6 @@ public class TestingController {
 	@Value("${milla.mulperiAddress}")
     private String mulperiAddress;
 	
-	@Autowired
-	MillaController millaController;
-	
 	@RequestMapping(value = "/example/gui", method = RequestMethod.GET)
 	public String exampleGUI(Model model) {
 
