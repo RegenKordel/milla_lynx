@@ -16,6 +16,7 @@ import eu.openreq.milla.services.ImportService;
 import eu.openreq.milla.services.MallikasService;
 import eu.openreq.milla.services.MulperiService;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import springfox.documentation.annotations.ApiIgnore;
@@ -75,10 +76,15 @@ public class QtController {
 			@ApiResponse(code = 400, message = "Failure, ex. model not found"), 
 			@ApiResponse(code = 409, message = "Conflict")}) 
 	@GetMapping(value = "/getConsistencyCheckForRequirement")
-	public ResponseEntity<String> getConsistencyCheckForRequirement(@RequestParam List<String> requirementId, @RequestParam
-			(required = false) Integer layerCount, @RequestParam(required = false) boolean analysisOnly, 
-			@RequestParam(required = false, defaultValue = "0") Integer timeOut, 
+	public ResponseEntity<String> getConsistencyCheckForRequirement(@RequestParam List<String> requirementId, 
+			@RequestParam (required = false) Integer layerCount, 
+			@ApiParam(name = "analysisOnly", value = "If true, only analysis of consistency is performed and diagnoses are omitted. If false, Diagnosis is performed in case of inconsistency.")
+			@RequestParam(required = false) boolean analysisOnly,
+			@ApiParam(name = "timeOut", value = "Time in milliseconds allowed for each diagnosis. If the timeOut is exceeded, diagnosis fails and output will include 'Timeout' and 'Timeout_msg' fields. If 0 (default), there is no timeout for diagnoses.")
+			@RequestParam(required = false, defaultValue = "0") int timeOut,
+			@ApiParam(name = "omitCrossProject", value = "If 'true' and 'description' field of a relationship includes 'crossProjectTrue', the relationship is not taken into account in analysis. Adds 'RelationshipsIgnored' and 'RelationshipsIgnored_msg' fields to output.")
 			@RequestParam(required = false) boolean omitCrossProject,
+			@ApiParam(name = "omitReqRelDiag", value = "If true, the third diagnosis (both requirements and relationships) is omitted.")
 			@RequestParam(required = false) boolean omitReqRelDiag) throws IOException {
 		return qtService.getConsistencyCheckForRequirement(requirementId, layerCount, 
 				analysisOnly, timeOut, omitCrossProject, omitReqRelDiag);
