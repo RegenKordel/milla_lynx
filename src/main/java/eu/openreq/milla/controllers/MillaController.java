@@ -295,7 +295,6 @@ public class MillaController {
 	 * @return
 	 * @throws IOException
 	 */
-	@ApiIgnore
 	@ApiOperation(value = "Import custom project", notes = "Import a custom project from OpenReq JSON string")
 	@PostMapping(value = "importProjectFromString")
 	public ResponseEntity<String> importProjectFromString(@RequestBody String jsonString, @RequestParam(defaultValue = "true") boolean sendToMulperi) throws IOException {
