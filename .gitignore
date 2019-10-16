@@ -31,4 +31,5 @@ bin/
 *.log
 
 *key.txt
-*key.txt2
+*key.txt*
+*.db
