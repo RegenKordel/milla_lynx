@@ -146,9 +146,6 @@ public class QtService {
 		params.setRequirementIds(requirementIds);
 		params.setProposedOnly(false);
 		params.setIncludeRejected(true);
-		if (maxResults!=null) {
-			params.setMaxDependencies(maxResults);
-		}
 		
 		List<Dependency> proposed = new ArrayList<Dependency>();		
 		List<String> acceptedAndRejectedIds = new ArrayList<String>();
@@ -255,11 +252,11 @@ public class QtService {
 		
 		try {
 			parser = new OpenReqJSONParser(requirementJson);
-			results.add("dependencies", gson.toJsonTree(topDependencies));
 			results.add("requirements", gson.toJsonTree(parser.getRequirements()));
-		} catch (com.google.gson.JsonSyntaxException e) {
-			System.out.println("Couldn't get requirements from Mallikas");
+		} catch (com.google.gson.JsonSyntaxException|java.lang.NullPointerException e) {
+			results.add("requirements", new JsonArray());
 		}
+		results.add("dependencies", gson.toJsonTree(topDependencies));
 		
 		return new ResponseEntity<>(results.toString(), HttpStatus.OK);
 	}
