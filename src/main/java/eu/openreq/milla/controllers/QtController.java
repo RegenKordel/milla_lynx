@@ -48,7 +48,7 @@ public class QtController {
 			@ApiResponse(code = 200, message = "Success, returns JSON model"),
 			@ApiResponse(code = 400, message = "Failure, ex. model not found"), 
 			@ApiResponse(code = 409, message = "Conflict")}) 
-	@GetMapping(value = "/getTransitiveClosureOfRequirement")
+	@GetMapping(value = "getTransitiveClosureOfRequirement")
 	public ResponseEntity<String> getTransitiveClosureOfRequirement(@RequestParam List<String> requirementId, 
 			@RequestParam(required = false) Integer layerCount) throws IOException {
 		return qtService.getTransitiveClosureOfRequirement(requirementId, layerCount);
@@ -61,7 +61,7 @@ public class QtController {
 			@ApiResponse(code = 200, message = "Success, returns JSON model"),
 			@ApiResponse(code = 400, message = "Failure, ex. model not found"), 
 			@ApiResponse(code = 409, message = "Conflict")}) 
-	@GetMapping(value = "/getDependenciesOfRequirement")
+	@GetMapping(value = "getDependenciesOfRequirement")
 	public ResponseEntity<String> getDependenciesOfRequirement(@RequestParam String requirementId, 
 			@RequestParam(required = false) Double scoreThreshold, 
 			@RequestParam(required = false) Integer maxResults) throws IOException {
@@ -75,7 +75,7 @@ public class QtController {
 			@ApiResponse(code = 200, message = "Success, returns JSON model"),
 			@ApiResponse(code = 400, message = "Failure, ex. model not found"), 
 			@ApiResponse(code = 409, message = "Conflict")}) 
-	@GetMapping(value = "/getConsistencyCheckForRequirement")
+	@GetMapping(value = "getConsistencyCheckForRequirement")
 	public ResponseEntity<String> getConsistencyCheckForRequirement(@RequestParam List<String> requirementId, 
 			@RequestParam (required = false) Integer layerCount, 
 			@ApiParam(name = "analysisOnly", value = "If true, only analysis of consistency is performed and diagnoses are omitted. If false, Diagnosis is performed in case of inconsistency.")
@@ -96,7 +96,7 @@ public class QtController {
 			@ApiResponse(code = 200, message = "Success, returns JSON model"),
 			@ApiResponse(code = 400, message = "Failure, ex. model not found"), 
 			@ApiResponse(code = 409, message = "Conflict")}) 
-	@GetMapping(value = "/getProposedDependenciesOfRequirement")
+	@GetMapping(value = "getProposedDependenciesOfRequirement")
 	@ApiIgnore
 	public ResponseEntity<String> getProposedDependenciesOfRequirement(@RequestParam List<String> requirementId, 
 			@RequestParam(required = false, defaultValue = "20") Integer maxResults) throws IOException {
@@ -111,7 +111,7 @@ public class QtController {
 			@ApiResponse(code = 200, message = "Success, returns JSON model"),
 			@ApiResponse(code = 400, message = "Failure, ex. model not found"), 
 			@ApiResponse(code = 409, message = "Conflict")}) 
-	@GetMapping(value = "/getTopProposedDependenciesOfRequirement")
+	@GetMapping(value = "getTopProposedDependenciesOfRequirement")
 	public ResponseEntity<String> getTopProposedDependencies(@RequestParam List<String> requirementId, 
 			@RequestParam(required = false, defaultValue = "20") Integer maxResults) throws IOException {
 		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults);
@@ -186,7 +186,7 @@ public class QtController {
 	}
 
 	@ApiIgnore
-	@PostMapping(value = "/transitiveClosureWithUpdate")
+	@PostMapping(value = "transitiveClosureWithUpdate")
 	public ResponseEntity<String> transitiveClosureWithUpdate(@RequestParam String requirementId, 
 			@RequestParam String projectId, @RequestParam(required = false) Integer layerCount) throws Exception {
 		return qtService.transitiveClosureWithUpdate(requirementId, projectId, layerCount);

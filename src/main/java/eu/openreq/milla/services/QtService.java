@@ -134,7 +134,7 @@ public class QtService {
 	
 	/**
 	 * Bloated method where the proposed are fetched from services and Mallikas and their scores are summed up
-	 * @param requirementId
+	 * @param requirementIds
 	 * @param maxResults
 	 * @return
 	 * @throws IOException

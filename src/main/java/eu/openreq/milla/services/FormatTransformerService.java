@@ -392,7 +392,6 @@ public class FormatTransformerService {
 	 * Adds children ("subRequirements") to a Requirement, Subtasks are received
 	 * from an Issue, and converted into Requirements.
 	 * 
-	 * @param requirements
 	 * @param req
 	 * @param subtask
 	 */
@@ -455,15 +454,11 @@ public class FormatTransformerService {
 		case "initiative":
 			req.setRequirement_type(Requirement_type.INITIATIVE);
 			break;
-		case "sub-task":
-			req.setRequirement_type(Requirement_type.TASK);
-			break;
 		case "suggestion":
 			req.setRequirement_type(Requirement_type.ISSUE);
 			break;
 		case "task":
-			req.setRequirement_type(Requirement_type.TASK);
-			break;
+		case "sub-task":
 		case "technical task":
 			req.setRequirement_type(Requirement_type.TASK);
 			break;
@@ -493,55 +488,27 @@ public class FormatTransformerService {
 
 		switch (status.toLowerCase()) {
 		case "reported":
+		case "reopened":
+		case "open":
+		case "todo":
+		case "accepted":
 			req.setStatus(Requirement_status.SUBMITTED); // SUBMITTED = Todo in Qt system
 			break;
-		case "reopened":
-			req.setStatus(Requirement_status.SUBMITTED);
-			break;
-		case "open":
-			req.setStatus(Requirement_status.SUBMITTED);
-			break;
-		case "todo":
-			req.setStatus(Requirement_status.SUBMITTED);
-			break;
-		case "accepted":
-			req.setStatus(Requirement_status.SUBMITTED);
-			break;
 		case "blocked":
-			req.setStatus(Requirement_status.DEFERRED); // DEFERRED = Stuck in Qt system
-			break;
 		case "need more info":
-			req.setStatus(Requirement_status.DEFERRED);
-			break;
 		case "waiting for 3rd party":
-			req.setStatus(Requirement_status.DEFERRED);
-			break;
 		case "on hold":
-			req.setStatus(Requirement_status.DEFERRED);
-			break;
 		case "in progress":
+		case "implemented":
 			req.setStatus(Requirement_status.ACCEPTED); // ACCEPTED = In progress in Qt system
 			break;
-		case "implemented":
-			req.setStatus(Requirement_status.ACCEPTED);
-			break;
 		case "withdrawn":
-			req.setStatus(Requirement_status.COMPLETED); // COMPLETED = Done in Qt system
-			break;
 		case "verified":
-			req.setStatus(Requirement_status.COMPLETED);
-			break;
 		case "closed":
-			req.setStatus(Requirement_status.COMPLETED);
-			break;
 		case "resolved":
-			req.setStatus(Requirement_status.COMPLETED);
-			break;
 		case "rejected":
-			req.setStatus(Requirement_status.COMPLETED);
-			break;
 		case "done":
-			req.setStatus(Requirement_status.COMPLETED);
+			req.setStatus(Requirement_status.COMPLETED); // COMPLETED = Done in Qt system
 			break;
 		}
 
@@ -573,8 +540,6 @@ public class FormatTransformerService {
 			dependency.setDependency_type(Dependency_type.REPLACES);
 			break;
 		case "work breakdown":
-			dependency.setDependency_type(Dependency_type.REFINES);
-			break;
 		case "test":
 			dependency.setDependency_type(Dependency_type.REFINES);
 			break;
@@ -856,7 +821,7 @@ public class FormatTransformerService {
 	 * 
 	 * @param projectId
 	 *            identifier of a Qt Jira project
-	 * @param requirementIds
+	 * @param reqIds
 	 *            List of Requirement ids
 	 * @return a new Project
 	 */

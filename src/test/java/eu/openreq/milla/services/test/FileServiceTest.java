@@ -55,7 +55,7 @@ public class FileServiceTest {
     	Path newFilePath = Paths.get("logs/testing.log");
         Files.createFile(newFilePath);
         
-    	fs.setLogFilePath("logs/testing.log");
+    	fs.setDependencyLogFilePath("logs/testing.log");
     	String result = fs.logDependencies(dependencies);
     	
     	Files.delete(newFilePath);

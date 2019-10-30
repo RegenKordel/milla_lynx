@@ -72,7 +72,7 @@ public class OAuthService {
 			
 			OAuthCredentialsResponse response = getTemp.execute();
 
-			System.out.println("Request token: " + response.token);
+			/* System.out.println("Request token: " + response.token);*/
 
 			String authorizationURL = JIRA_BASE_URL + AUTHORIZATION_URL + "?oauth_token=" + response.token;
 
@@ -107,8 +107,7 @@ public class OAuthService {
 			ACCESS_TOKEN = response.token;
 			SECRET = response.tokenSecret;
 
-			System.out.println("Access token: " + response.token);
-
+			/*System.out.println("Access token: " + response.token);*/
 			parameters = new OAuthParameters();
 			parameters.consumerKey = CONSUMER_KEY;
 			parameters.signer = signer;
