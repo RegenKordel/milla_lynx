@@ -280,7 +280,7 @@ public class MillaController {
 			notes = "Test if successfully authorized for Jira, returns some user statistics on success",
 			response = String.class)
 	@GetMapping(value = "testJiraAuthorization")
-	public ResponseEntity<String> test() {
+	public ResponseEntity<String> testAuthorization() {
 		if (!authService.isInitialized()) {
 			return new ResponseEntity<String>("Not authorized for Jira", HttpStatus.UNAUTHORIZED);
 		}
@@ -299,5 +299,11 @@ public class MillaController {
 	@PostMapping(value = "importProjectFromString")
 	public ResponseEntity<String> importProjectFromString(@RequestBody String jsonString, @RequestParam(defaultValue = "true") boolean sendToMulperi) throws IOException {
 		return importService.importFromString(jsonString, sendToMulperi);
+	}
+
+	@ApiIgnore
+	@GetMapping(value = "test")
+	public ResponseEntity<String> test() {
+		return new ResponseEntity<>("Test endpoint", HttpStatus.OK);
 	}
 }

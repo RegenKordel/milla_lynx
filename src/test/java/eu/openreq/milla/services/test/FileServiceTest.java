@@ -1,5 +1,10 @@
 package eu.openreq.milla.services.test;
 
+import eu.openreq.milla.MillaApplication;
+import eu.openreq.milla.models.json.Dependency;
+import eu.openreq.milla.models.json.Dependency_status;
+import eu.openreq.milla.services.FileService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,22 +12,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import static org.junit.Assert.assertEquals;
-
-import eu.openreq.milla.MillaApplication;
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Dependency_status;
-import eu.openreq.milla.services.FileService;
 
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=MillaApplication.class)
@@ -48,20 +50,38 @@ public class FileServiceTest {
 		dep2.setId("test2");
 		dep2.setStatus(Dependency_status.REJECTED);
 		dependencies = Arrays.asList(dep, dep2);
+
+		Path newFilePath = Paths.get("logs/testing.log");
+		Files.write(newFilePath, "".getBytes(), StandardOpenOption.CREATE);
+
     }
+
+    @After
+	public void close() throws Exception {
+		Path filePath = Paths.get("logs/testing.log");
+    	Files.delete(filePath);
+	}
 
     @Test
     public void testDependencyLogSuccess() throws Exception {
-    	Path newFilePath = Paths.get("logs/testing.log");
-        Files.createFile(newFilePath);
-        
     	fs.setDependencyLogFilePath("logs/testing.log");
     	String result = fs.logDependencies(dependencies);
-    	
-    	Files.delete(newFilePath);
-    	
+
     	assertEquals("Success", result);
     }
-    
-    
+
+	@Test
+	public void testRequestLogSuccess() throws Exception {
+		fs.setRequestLogFilePath("logs/testing.log");
+
+		MockHttpServletRequest request = new MockHttpServletRequest();
+
+		request.setRequestURI("/testUri");
+		request.addParameter("TEST", "VALUE");
+
+		String result = fs.logRequests(request);
+
+		assertEquals("Success", result);
+	}
+
 }

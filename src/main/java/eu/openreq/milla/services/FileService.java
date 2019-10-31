@@ -20,7 +20,7 @@ public class FileService {
 	private String dependencyLog;
 
 	@Value("${milla.requestLogFile}")
-	private String restLog;
+	private String requestLog;
 
 	public String logDependencies(Collection<Dependency> dependencies) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(dependencyLog, true))) {
@@ -44,9 +44,9 @@ public class FileService {
 	}
 
 	public String logRequests(HttpServletRequest httpRequest) {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(restLog, true))) {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(requestLog, true))) {
 			String uri = httpRequest.getRequestURI();
-			String line = "\n" + uri.substring(1, uri.length()) + " | ";
+			String line = uri.substring(1, uri.length()) + " | ";
 			line += writeParamsToLine(httpRequest.getParameterMap());
 			writer.append(line);
 			writer.close();
@@ -69,15 +69,13 @@ public class FileService {
 			line = line.substring(0, line.length() - 1) + " | ";
 		}
 
-		line = line.substring(0, line.length() - 2);
+		line = line.substring(0, line.length() - 2) + "\n";
 
 		return line;
 	}
 
-	public void setDependencyLogFilePath(String path) {
-		this.dependencyLog = path;
-	}
+	public void setDependencyLogFilePath(String path) { this.dependencyLog = path; }
 
-	public void setRestLogFilePath(String restLog) { this.restLog = restLog; }
+	public void setRequestLogFilePath(String requestLog) { this.requestLog = requestLog; }
 
 }

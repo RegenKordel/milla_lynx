@@ -17,7 +17,7 @@ public class RequestLoggingFilterConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(millaRequestInterceptor).addPathPatterns("/get*","/update*");
+        registry.addInterceptor(millaRequestInterceptor).addPathPatterns("/get*","/update*","/test");
     }
 }
 
