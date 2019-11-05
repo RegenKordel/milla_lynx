@@ -141,7 +141,7 @@ public class DetectionController {
 	@ApiOperation(value = "Post a project to ORSI cluster computation")
 	@PostMapping("projectToORSI")
 	public ResponseEntity<String> postProjectToORSI(@RequestParam String projectId, @RequestParam(required = false, 
-			defaultValue = "0.3") double threshold) throws IOException {
+			defaultValue = "0.7") double threshold) throws IOException {
 		String jsonString;
 		
 		if (projectId.equals("ALL")) {
@@ -156,7 +156,7 @@ public class DetectionController {
 	
 	/**
 	 * Post accepted/rejected dependencies to ORSI
-	 * @param projectId
+	 * @param dependencies
 	 * @return
 	 * @throws IOException
 	 */
