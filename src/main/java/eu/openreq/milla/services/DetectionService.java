@@ -115,8 +115,7 @@ public class DetectionService {
 	 * Retrieve the requirements from Mallikas based either on the given requirement IDs or project ID,
 	 * then send them to the similarity detection server. A URL has to be provided for 
 	 * the server to send the dependencies calculated. (Here the response only tells whether the sending was successful)
-	 * @param projectId
-	 * @param ids
+	 * @param jsonString
 	 * @param url
 	 * @return Response from the server, which contains the id of the request if successful. 
 	 * @throws IOException
@@ -185,16 +184,15 @@ public class DetectionService {
 		String completeAddress = upcSimilarityAddress + "/upc/similarity-detection/BuildClusters";
 		
 		Map<String, String> formParams = new HashMap<>();
-		
-		formParams.put("url", receiveAddress);
+
 		formParams.put("threshold", threshold + "");
 		formParams.put("organization", "Qt");
 		formParams.put("compare", "true");
-	
+		formParams.put("url", receiveAddress);
+
 		ResponseEntity<String> response = postFileToService(projectId, jsonString, formParams, completeAddress);
 	
-		String results = "Response from " + receiveAddress + " \n" + response.toString() + "\n\n";
-		
+		String results = "Response from ORSI: \n" + response.toString() + "\n\n";
 		
 		return new ResponseEntity<String>(results, HttpStatus.OK);
 	

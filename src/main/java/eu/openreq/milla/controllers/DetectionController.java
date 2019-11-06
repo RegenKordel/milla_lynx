@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Queue;
 
+import com.google.api.client.json.Json;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -134,8 +135,8 @@ public class DetectionController {
 	
 	/**
 	 * Fetch a project from Mallikas and post it to ORSI
-	 * @param projectId
 	 * @return
+	 * @param projectId
 	 * @throws IOException
 	 */
 	@ApiOperation(value = "Post a project to ORSI cluster computation")
@@ -174,19 +175,9 @@ public class DetectionController {
 	 */
 	@ApiIgnore
 	@PostMapping(value = "receiveAddReqResponse")
-	public ResponseEntity<String> receiveAddReqResponse(@RequestParam MultipartFile result)
-			throws IOException{
-		
-		System.out.println("Received response");
-		String content = new String(result.getBytes());
-
-		try {
-			JsonObject object = new Gson().fromJson(content, JsonObject.class);
-			System.out.println(object.toString());
-		} catch (JSONException e) {
-			System.out.println(e.getMessage());
-		}
-		
+	public ResponseEntity<String> receiveAddReqResponse(@RequestBody String result)
+			throws IOException {
+		System.out.println("ORSI processing response:\n" + result);
 		return new ResponseEntity<String>("Response received", HttpStatus.OK);
 	}
 	
