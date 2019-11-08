@@ -1,5 +1,6 @@
-package eu.openreq.milla;
+package eu.openreq.milla.test;
 
+import eu.openreq.milla.MillaApplication;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
