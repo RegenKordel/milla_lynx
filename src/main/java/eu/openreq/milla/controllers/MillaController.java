@@ -172,14 +172,6 @@ public class MillaController {
 	 * @return ResponseEntity<String>
 	 * @throws IOException
 	 */
-//	@ApiOperation(value = "Fetch all requirements including their dependencies from the Mallikas database in OpenReq JSON format.", 
-//			notes = "<b>Functionality</b>: Fetch all requirements from Mallikas database in OpenReq JSON requirement and dependency format. "
-//					+ "Project object is not included."
-//					+ "This is practically an export of the entire database and, thus, dataset. "
-//					+ "In Swagger, the data might get too large to be shown in the response field."
-//					+ "For large database, Milla and Mallikas java VM need extra memory."
-//			+ "<br><b>Precondition</b>: There is at least one project and requirement cached in Mallikas.<br>"
-//			+ "<b>Postcondition</b>: Requirements and dependencies in OpenReq JSON are fetched.<br>")
 	@GetMapping(value = "allRequirements")
 	@ApiIgnore
 	public ResponseEntity<?> getAllRequirements() throws IOException {

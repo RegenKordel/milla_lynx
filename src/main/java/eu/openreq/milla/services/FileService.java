@@ -9,7 +9,9 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 
@@ -22,16 +24,16 @@ public class FileService {
 	@Value("${milla.requestLogFile}")
 	private String requestLog;
 
+	private SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
 	public String logDependencies(Collection<Dependency> dependencies) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(dependencyLog, true))) {
 			for (Dependency dep : dependencies) {
 				if (dep.getStatus()!=null && dep.getStatus().equals(Dependency_status.ACCEPTED)) {
-					String acceptedString = "ACCEPTED | " + dep.getFromid() + "_" + dep.getToid() + " | " + dep.getDependency_type() + "\n";
-					writer.append(acceptedString);
+					writer.append(dependencyLogString("ACCEPTED", dep));
 				}
 				if (dep.getStatus()!=null && dep.getStatus().equals(Dependency_status.REJECTED)) {
-					String rejectedString = "REJECTED | " + dep.getFromid() + "_" + dep.getToid() + " | " + dep.getDependency_type() + "\n";
-					writer.append(rejectedString);
+					writer.append(dependencyLogString("REJECTED", dep));
 				}
 			}
 			writer.close();	
@@ -46,7 +48,7 @@ public class FileService {
 	public String logRequests(HttpServletRequest httpRequest) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(requestLog, true))) {
 			String uri = httpRequest.getRequestURI();
-			String line = uri.substring(1, uri.length()) + " | ";
+			String line = dateString() + " | " + uri.substring(1, uri.length()) + " | ";
 			line += writeParamsToLine(httpRequest.getParameterMap());
 			writer.append(line);
 			writer.close();
@@ -57,7 +59,15 @@ public class FileService {
 		}
 	}
 
-	public String writeParamsToLine(Map<String, String[]> parameterMap) {
+	private String dependencyLogString(String type, Dependency dep) {
+		String logString = dateString() + " | " + type + " | " + dep.getFromid() + "_" + dep.getToid() + " | " + dep.getDependency_type();
+		for (String desc : dep.getDescription()) {
+			logString += " | " + desc;
+		}
+		return logString + "\n";
+	}
+
+	private String writeParamsToLine(Map<String, String[]> parameterMap) {
 		String line = "";
 
 		for (String key : parameterMap.keySet()) {
@@ -72,6 +82,11 @@ public class FileService {
 		line = line.substring(0, line.length() - 2) + "\n";
 
 		return line;
+	}
+
+	private String dateString() {
+		Date date = new Date();
+		return formatter.format(date);
 	}
 
 	public void setDependencyLogFilePath(String path) { this.dependencyLog = path; }
