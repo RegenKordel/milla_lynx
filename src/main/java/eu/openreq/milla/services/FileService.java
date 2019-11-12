@@ -61,7 +61,7 @@ public class FileService {
 
 	private String dependencyLogString(String type, Dependency dep) {
 		String logString = dateString() + " | " + type + " | " + dep.getFromid() + "_" + dep.getToid() + " | " + dep.getDependency_type();
-		for (String desc : dep.getDescription()) {
+		if (dep.getDescription()!=null) for (String desc : dep.getDescription()) {
 			logString += " | " + desc;
 		}
 		return logString + "\n";

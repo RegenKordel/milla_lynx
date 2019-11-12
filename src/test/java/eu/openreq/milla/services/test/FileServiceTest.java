@@ -45,6 +45,7 @@ public class FileServiceTest {
     	Dependency dep = new Dependency();
 		dep.setId("test");
 		dep.setStatus(Dependency_status.ACCEPTED);
+		dep.setDescription(Arrays.asList("Description goes here"));
 		
 		Dependency dep2 = new Dependency();
 		dep2.setId("test2");

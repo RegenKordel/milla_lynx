@@ -239,15 +239,12 @@ public class DetectionControllerTest {
 	
 	@Test
 	public void addReqResponseTest() throws Exception {
-		
-		MockMultipartFile file = new MockMultipartFile("result", "", "application/json", 
-				"{\"json\":\"test\"}".getBytes());
-		
-		mockMvc.perform(MockMvcRequestBuilders.fileUpload("/receiveAddReqResponse")
-				.file(file))
-				.andExpect(status().isOk());
+		mockMvc.perform(post("/receiveAddReqResponse")
+			.content("Test string"))
+			.andExpect(status().isOk());
+		mockServer.verify();
 	}
-	
+
 	@Test
 	public void acceptedAndRejectedTest() throws Exception {
   
