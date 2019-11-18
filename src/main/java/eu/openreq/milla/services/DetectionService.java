@@ -72,25 +72,26 @@ public class DetectionService {
 		}	
 	}
 	
-	public List<Dependency> getDetectedFromServices(String requirementId) {
+	public List<Dependency> getDetectedFromServices(String requirementId, String additionalParams) {
 		List<Dependency> dependencies = new ArrayList<>();
-		dependencies.addAll(getDetectedByGetOrPost(requirementId, Arrays.asList(detectionGetAddresses), false));
-		dependencies.addAll(getDetectedByGetOrPost(requirementId, Arrays.asList(detectionGetPostAddresses), true));
+		dependencies.addAll(getDetectedByGetOrPost(requirementId, Arrays.asList(detectionGetAddresses), false, additionalParams));
+		dependencies.addAll(getDetectedByGetOrPost(requirementId, Arrays.asList(detectionGetPostAddresses), true, additionalParams));
 
 		return dependencies;
 	}
 	
-	private List<Dependency> getDetectedByGetOrPost(String requirementId, List<String> urls, boolean byPost) {
+	private List<Dependency> getDetectedByGetOrPost(String requirementId, List<String> urls, boolean byPost, String additionalParams) {
 		List<Dependency> dependencies = new ArrayList<>();
 
 		for (String url : urls) {
 			String responseBody = "No response";
+			url = url + requirementId + additionalParams;
 			try {
 				ResponseEntity<String> serviceResponse;
 				if (byPost) {
-					serviceResponse = rt.postForEntity(url + requirementId, null, String.class);
+					serviceResponse = rt.postForEntity(url, null, String.class);
 				} else {
-					serviceResponse = rt.getForEntity(url + requirementId, String.class);
+					serviceResponse = rt.getForEntity(url, String.class);
 				}
 				
 				responseBody = serviceResponse.getBody();
@@ -118,21 +119,20 @@ public class DetectionService {
 	 * @param jsonString
 	 * @param url
 	 * @return Response from the server, which contains the id of the request if successful. 
-	 * @throws IOException
 	 */
-	public ResponseEntity<String> postStringToService(String jsonString, String url) {
+	private ResponseEntity<String> postStringToService(String jsonString, String url) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		HttpEntity<String> entity = new HttpEntity<String>(jsonString, headers);
+		HttpEntity<String> entity = new HttpEntity<>(jsonString, headers);
 		try {
 			ResponseEntity<String> response = rt.postForEntity(url, entity, String.class);	
 			if(response==null) {
-				return new ResponseEntity<String>("No response", HttpStatus.NOT_FOUND);
+				return new ResponseEntity<>("No response", HttpStatus.NOT_FOUND);
 			}
-			return new ResponseEntity<String>(response.getBody() + "", response.getStatusCode());
+			return new ResponseEntity<>(response.getBody() + "", response.getStatusCode());
 		} catch (Exception e) {
-			return new ResponseEntity<String>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
@@ -145,7 +145,8 @@ public class DetectionService {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public ResponseEntity<String> postFileToService(String name, String file, Map<String, String> formParams, String completeAddress) throws UnsupportedEncodingException {
+	public ResponseEntity<String> postFileToService(String name, String file, Map<String, String> formParams,
+			String completeAddress) throws UnsupportedEncodingException {
 		
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
@@ -171,7 +172,7 @@ public class DetectionService {
 		
 		try {
 			ResponseEntity<String> response = rt.postForEntity(completeAddress, entity, String.class);
-			return new ResponseEntity<String>(response.getBody() + "", HttpStatus.ACCEPTED);			
+			return new ResponseEntity<>(response.getBody() + "", HttpStatus.ACCEPTED);
 		} catch (HttpClientErrorException e) {
 			return new ResponseEntity<>("Error:\n\n" + e.getResponseBodyAsString(), e.getStatusCode());
 		}

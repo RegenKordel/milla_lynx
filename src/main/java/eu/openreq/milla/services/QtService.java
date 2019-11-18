@@ -139,9 +139,9 @@ public class QtService {
 	 * @return
 	 * @throws IOException
 	 */
-	public ResponseEntity<String> sumScoresAndGetTopProposed(List<String> requirementIds, 
-			Integer maxResults) throws IOException {
-		
+	public ResponseEntity<String> sumScoresAndGetTopProposed(List<String> requirementIds,
+			Integer maxResults, String additionalParams) throws IOException {
+
 		RequestParams params = new RequestParams();
 		params.setRequirementIds(requirementIds);
 		params.setProposedOnly(false);
@@ -179,7 +179,7 @@ public class QtService {
 		//Get from services
 		
 		for (String reqId : params.getRequirementIds()) {
-			List<Dependency> detectedFromServices = detectionService.getDetectedFromServices(reqId);
+			List<Dependency> detectedFromServices = detectionService.getDetectedFromServices(reqId, additionalParams);
 			for (Dependency dep : detectedFromServices) {
 				String id = dep.getFromid() + "_" + dep.getToid();
 				if (!acceptedAndRejectedIds.contains(id) && 
@@ -196,7 +196,7 @@ public class QtService {
 			
 			results.add("dependencies", new JsonArray());
 			results.add("requirements", gson.toJsonTree(parser.getRequirements()));
-			return new ResponseEntity<String>(results.toString(), HttpStatus.OK);
+			return new ResponseEntity<>(results.toString(), HttpStatus.OK);
 		}
 		
 		//Sum the scores (& descriptions)
@@ -218,9 +218,9 @@ public class QtService {
 				Dependency totalDep = detectedWithTotalScore.get(dep.getId());
 				totalDep.setDependency_score(totalDep.getDependency_score() + dep.getDependency_score());	
 				if (totalDep.getDescription()!=null) {
-					Set<String> desc = new HashSet<String>(totalDep.getDescription());
+					Set<String> desc = new HashSet<>(totalDep.getDescription());
 					desc.addAll(dep.getDescription());
-					totalDep.setDescription(new ArrayList<String>(desc));
+					totalDep.setDescription(new ArrayList<>(desc));
 				}
 				dep = totalDep;	
 			} 
@@ -261,14 +261,14 @@ public class QtService {
 		return new ResponseEntity<>(results.toString(), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<String> updateProposed(String dependenciesJson) throws IOException, NestedServletException {
+	public ResponseEntity<String> updateProposed(String dependenciesJson) throws NestedServletException {
 		try {
 			Type depListType = new TypeToken<List<Dependency>>(){}.getType();
 			List<Dependency> dependencies = gson.fromJson(dependenciesJson, depListType);
 			ResponseEntity<String> updateResponse = mallikasService.updateDependencies(dependencies, false, true);
 			
 			if (updateResponse.getStatusCode()!=HttpStatus.OK) {
-				return new ResponseEntity<String>(updateResponse.getBody(), updateResponse.getStatusCode());
+				return new ResponseEntity<>(updateResponse.getBody(), updateResponse.getStatusCode());
 			}
 			
 			List<Dependency> correctDependencies = mallikasService.correctIdsForDependencies(dependencies);
@@ -279,7 +279,7 @@ public class QtService {
 			
 			for (String projectId : depMap.keySet()) {				
 				dependencies = depMap.get(projectId);
-				List<Dependency> acceptedDependencies = new ArrayList<Dependency>();
+				List<Dependency> acceptedDependencies = new ArrayList<>();
 				
 				for (Dependency dep : dependencies) {
 					if (dep.getStatus()==Dependency_status.ACCEPTED)

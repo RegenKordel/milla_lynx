@@ -112,9 +112,10 @@ public class QtController {
 			@ApiResponse(code = 400, message = "Failure, ex. model not found"), 
 			@ApiResponse(code = 409, message = "Conflict")}) 
 	@GetMapping(value = "getTopProposedDependenciesOfRequirement")
-	public ResponseEntity<String> getTopProposedDependencies(@RequestParam List<String> requirementId, 
-			@RequestParam(required = false, defaultValue = "20") Integer maxResults) throws IOException {
-		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults);
+	public ResponseEntity<String> getTopProposedDependencies(@RequestParam List<String> requirementId,
+			@RequestParam(required = false, defaultValue = "20") Integer maxResults,
+			@RequestParam(required = false, defaultValue = "") String additionalParams) throws IOException {
+		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults, additionalParams);
 	}
 	
 

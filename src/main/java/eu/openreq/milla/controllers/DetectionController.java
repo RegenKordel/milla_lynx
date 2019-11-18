@@ -35,8 +35,6 @@ public class DetectionController {
 	@Autowired
 	RestTemplate rt;
 	
-	Queue<String> responseIds;
-	
 	@Autowired
 	MallikasService mallikasService;
 	
@@ -110,13 +108,14 @@ public class DetectionController {
 	 */
 	@ApiOperation(value = "Get results from all detection services for the requirement id")
 	@GetMapping("detectedFromServices")
-	public ResponseEntity<String> getDetectedFromServices(@RequestParam String requirementId) throws IOException {
-		List<Dependency> dependencies = detectionService.getDetectedFromServices(requirementId);
+	public ResponseEntity<String> getDetectedFromServices(@RequestParam String requirementId,
+			@RequestParam(required = false, defaultValue = "") String additionalParams) {
+		List<Dependency> dependencies = detectionService.getDetectedFromServices(requirementId, additionalParams);
 		
 		JsonObject resultObj = new JsonObject();
 		resultObj.add("dependencies", new Gson().toJsonTree(dependencies));
 		
-		return new ResponseEntity<String>(resultObj.toString(), HttpStatus.OK);
+		return new ResponseEntity<>(resultObj.toString(), HttpStatus.OK);
 	}
 	
 
@@ -124,11 +123,10 @@ public class DetectionController {
 	 * Fetch a project from Mallikas and post it to all services defined in properties
 	 * @param projectId
 	 * @return
-	 * @throws IOException
 	 */
 	@ApiOperation(value = "Post a project to all detection services")
 	@PostMapping("projectToServices")
-	public ResponseEntity<String> postProjectToServices(@RequestParam String projectId) throws IOException {
+	public ResponseEntity<String> postProjectToServices(@RequestParam String projectId) {
 		return detectionService.postProjectToServices(projectId);
 	}
 	
