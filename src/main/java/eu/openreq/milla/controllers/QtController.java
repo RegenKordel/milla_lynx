@@ -89,8 +89,15 @@ public class QtController {
 		return qtService.getConsistencyCheckForRequirement(requirementId, layerCount, 
 				analysisOnly, timeOut, omitCrossProject, omitReqRelDiag);
 	}
-	
-	@ApiOperation(value = "Get top X proposed dependencies of a requirement saved in Mallikas", notes = "Get the top dependencies", 
+
+	/**
+	 * Get proposed dependencies of a requirement
+	 * @param requirementId
+	 * @param maxResults
+	 * @return
+	 * @throws IOException
+	 */
+	@ApiOperation(value = "Get proposed dependencies of a requirement saved in Mallikas", notes = "Get the top dependencies",
 			response = String.class)
 	@ApiResponses(value = { 
 			@ApiResponse(code = 200, message = "Success, returns JSON model"),
@@ -103,7 +110,17 @@ public class QtController {
 		return qtService.getProposedDependenciesOfRequirement(requirementId, maxResults);
 
 	}
-	
+
+	/**
+	 * Get proposed dependencies from detection services sorted by score
+	 * @param requirementId
+	 * @param maxResults
+	 * @param orphanMultiplier
+	 * @param minDistanceMultiplier
+	 * @param additionalParams
+	 * @return
+	 * @throws IOException
+	 */
 	@ApiOperation(value = "Detect and get top X proposed dependencies of a requirement", notes = "Get the top dependencies "
 			+ "as proposed by all detection services", 
 			response = String.class)
@@ -114,8 +131,12 @@ public class QtController {
 	@GetMapping(value = "getTopProposedDependenciesOfRequirement")
 	public ResponseEntity<String> getTopProposedDependencies(@RequestParam List<String> requirementId,
 			@RequestParam(required = false, defaultValue = "20") Integer maxResults,
+			@RequestParam(required = false, defaultValue = "0") double orphanMultiplier,
+		 	@RequestParam(required = false, defaultValue = "0") Integer minimumDistance,
+		 	@RequestParam(required = false, defaultValue = "0") double minDistanceMultiplier,
 			@RequestParam(required = false, defaultValue = "") String additionalParams) throws IOException {
-		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults, additionalParams);
+		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults, orphanMultiplier, minimumDistance,
+				minDistanceMultiplier, additionalParams);
 	}
 	
 

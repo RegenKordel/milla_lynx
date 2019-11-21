@@ -1,0 +1,183 @@
+package eu.openreq.milla.services.test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import eu.openreq.milla.models.json.Dependency;
+import eu.openreq.milla.models.json.Dependency_status;
+import eu.openreq.milla.models.json.Requirement;
+import eu.openreq.milla.services.DetectionService;
+import eu.openreq.milla.services.MallikasService;
+import eu.openreq.milla.services.MulperiService;
+import eu.openreq.milla.services.QtService;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest
+public class QtServiceTest {
+
+    @Value("${milla.mallikasAddress}")
+    private String mallikasAddress;
+
+    @Value("${milla.detectionGetAddresses}")
+    private String[] detectionGetAddresses;
+
+    @Value("${milla.detectionGetPostAddresses}")
+    private String detectionGetPostAddresses;
+
+    @Autowired
+    private RestTemplate rt;
+
+    @Mock
+    MallikasService mallikasService = new MallikasService();
+
+    @Mock
+    MulperiService mulperiService = new MulperiService();
+
+    @Mock
+    DetectionService detectionService = new DetectionService();
+
+    @InjectMocks
+    private QtService qtService;
+
+    Gson gson = new Gson();
+
+    List<Dependency> dependencies;
+
+    ObjectMapper mapper = new ObjectMapper();
+
+    Type depListType = new TypeToken<List<Dependency>>() {}.getType();
+
+    @Before
+    public void setUp() throws Exception {
+        Dependency dep = new Dependency();
+        dep.setFromid("test");
+        dep.setToid("test2");
+        dep.setDependency_score(1);
+        dep.setDescription(Arrays.asList("testDesc"));
+        dep.setStatus(Dependency_status.PROPOSED);
+
+        Dependency dep2 = new Dependency();
+        dep2.setFromid("test");
+        dep2.setToid("test3");
+        dep2.setDependency_score(1);
+        dep2.setDescription(Collections.singletonList("testDesc2"));
+        dep2.setStatus(Dependency_status.PROPOSED);
+
+        Dependency dep3 = new Dependency();
+        dep3.setFromid("test4");
+        dep3.setToid("test");
+        dep3.setDependency_score(1);
+        dep3.setDescription(Collections.singletonList("testDesc3"));
+        dep3.setStatus(Dependency_status.PROPOSED);
+
+        Dependency dep4 = new Dependency();
+        dep4.setFromid("test");
+        dep4.setToid(("test5"));
+        dep4.setDependency_score(1);
+        dep4.setStatus(Dependency_status.PROPOSED);
+
+        dependencies = Arrays.asList(dep, dep2, dep3, dep4);
+        String depContent = mapper.writeValueAsString(Arrays.asList(dep, dep2, dep3, dep4));
+        depContent = "{\"dependencies\":" + depContent + "}";
+
+        Requirement req = new Requirement();
+        req.setId("testReq");
+
+        String reqContent = mapper.writeValueAsString(Arrays.asList(req));
+        reqContent = "{\"requirements\":" + reqContent + "}";
+
+        List<Requirement> reqs = new ArrayList<>();
+        req = new Requirement();
+        req.setId("test2");
+        reqs.add(req);
+        req = new Requirement();
+        req.setId("test4");
+        reqs.add(req);
+        req = new Requirement();
+        req.setId("test5");
+        reqs.add(req);
+
+        String tcContent = "{\"requirements\":" + mapper.writeValueAsString(reqs) + "}";
+
+        Mockito.when(detectionService.getDetectedFromServices(Matchers.any(), Matchers.any())).thenReturn(new ArrayList<>());
+        Mockito.when(mallikasService.requestWithParams(Matchers.any(), Matchers.anyString())).thenReturn(depContent,
+                "{\"dependencies\": []}", depContent, depContent);
+        Mockito.when(mallikasService.getSelectedRequirements(Matchers.any())).thenReturn(reqContent);
+        Mockito.when(mulperiService.getTransitiveClosure(Arrays.asList("test"), 2))
+                .thenReturn(new ResponseEntity<>(tcContent, HttpStatus.OK));
+    }
+
+    @Test
+    public void prioritizeOrphansTest() {
+        List<Dependency> deps = new ArrayList<>();
+        Dependency testDep = new Dependency();
+        testDep.setFromid("test");
+        testDep.setToid("test6");
+        testDep.setDependency_score(1);
+        deps.add(testDep);
+        testDep = new Dependency();
+        testDep.setFromid("test");
+        testDep.setToid("test2");
+        testDep.setDependency_score(1);
+        deps.add(testDep);
+        List<Dependency> results = qtService.prioritizeOrphans("test", deps, 1.5);
+        double totalScore = 0;
+        for (Dependency dep : results) {
+            totalScore += dep.getDependency_score();
+        }
+        assertEquals(2.5, totalScore, 0);
+    }
+
+    @Test
+    public void prioritizeDistantTest() throws IOException {
+        List<Dependency> results = qtService.prioritizeDistantDeps("test", dependencies, 3, 2);
+        double totalScore = 0;
+        for (Dependency dep : results) {
+            totalScore += dep.getDependency_score();
+        }
+        assertEquals(5, totalScore, 0);
+    }
+
+    @Test
+    public void sumScoresTest() throws IOException {
+        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test"), 20, 1.5,
+                3, 2.0, "").getBody();
+
+        System.out.println(result);
+
+        JsonObject obj = gson.fromJson(result, JsonObject.class);
+        List<Dependency> dependencies = gson.fromJson(obj.get("dependencies"), depListType);
+
+        double totalScore = 0;
+        for (Dependency dep : dependencies) {
+            totalScore += dep.getDependency_score();
+        }
+        assertEquals(5.5, totalScore, 0);
+    }
+
+
+}

@@ -1,5 +1,6 @@
 package eu.openreq.milla.controllers.test;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -255,8 +256,8 @@ public class QtControllerTest {
 				.andExpect((jsonPath("$.dependencies[1].id").doesNotExist()));	
 		mockServer.verify();
 	}
-	
-	
+
+
 	@Test
 	public void updateProjectTest() throws Exception {
 		mockServer.expect(requestTo(mallikasAddress + "/projectRequirements?projectId=testId&includeProposed=false"

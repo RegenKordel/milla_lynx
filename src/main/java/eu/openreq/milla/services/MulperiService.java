@@ -1,6 +1,7 @@
 package eu.openreq.milla.services;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -24,12 +26,28 @@ public class MulperiService {
 	
 	@Autowired
 	RestTemplate rt;
-	
+
+	public ResponseEntity<String> getTransitiveClosure(List<String> requirementId, Integer layerCount) {
+
+		String completeAddress = mulperiAddress + "/models/findTransitiveClosureOfRequirement";
+
+		if (layerCount != null) {
+			completeAddress += "?layerCount=" + layerCount;
+		}
+
+		try {
+			String response = rt.postForObject(completeAddress, requirementId, String.class);
+			return new ResponseEntity<>(response, HttpStatus.OK);
+		} catch (HttpClientErrorException | HttpServerErrorException e) {
+			return new ResponseEntity<>(e.getResponseBodyAsString(), e.getStatusCode());
+		}
+	}
+
 	/**
 	 * Post Requirements and Dependencies to Mulperi.
 	 * 
 	 * @param data
-	 * @param path
+	 * @param urlTail
 	 * @return
 	 * @throws IOException
 	 */
