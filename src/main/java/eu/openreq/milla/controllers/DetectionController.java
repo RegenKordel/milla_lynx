@@ -109,8 +109,8 @@ public class DetectionController {
 	@ApiOperation(value = "Get results from all detection services for the requirement id")
 	@GetMapping("detectedFromServices")
 	public ResponseEntity<String> getDetectedFromServices(@RequestParam String requirementId,
-			@RequestParam(required = false, defaultValue = "") String additionalParams) {
-		List<Dependency> dependencies = detectionService.getDetectedFromServices(requirementId, additionalParams);
+			@RequestParam(required = false, defaultValue = "") String extraDetectionParams) {
+		List<Dependency> dependencies = detectionService.getDetectedFromServices(requirementId, extraDetectionParams);
 		
 		JsonObject resultObj = new JsonObject();
 		resultObj.add("dependencies", new Gson().toJsonTree(dependencies));
@@ -157,24 +157,21 @@ public class DetectionController {
 	 * Post accepted/rejected dependencies to ORSI
 	 * @param dependencies
 	 * @return
-	 * @throws IOException
 	 */
 	@ApiIgnore
 	@ApiOperation(value = "Post accepted and rejected to ORSI cluster computation")
 	@PostMapping("acceptedAndRejectedToORSI")
-	public ResponseEntity<String> acceptedAndRejectedToORSI(@RequestBody List<Dependency> dependencies) throws IOException {
+	public ResponseEntity<String> acceptedAndRejectedToORSI(@RequestBody List<Dependency> dependencies) {
 		return detectionService.acceptedAndRejectedToORSI(dependencies);
 	}
 	
 	/**
 	 * Receive the confirmation that adding requirements to similarity detection has begun
 	 * @param result
-	 * @throws IOException
 	 */
 	@ApiIgnore
 	@PostMapping(value = "receiveAddReqResponse")
-	public ResponseEntity<String> receiveAddReqResponse(@RequestBody String result)
-			throws IOException {
+	public ResponseEntity<String> receiveAddReqResponse(@RequestBody String result) {
 		System.out.println("ORSI processing response:\n" + result);
 		return new ResponseEntity<String>("Response received", HttpStatus.OK);
 	}

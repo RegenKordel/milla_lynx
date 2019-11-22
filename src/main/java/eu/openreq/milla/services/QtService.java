@@ -6,10 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import eu.openreq.milla.models.TotalDependencyScore;
 import eu.openreq.milla.models.jira.Project;
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Dependency_status;
-import eu.openreq.milla.models.json.RequestParams;
-import eu.openreq.milla.models.json.Requirement;
+import eu.openreq.milla.models.json.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,6 +21,7 @@ import javax.xml.transform.sax.SAXSource;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class QtService {
@@ -121,14 +119,14 @@ public class QtService {
 	 *
 	 * @param requirementIds
 	 * @param maxResults
-	 * @param orphanMultiplier
-	 * @param minDistanceMultiplier
+	 * @param additionalParams
+	 * @param weightParams
 	 * @return
 	 * @throws IOException
 	 */
 	public ResponseEntity<String> sumScoresAndGetTopProposed(List<String> requirementIds,
-			Integer maxResults, double orphanMultiplier, Integer minimumDistance, double minDistanceMultiplier,
-			String additionalParams) throws IOException {
+			Integer maxResults, String additionalParams,
+			WeightParams weightParams) throws IOException {
 
 		RequestParams params = new RequestParams();
 		params.setRequirementIds(requirementIds);
@@ -187,12 +185,10 @@ public class QtService {
 			return new ResponseEntity<>(results.toString(), HttpStatus.OK);
 		}
 
+		//Apply weight params
+
 		for (String reqId : requirementIds) {
-			//Multiply scores of those not in TC
-			if (minDistanceMultiplier != 0 && minimumDistance != 0) proposed = prioritizeDistantDeps(reqId, proposed,
-					minimumDistance, minDistanceMultiplier);
-			//Multiply scores of orphans
-			if (orphanMultiplier != 0) proposed = prioritizeOrphans(reqId, proposed, orphanMultiplier);
+			proposed = applyWeights(reqId, proposed, weightParams);
 		}
 
 		//Sum the scores (& descriptions)
@@ -347,6 +343,8 @@ public class QtService {
 		return getTransitiveClosureOfRequirement(Arrays.asList(requirementId), layerCount);
 	}
 
+	//Filter methods
+
 	public List<Dependency> prioritizeOrphans(String reqId, List<Dependency> dependencies, double multiplier) {
 		HashMap<String, String> alreadyChecked = new HashMap<>();
 		alreadyChecked.put(reqId, reqId);
@@ -354,11 +352,8 @@ public class QtService {
 			String fromId = dep.getFromid();
 			String toId = dep.getToid();
 			for (String id : Arrays.asList(fromId, toId)) {
-				System.out.print(id + " : ");
 				if (!alreadyChecked.containsKey(id)) {
-					System.out.print("checked ");
 					if (checkIfOrphan(id)) {
-						System.out.print("isOrphan");
 						double newScore = dep.getDependency_score() * multiplier;
 						dep.setDependency_score(newScore);
 					}
@@ -396,6 +391,76 @@ public class QtService {
 				dep.setDependency_score(newScore);
 			}
 		}
+		return dependencies;
+	}
+
+	private List<Dependency> checkFields(String reqId, List<Dependency> dependencies, WeightParams weightParams) {
+		for (Dependency dep : dependencies) {
+			String reqsString = mallikasService.getSelectedRequirements(Arrays.asList(dep.getFromid(), dep.getToid()));
+			JsonObject obj = gson.fromJson(reqsString, JsonObject.class);
+			if (obj==null) {
+				continue;
+			}
+			List<Requirement> foundReqs = gson.fromJson(obj.get("requirements"), reqListType);
+			if (foundReqs.size()!=2) {
+				continue;
+			}
+			Requirement sourceReq = foundReqs.get(0);
+			Requirement targetReq = foundReqs.get(1);
+			if (targetReq.getId().equals(reqId)) {
+				Requirement temp = sourceReq;
+				sourceReq = targetReq;
+				targetReq = temp;
+			}
+
+			String targetProjectId = targetReq.getId().split("-")[0];
+			System.out.println(targetProjectId);
+
+			if (weightParams.getProjectId()!=null && weightParams.getProjectId().equals(targetProjectId)) {
+				dep.setDependency_score(dep.getDependency_score() * weightParams.getProjectFactor());
+			}
+
+			for (RequirementPart part : targetReq.getRequirementParts()) {
+				if (weightParams.getLabelName()!=null && part.getName().equals("Label") && part.getText().equals(weightParams.getLabelName())) {
+					dep.setDependency_score(dep.getDependency_score() * weightParams.getLabelFactor());
+				}
+				if (weightParams.getPlatformName()!=null && part.getName().equals("Platform") && part.getText().equals(weightParams.getPlatformName())) {
+					dep.setDependency_score(dep.getDependency_score() * weightParams.getPlatformFactor());
+				}
+				if (weightParams.getComponentName()!=null && part.getName().equals("Component") && part.getText().equals(weightParams.getComponentName())) {
+					dep.setDependency_score(dep.getDependency_score() * weightParams.getComponentFactor());
+				}
+			}
+
+			if (weightParams.getDateDifference()!=null && checkDateDifference(sourceReq.getCreated_at(),
+					targetReq.getCreated_at(), weightParams.getDateDifference())) {
+				dep.setDependency_score(dep.getDependency_score() * weightParams.getDateFactor());
+			}
+		}
+		return dependencies;
+	}
+
+	private boolean checkDateDifference(Long fromDate, Long toDate, Integer days) {
+		Long difference = TimeUnit.MILLISECONDS.convert(days, TimeUnit.DAYS);
+		return (toDate<=fromDate+difference && toDate>=fromDate-difference);
+	}
+
+	public List<Dependency> applyWeights(String reqId, List<Dependency> dependencies, WeightParams weightParams) {
+		double orphanFactor = weightParams.getOrphanFactor();
+		Integer minimumDistance = weightParams.getMinimumDistance();
+		Integer dateDifference = weightParams.getDateDifference();
+		String projectId = weightParams.getProjectId();
+		String platform = weightParams.getPlatformName();
+		String label = weightParams.getLabelName();
+
+		//Multiply scores of those not in TC
+		if (minimumDistance != 0) dependencies = prioritizeDistantDeps(reqId, dependencies,
+				minimumDistance, weightParams.getMinDistanceFactor());
+		//Multiply scores of orphans
+		if (orphanFactor != 0) dependencies = prioritizeOrphans(reqId, dependencies, orphanFactor);
+		//Check different fields of the target requirement
+		dependencies = checkFields(reqId, dependencies, weightParams);
+
 		return dependencies;
 	}
 }

@@ -2,6 +2,8 @@ package eu.openreq.milla.controllers;
 
 import java.io.IOException;
 import java.util.List;
+
+import eu.openreq.milla.models.json.WeightParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -115,28 +117,25 @@ public class QtController {
 	 * Get proposed dependencies from detection services sorted by score
 	 * @param requirementId
 	 * @param maxResults
-	 * @param orphanMultiplier
-	 * @param minDistanceMultiplier
-	 * @param additionalParams
+	 * @param weightParams
+	 * @param extraDetectionParams
 	 * @return
 	 * @throws IOException
 	 */
 	@ApiOperation(value = "Detect and get top X proposed dependencies of a requirement", notes = "Get the top dependencies "
 			+ "as proposed by all detection services", 
 			response = String.class)
-	@ApiResponses(value = { 
+	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "Success, returns JSON model"),
 			@ApiResponse(code = 400, message = "Failure, ex. model not found"), 
 			@ApiResponse(code = 409, message = "Conflict")}) 
 	@GetMapping(value = "getTopProposedDependenciesOfRequirement")
 	public ResponseEntity<String> getTopProposedDependencies(@RequestParam List<String> requirementId,
 			@RequestParam(required = false, defaultValue = "20") Integer maxResults,
-			@RequestParam(required = false, defaultValue = "0") double orphanMultiplier,
-		 	@RequestParam(required = false, defaultValue = "0") Integer minimumDistance,
-		 	@RequestParam(required = false, defaultValue = "0") double minDistanceMultiplier,
-			@RequestParam(required = false, defaultValue = "") String additionalParams) throws IOException {
-		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults, orphanMultiplier, minimumDistance,
-				minDistanceMultiplier, additionalParams);
+			@RequestParam(required = false, defaultValue = "") String extraDetectionParams,
+			@RequestBody(required = false) WeightParams weightParams
+			) throws IOException {
+		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults, extraDetectionParams, weightParams);
 	}
 	
 

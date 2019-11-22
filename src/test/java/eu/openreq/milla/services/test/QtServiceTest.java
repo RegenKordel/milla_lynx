@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Dependency_status;
-import eu.openreq.milla.models.json.Requirement;
+import eu.openreq.milla.models.json.*;
 import eu.openreq.milla.services.DetectionService;
 import eu.openreq.milla.services.MallikasService;
 import eu.openreq.milla.services.MulperiService;
@@ -69,7 +67,8 @@ public class QtServiceTest {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    Type depListType = new TypeToken<List<Dependency>>() {}.getType();
+    Type depListType = new TypeToken<List<Dependency>>() {
+    }.getType();
 
     @Before
     public void setUp() throws Exception {
@@ -104,16 +103,22 @@ public class QtServiceTest {
         String depContent = mapper.writeValueAsString(Arrays.asList(dep, dep2, dep3, dep4));
         depContent = "{\"dependencies\":" + depContent + "}";
 
-        Requirement req = new Requirement();
-        req.setId("testReq");
-
-        String reqContent = mapper.writeValueAsString(Arrays.asList(req));
-        reqContent = "{\"requirements\":" + reqContent + "}";
-
         List<Requirement> reqs = new ArrayList<>();
+
+        Requirement req = new Requirement();
+        req.setId("test");
+        reqs.add(req);
+
         req = new Requirement();
+        RequirementPart part = new RequirementPart();
+        part.setName("Component");
+        part.setText("TestComp");
+        req.setRequirementParts(Collections.singletonList(part));
         req.setId("test2");
         reqs.add(req);
+
+        String reqContent = "{\"requirements\":" + mapper.writeValueAsString(reqs) + "}";
+
         req = new Requirement();
         req.setId("test4");
         reqs.add(req);
@@ -126,7 +131,7 @@ public class QtServiceTest {
         Mockito.when(detectionService.getDetectedFromServices(Matchers.any(), Matchers.any())).thenReturn(new ArrayList<>());
         Mockito.when(mallikasService.requestWithParams(Matchers.any(), Matchers.anyString())).thenReturn(depContent,
                 "{\"dependencies\": []}", depContent, depContent);
-        Mockito.when(mallikasService.getSelectedRequirements(Matchers.any())).thenReturn(reqContent);
+        Mockito.when(mallikasService.getSelectedRequirements(Matchers.any())).thenReturn(reqContent, "", "", "");
         Mockito.when(mulperiService.getTransitiveClosure(Arrays.asList("test"), 2))
                 .thenReturn(new ResponseEntity<>(tcContent, HttpStatus.OK));
     }
@@ -164,8 +169,12 @@ public class QtServiceTest {
 
     @Test
     public void sumScoresTest() throws IOException {
-        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test"), 20, 1.5,
-                3, 2.0, "").getBody();
+        WeightParams params = new WeightParams();
+        params.setOrphanFactor(1.5);
+        params.setMinimumDistance(3);
+        params.setMinDistanceFactor(2.0);
+        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test"), 20,
+                "", params).getBody();
 
         System.out.println(result);
 
@@ -179,5 +188,29 @@ public class QtServiceTest {
         assertEquals(5.5, totalScore, 0);
     }
 
+    @Test
+    public void sumScoresWithComponentParamAddedTest() throws IOException {
+        WeightParams params = new WeightParams();
+        params.setOrphanFactor(1.5);
+        params.setMinimumDistance(3);
+        params.setMinDistanceFactor(2.0);
 
+        params.setComponentName("TestComp");
+        params.setComponentFactor(3);
+
+        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test"), 20,
+                "", params).getBody();
+
+        System.out.println(result);
+
+        JsonObject obj = gson.fromJson(result, JsonObject.class);
+        List<Dependency> dependencies = gson.fromJson(obj.get("dependencies"), depListType);
+
+        double totalScore = 0;
+        for (Dependency dep : dependencies) {
+            totalScore += dep.getDependency_score();
+        }
+        assertEquals(8.5, totalScore, 0);
+
+    }
 }

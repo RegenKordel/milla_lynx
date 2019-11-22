@@ -17,8 +17,8 @@ public class RequestParams {
 	    private Boolean includeProposed;
 	    private Boolean proposedOnly;
 	    private Boolean includeRejected;
-	    
-	    
+
+
 		public String getProjectId() {
 			return projectId;
 		}
@@ -91,6 +91,6 @@ public class RequestParams {
 		public void setIncludeRejected(Boolean includeRejected) {
 			this.includeRejected = includeRejected;
 		}
-	    
-	
+
+
 }
