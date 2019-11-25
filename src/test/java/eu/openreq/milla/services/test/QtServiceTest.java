@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
@@ -73,29 +74,29 @@ public class QtServiceTest {
     @Before
     public void setUp() throws Exception {
         Dependency dep = new Dependency();
-        dep.setFromid("test");
-        dep.setToid("test2");
+        dep.setFromid("test-1");
+        dep.setToid("test-2");
         dep.setDependency_score(1);
         dep.setDescription(Arrays.asList("testDesc"));
         dep.setStatus(Dependency_status.PROPOSED);
 
         Dependency dep2 = new Dependency();
-        dep2.setFromid("test");
-        dep2.setToid("test3");
+        dep2.setFromid("test-1");
+        dep2.setToid("test-3");
         dep2.setDependency_score(1);
         dep2.setDescription(Collections.singletonList("testDesc2"));
         dep2.setStatus(Dependency_status.PROPOSED);
 
         Dependency dep3 = new Dependency();
-        dep3.setFromid("test4");
-        dep3.setToid("test");
+        dep3.setFromid("test-4");
+        dep3.setToid("test-1");
         dep3.setDependency_score(1);
         dep3.setDescription(Collections.singletonList("testDesc3"));
         dep3.setStatus(Dependency_status.PROPOSED);
 
         Dependency dep4 = new Dependency();
-        dep4.setFromid("test");
-        dep4.setToid(("test5"));
+        dep4.setFromid("test-1");
+        dep4.setToid(("test-5"));
         dep4.setDependency_score(1);
         dep4.setStatus(Dependency_status.PROPOSED);
 
@@ -104,26 +105,35 @@ public class QtServiceTest {
         depContent = "{\"dependencies\":" + depContent + "}";
 
         List<Requirement> reqs = new ArrayList<>();
+        List<Requirement> reqs2 = new ArrayList<>();
 
         Requirement req = new Requirement();
-        req.setId("test");
+        req.setId("test-1");
+        req.setCreated_at(TimeUnit.MILLISECONDS.convert(2, TimeUnit.DAYS));
         reqs.add(req);
+        reqs2.add(req);
 
         req = new Requirement();
         RequirementPart part = new RequirementPart();
         part.setName("Component");
         part.setText("TestComp");
         req.setRequirementParts(Collections.singletonList(part));
-        req.setId("test2");
+        req.setId("test-2");
+        req.setCreated_at(TimeUnit.MILLISECONDS.convert(4, TimeUnit.DAYS));
         reqs.add(req);
 
         String reqContent = "{\"requirements\":" + mapper.writeValueAsString(reqs) + "}";
 
         req = new Requirement();
-        req.setId("test4");
+        req.setId("test-4");
+        req.setCreated_at(TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS));
         reqs.add(req);
+        reqs2.add(req);
+
+        String reqContent2 = "{\"requirements\":" + mapper.writeValueAsString(reqs2) + "}";
+
         req = new Requirement();
-        req.setId("test5");
+        req.setId("test-5");
         reqs.add(req);
 
         String tcContent = "{\"requirements\":" + mapper.writeValueAsString(reqs) + "}";
@@ -131,8 +141,9 @@ public class QtServiceTest {
         Mockito.when(detectionService.getDetectedFromServices(Matchers.any(), Matchers.any())).thenReturn(new ArrayList<>());
         Mockito.when(mallikasService.requestWithParams(Matchers.any(), Matchers.anyString())).thenReturn(depContent,
                 "{\"dependencies\": []}", depContent, depContent);
-        Mockito.when(mallikasService.getSelectedRequirements(Matchers.any())).thenReturn(reqContent, "", "", "");
-        Mockito.when(mulperiService.getTransitiveClosure(Arrays.asList("test"), 2))
+        Mockito.when(mallikasService.getSelectedRequirements(Matchers.any())).thenReturn(reqContent,
+                reqContent2, "", "");
+        Mockito.when(mulperiService.getTransitiveClosure(Arrays.asList("test-1"), 2))
                 .thenReturn(new ResponseEntity<>(tcContent, HttpStatus.OK));
     }
 
@@ -140,16 +151,16 @@ public class QtServiceTest {
     public void prioritizeOrphansTest() {
         List<Dependency> deps = new ArrayList<>();
         Dependency testDep = new Dependency();
-        testDep.setFromid("test");
-        testDep.setToid("test6");
+        testDep.setFromid("test-1");
+        testDep.setToid("test-6");
         testDep.setDependency_score(1);
         deps.add(testDep);
         testDep = new Dependency();
-        testDep.setFromid("test");
-        testDep.setToid("test2");
+        testDep.setFromid("test-1");
+        testDep.setToid("test-2");
         testDep.setDependency_score(1);
         deps.add(testDep);
-        List<Dependency> results = qtService.prioritizeOrphans("test", deps, 1.5);
+        List<Dependency> results = qtService.prioritizeOrphans("test-1", deps, 1.5);
         double totalScore = 0;
         for (Dependency dep : results) {
             totalScore += dep.getDependency_score();
@@ -159,7 +170,7 @@ public class QtServiceTest {
 
     @Test
     public void prioritizeDistantTest() throws IOException {
-        List<Dependency> results = qtService.prioritizeDistantDeps("test", dependencies, 3, 2);
+        List<Dependency> results = qtService.prioritizeDistantDeps("test-1", dependencies, 3, 2);
         double totalScore = 0;
         for (Dependency dep : results) {
             totalScore += dep.getDependency_score();
@@ -173,7 +184,7 @@ public class QtServiceTest {
         params.setOrphanFactor(1.5);
         params.setMinimumDistance(3);
         params.setMinDistanceFactor(2.0);
-        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test"), 20,
+        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
                 "", params).getBody();
 
         System.out.println(result);
@@ -198,7 +209,7 @@ public class QtServiceTest {
         params.setComponentName("TestComp");
         params.setComponentFactor(3);
 
-        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test"), 20,
+        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
                 "", params).getBody();
 
         System.out.println(result);
@@ -213,4 +224,65 @@ public class QtServiceTest {
         assertEquals(8.5, totalScore, 0);
 
     }
+
+    @Test
+    public void sumScoresWithProjectIdTest() throws IOException {
+        WeightParams params = new WeightParams();
+        params.setProjectId("test");
+        params.setProjectFactor(3);
+
+        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
+                "", params).getBody();
+
+        JsonObject obj = gson.fromJson(result, JsonObject.class);
+        List<Dependency> dependencies = gson.fromJson(obj.get("dependencies"), depListType);
+
+        double totalScore = 0;
+        for (Dependency dep : dependencies) {
+            totalScore += dep.getDependency_score();
+        }
+        assertEquals(8, totalScore, 0);
+
+    }
+
+    @Test
+    public void sumScoresWithDate() throws IOException {
+        WeightParams params = new WeightParams();
+        params.setDateDifference(2);
+        params.setDateFactor(3);
+
+        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
+                "", params).getBody();
+
+        JsonObject obj = gson.fromJson(result, JsonObject.class);
+        List<Dependency> dependencies = gson.fromJson(obj.get("dependencies"), depListType);
+
+        double totalScore = 0;
+        for (Dependency dep : dependencies) {
+            totalScore += dep.getDependency_score();
+        }
+        assertEquals(8, totalScore, 0);
+
+    }
+
+    @Test
+    public void sumScoresWithDateTooFar() throws IOException {
+        WeightParams params = new WeightParams();
+        params.setDateDifference(1);
+        params.setDateFactor(3);
+
+        String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
+                "", params).getBody();
+
+        JsonObject obj = gson.fromJson(result, JsonObject.class);
+        List<Dependency> dependencies = gson.fromJson(obj.get("dependencies"), depListType);
+
+        double totalScore = 0;
+        for (Dependency dep : dependencies) {
+            totalScore += dep.getDependency_score();
+        }
+        assertEquals(6, totalScore, 0);
+
+    }
+
 }

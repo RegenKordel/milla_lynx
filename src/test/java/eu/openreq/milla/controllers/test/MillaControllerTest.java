@@ -88,7 +88,7 @@ public class MillaControllerTest {
 		
 		authService.setJiraBaseUrl(JIRA_BASE_URL);
 		
-		Mockito.when(importService.importProjectIssues("test", new OAuthService()))
+		Mockito.when(importService.importProjectIssues("test", new OAuthService("")))
 			.thenReturn(new ResponseEntity<String>("test", HttpStatus.OK));
 		
 		Mockito.when(authService.tempTokenAuthorization())

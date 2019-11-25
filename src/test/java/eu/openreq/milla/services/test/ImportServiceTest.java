@@ -53,7 +53,7 @@ public class ImportServiceTest {
 	@InjectMocks
 	private ImportService importService = new ImportService();
 	
-	private OAuthService authService = new OAuthService();
+	private OAuthService authService = new OAuthService("");
     
     @Before
     public void setUp() throws Exception {    

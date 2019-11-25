@@ -26,7 +26,7 @@ public class UpdatedIssues {
 		if (service!=null) {
 			authService = service;
 		} else {
-			authService = new OAuthService();
+			authService = new OAuthService("");
 		}
 		
 		_projectIssues = new HashMap<String, JsonElement>();

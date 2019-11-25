@@ -29,7 +29,7 @@ public class OAuthServiceTest {
 
 	private String JIRA_BASE_URL = "http://localhost:8089";
 	
-	private OAuthService authService = new OAuthService();
+	private OAuthService authService = new OAuthService("");
 	
 	String responseJson = "{\"token\":\"Success\"}";
 	

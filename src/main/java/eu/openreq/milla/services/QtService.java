@@ -17,7 +17,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.xml.transform.sax.SAXSource;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -122,11 +121,10 @@ public class QtService {
 	 * @param additionalParams
 	 * @param weightParams
 	 * @return
-	 * @throws IOException
 	 */
 	public ResponseEntity<String> sumScoresAndGetTopProposed(List<String> requirementIds,
 			Integer maxResults, String additionalParams,
-			WeightParams weightParams) throws IOException {
+			WeightParams weightParams) {
 
 		RequestParams params = new RequestParams();
 		params.setRequirementIds(requirementIds);
@@ -186,9 +184,10 @@ public class QtService {
 		}
 
 		//Apply weight params
-
-		for (String reqId : requirementIds) {
-			proposed = applyWeights(reqId, proposed, weightParams);
+		if (weightParams!=null) {
+			for (String reqId : requirementIds) {
+				proposed = applyWeights(reqId, proposed, weightParams);
+			}
 		}
 
 		//Sum the scores (& descriptions)
@@ -414,7 +413,6 @@ public class QtService {
 			}
 
 			String targetProjectId = targetReq.getId().split("-")[0];
-			System.out.println(targetProjectId);
 
 			if (weightParams.getProjectId()!=null && weightParams.getProjectId().equals(targetProjectId)) {
 				dep.setDependency_score(dep.getDependency_score() * weightParams.getProjectFactor());
@@ -432,7 +430,7 @@ public class QtService {
 				}
 			}
 
-			if (weightParams.getDateDifference()!=null && checkDateDifference(sourceReq.getCreated_at(),
+			if (weightParams.getDateDifference()!=0 && checkDateDifference(sourceReq.getCreated_at(),
 					targetReq.getCreated_at(), weightParams.getDateDifference())) {
 				dep.setDependency_score(dep.getDependency_score() * weightParams.getDateFactor());
 			}
@@ -447,11 +445,7 @@ public class QtService {
 
 	public List<Dependency> applyWeights(String reqId, List<Dependency> dependencies, WeightParams weightParams) {
 		double orphanFactor = weightParams.getOrphanFactor();
-		Integer minimumDistance = weightParams.getMinimumDistance();
-		Integer dateDifference = weightParams.getDateDifference();
-		String projectId = weightParams.getProjectId();
-		String platform = weightParams.getPlatformName();
-		String label = weightParams.getLabelName();
+		int minimumDistance = weightParams.getMinimumDistance();
 
 		//Multiply scores of those not in TC
 		if (minimumDistance != 0) dependencies = prioritizeDistantDeps(reqId, dependencies,

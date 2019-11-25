@@ -10,6 +10,7 @@ import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Scanner;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -44,9 +45,9 @@ public class OAuthService {
 	private OAuthRsaSigner signer;
 	private boolean initialized;
 	
-	public OAuthService() {	
+	public OAuthService(@Value("${milla.jiraAppLinkKey}") String KEY_PATH) {
 		try {
-			byte[] encoded = Files.readAllBytes(Paths.get("key.txt"));
+			byte[] encoded = Files.readAllBytes(Paths.get(KEY_PATH));
 			PRIVATE_KEY = new String(encoded, StandardCharsets.UTF_8);
 			signer = new OAuthRsaSigner();
 			signer.privateKey = encodedPrivateKey();

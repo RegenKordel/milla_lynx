@@ -51,7 +51,7 @@ public class UpdateServiceTest {
 	@InjectMocks
 	private UpdateService updateService = new UpdateService();
 
-	private static OAuthService authService = new OAuthService();
+	private static OAuthService authService = new OAuthService("");
 	
 	@Before
     public void setUp() throws Exception {

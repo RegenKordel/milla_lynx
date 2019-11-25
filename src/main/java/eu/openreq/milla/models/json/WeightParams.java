@@ -4,13 +4,13 @@ public class WeightParams {
 
     private double orphanFactor;
 
-    private Integer minimumDistance;
+    private int minimumDistance;
     private double minDistanceFactor;
 
     private String projectId;
     private double projectFactor;
 
-    private Integer dateDifference;
+    private int dateDifference;
     private double dateFactor;
 
     private String componentName;
@@ -30,11 +30,11 @@ public class WeightParams {
         this.orphanFactor = orphanFactor;
     }
 
-    public Integer getMinimumDistance() {
+    public int getMinimumDistance() {
         return minimumDistance;
     }
 
-    public void setMinimumDistance(Integer minimumDistance) {
+    public void setMinimumDistance(int minimumDistance) {
         this.minimumDistance = minimumDistance;
     }
 
@@ -62,11 +62,11 @@ public class WeightParams {
         this.projectFactor = projectFactor;
     }
 
-    public Integer getDateDifference() {
+    public int getDateDifference() {
         return dateDifference;
     }
 
-    public void setDateDifference(Integer dateDifference) {
+    public void setDateDifference(int dateDifference) {
         this.dateDifference = dateDifference;
     }
 

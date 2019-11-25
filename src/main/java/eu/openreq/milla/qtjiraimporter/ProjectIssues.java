@@ -36,7 +36,7 @@ public class ProjectIssues {
 		if (service!=null) {
 			authService = service;
 		} else {
-			authService = new OAuthService();
+			authService = new OAuthService("");
 		}
 		
 		_project = project;
