@@ -115,7 +115,7 @@ public class QtServiceTest {
 
         req = new Requirement();
         RequirementPart part = new RequirementPart();
-        part.setName("Component");
+        part.setName("Components");
         part.setText("TestComp");
         req.setRequirementParts(Collections.singletonList(part));
         req.setId("test-2");
@@ -207,7 +207,7 @@ public class QtServiceTest {
         params.setMinDistanceFactor(2.0);
 
         params.setComponentName("TestComp");
-        params.setComponentFactor(3);
+        params.setComponentFactor(3.0);
 
         String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
                 "", params).getBody();
@@ -229,7 +229,7 @@ public class QtServiceTest {
     public void sumScoresWithProjectIdTest() throws IOException {
         WeightParams params = new WeightParams();
         params.setProjectId("test");
-        params.setProjectFactor(3);
+        params.setProjectFactor(3.0);
 
         String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
                 "", params).getBody();
@@ -249,7 +249,7 @@ public class QtServiceTest {
     public void sumScoresWithDate() throws IOException {
         WeightParams params = new WeightParams();
         params.setDateDifference(2);
-        params.setDateFactor(3);
+        params.setDateFactor(3.0);
 
         String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
                 "", params).getBody();
@@ -269,7 +269,7 @@ public class QtServiceTest {
     public void sumScoresWithDateTooFar() throws IOException {
         WeightParams params = new WeightParams();
         params.setDateDifference(1);
-        params.setDateFactor(3);
+        params.setDateFactor(3.0);
 
         String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
                 "", params).getBody();

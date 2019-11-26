@@ -66,7 +66,6 @@ public class MillaController {
 	 * 
 	 * @param projectId
 	 * @return ResponseEntity<?>
-	 * @throws IOException
 	 */
 	@ApiOperation(value = "Fetch all requirements of a project in OpenReq JSON format.", 
 			notes = "<b>Functionality</b>: Fetch all requirements of a project including their dependencies that are cached in Mallikas database in the OpenReq JSON format."
@@ -77,7 +76,7 @@ public class MillaController {
 					+ "<br>includeProposed: Whether to fetch proposed dependencies")
 	@GetMapping(value = "requirementsInProject")
 	public ResponseEntity<?> getRequirementsInProject(@RequestParam String projectId, @RequestParam(required = false)
-			boolean includeProposed, @RequestParam(required = false) boolean requirementsOnly) throws IOException {
+			boolean includeProposed, @RequestParam(required = false) boolean requirementsOnly) {
 
 		String reqsInProject = mallikasService.getAllRequirementsInProject(projectId, includeProposed, requirementsOnly);
 
@@ -92,7 +91,6 @@ public class MillaController {
 	 * 
 	 * @param ids
 	 * @return ResponseEntity
-	 * @throws IOException
 	 */
 	@ApiOperation(value = "Fetch a specified set of requirements in OpenReq JSON format.", 
 	notes = "<b>Functionality</b>: Fetch specified requirements and their dependencies that are cached in Mallikas database "
@@ -101,8 +99,8 @@ public class MillaController {
 			+ "<br><b>Postcondition</b>: An OpenReq JSON of the requirements and their dependencies is produced."
 			+ "<br><b>Parameter: </b>"
 			+ "<br>ids: ids as a String array, e.g. [\"QTWB-1\", \"QTWB-2\"] ")
-	@PostMapping(value = "requirementsByIds")
-	public ResponseEntity<?> getRequirementsByIds(@RequestParam Collection<String> ids) throws IOException {
+	@GetMapping(value = "requirementsByIds")
+	public ResponseEntity<?> getRequirementsByIds(@RequestParam Collection<String> ids) {
 
 		String reqsWithIds = mallikasService.getSelectedRequirements(ids);
 
@@ -117,7 +115,6 @@ public class MillaController {
 	 * 
 	 * @param params
 	 * @return ResponseEntity<String>
-	 * @throws IOException
 	 */
 	@ApiOperation(value = "Fetch requirements based on various parameters posted in JSON format.", 
 			notes = "<b>Functionality</b>: Fetch requirements based on various parameters given in JSON format."
@@ -125,8 +122,8 @@ public class MillaController {
 					+ "<br><b>Postcondition</b>: An OpenReq JSON of the requirements and their dependencies is produced."
 					+ "<br><b>Parameter: </b>"
 					+ "<br>params: RequestParams object containing various parameters to be used in database query")
-	@PostMapping(value = "requirementsByParams")
-	public ResponseEntity<?> getRequirementsByParams(@RequestBody RequestParams params) throws IOException {
+	@GetMapping(value = "requirementsByParams")
+	public ResponseEntity<?> getRequirementsByParams(RequestParams params) {
 		
 		String reqsWithDependencyType = mallikasService.requestWithParams(params,
 				"requirements");

@@ -1,5 +1,7 @@
 package eu.openreq.milla.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -124,7 +126,7 @@ public class QtService {
 	 */
 	public ResponseEntity<String> sumScoresAndGetTopProposed(List<String> requirementIds,
 			Integer maxResults, String additionalParams,
-			WeightParams weightParams) {
+			WeightParams weightParams) throws JsonProcessingException {
 
 		RequestParams params = new RequestParams();
 		params.setRequirementIds(requirementIds);
@@ -185,6 +187,8 @@ public class QtService {
 
 		//Apply weight params
 		if (weightParams!=null) {
+			String asd = new ObjectMapper().writeValueAsString(weightParams);
+			System.out.println(asd);
 			for (String reqId : requirementIds) {
 				proposed = applyWeights(reqId, proposed, weightParams);
 			}
@@ -323,7 +327,7 @@ public class QtService {
 		}
 	}
 
-	public ResponseEntity<String> updateRecentForAllProjects() throws IOException {
+	public ResponseEntity<String> updateRecentForAllProjects() {
 		String mapString = mallikasService.getListOfProjects();
 		Type mapType = new TypeToken<HashMap<String, Integer>>() {
 		}.getType();
@@ -406,6 +410,7 @@ public class QtService {
 			}
 			Requirement sourceReq = foundReqs.get(0);
 			Requirement targetReq = foundReqs.get(1);
+
 			if (targetReq.getId().equals(reqId)) {
 				Requirement temp = sourceReq;
 				sourceReq = targetReq;
@@ -414,23 +419,28 @@ public class QtService {
 
 			String targetProjectId = targetReq.getId().split("-")[0];
 
-			if (weightParams.getProjectId()!=null && weightParams.getProjectId().equals(targetProjectId)) {
+			if (weightParams.getProjectId()!=null && weightParams.getProjectFactor()!=null &&
+					weightParams.getProjectId().equals(targetProjectId)) {
 				dep.setDependency_score(dep.getDependency_score() * weightParams.getProjectFactor());
 			}
 
 			for (RequirementPart part : targetReq.getRequirementParts()) {
-				if (weightParams.getLabelName()!=null && part.getName().equals("Label") && part.getText().equals(weightParams.getLabelName())) {
+				if (weightParams.getLabelName()!=null && weightParams.getLabelFactor()!=null &&
+						part.getName().equals("Labels") && part.getText().equals(weightParams.getLabelName())) {
 					dep.setDependency_score(dep.getDependency_score() * weightParams.getLabelFactor());
 				}
-				if (weightParams.getPlatformName()!=null && part.getName().equals("Platform") && part.getText().equals(weightParams.getPlatformName())) {
+				if (weightParams.getPlatformName()!=null && weightParams.getPlatformFactor()!=null &&
+						part.getName().equals("Platforms") && part.getText().equals(weightParams.getPlatformName())) {
 					dep.setDependency_score(dep.getDependency_score() * weightParams.getPlatformFactor());
 				}
-				if (weightParams.getComponentName()!=null && part.getName().equals("Component") && part.getText().equals(weightParams.getComponentName())) {
+				if (weightParams.getComponentName()!=null && weightParams.getComponentFactor()!=null &&
+						part.getName().equals("Components") && part.getText().equals(weightParams.getComponentName())) {
 					dep.setDependency_score(dep.getDependency_score() * weightParams.getComponentFactor());
 				}
 			}
 
-			if (weightParams.getDateDifference()!=0 && checkDateDifference(sourceReq.getCreated_at(),
+			if (weightParams.getDateDifference()!=null && weightParams.getDateFactor() != null
+					&& checkDateDifference(sourceReq.getCreated_at(),
 					targetReq.getCreated_at(), weightParams.getDateDifference())) {
 				dep.setDependency_score(dep.getDependency_score() * weightParams.getDateFactor());
 			}
@@ -444,15 +454,19 @@ public class QtService {
 	}
 
 	public List<Dependency> applyWeights(String reqId, List<Dependency> dependencies, WeightParams weightParams) {
-		double orphanFactor = weightParams.getOrphanFactor();
-		int minimumDistance = weightParams.getMinimumDistance();
+		Double orphanFactor = weightParams.getOrphanFactor();
+		Integer minimumDistance = weightParams.getMinimumDistance();
+		Double minDistanceFactor = weightParams.getMinDistanceFactor();
 
 		//Multiply scores of those not in TC
-		if (minimumDistance != 0) dependencies = prioritizeDistantDeps(reqId, dependencies,
-				minimumDistance, weightParams.getMinDistanceFactor());
+		if (minimumDistance!=null && minDistanceFactor!=null) dependencies = prioritizeDistantDeps(reqId, dependencies,
+				minimumDistance, minDistanceFactor);
 		//Multiply scores of orphans
-		if (orphanFactor != 0) dependencies = prioritizeOrphans(reqId, dependencies, orphanFactor);
+		if (orphanFactor!=null) dependencies = prioritizeOrphans(reqId, dependencies, orphanFactor);
 		//Check different fields of the target requirement
+		if (weightParams.getDateFactor()!=null || weightParams.getProjectFactor()!=null ||
+				weightParams.getPlatformFactor()!=null || weightParams.getComponentFactor()!=null ||
+				weightParams.getLabelFactor()!=null)
 		dependencies = checkFields(reqId, dependencies, weightParams);
 
 		return dependencies;

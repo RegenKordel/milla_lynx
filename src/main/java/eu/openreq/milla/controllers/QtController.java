@@ -1,27 +1,22 @@
 package eu.openreq.milla.controllers;
 
-import java.io.IOException;
-import java.util.List;
-
 import eu.openreq.milla.models.json.WeightParams;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.NestedServletException;
-
-import eu.openreq.milla.services.QtService;
 import eu.openreq.milla.services.ImportService;
 import eu.openreq.milla.services.MallikasService;
 import eu.openreq.milla.services.MulperiService;
+import eu.openreq.milla.services.QtService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.NestedServletException;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 public class QtController {
@@ -40,8 +35,8 @@ public class QtController {
 	
 	@Autowired
 	MillaController millaController;
-	
-	
+
+
 	@ApiOperation(value = "Get the transitive closure of a requirement",
 			notes = "Returns the transitive closure of a given requirement up to the depth of 5. "
 					+ "Can now also provide custom depth value (layerCount).",
@@ -133,7 +128,7 @@ public class QtController {
 	public ResponseEntity<String> getTopProposedDependencies(@RequestParam List<String> requirementId,
 			@RequestParam(required = false, defaultValue = "20") Integer maxResults,
 			@RequestParam(required = false, defaultValue = "") String extraDetectionParams,
-			@RequestBody(required = false) WeightParams weightParams
+			WeightParams weightParams
 			) throws IOException {
 		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults, extraDetectionParams, weightParams);
 	}

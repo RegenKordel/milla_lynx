@@ -2,47 +2,47 @@ package eu.openreq.milla.models.json;
 
 public class WeightParams {
 
-    private double orphanFactor;
+    private Double orphanFactor;
 
-    private int minimumDistance;
-    private double minDistanceFactor;
+    private Integer minimumDistance;
+    private Double minDistanceFactor;
 
     private String projectId;
-    private double projectFactor;
+    private Double projectFactor;
 
-    private int dateDifference;
-    private double dateFactor;
+    private Integer dateDifference;
+    private Double dateFactor;
 
     private String componentName;
-    private double componentFactor;
+    private Double componentFactor;
 
     private String labelName;
-    private double labelFactor;
+    private Double labelFactor;
 
     private String platformName;
-    private double platformFactor;
+    private Double platformFactor;
 
-    public double getOrphanFactor() {
+    public Double getOrphanFactor() {
         return orphanFactor;
     }
 
-    public void setOrphanFactor(double orphanFactor) {
+    public void setOrphanFactor(Double orphanFactor) {
         this.orphanFactor = orphanFactor;
     }
 
-    public int getMinimumDistance() {
+    public Integer getMinimumDistance() {
         return minimumDistance;
     }
 
-    public void setMinimumDistance(int minimumDistance) {
+    public void setMinimumDistance(Integer minimumDistance) {
         this.minimumDistance = minimumDistance;
     }
 
-    public double getMinDistanceFactor() {
+    public Double getMinDistanceFactor() {
         return minDistanceFactor;
     }
 
-    public void setMinDistanceFactor(double minDistanceFactor) {
+    public void setMinDistanceFactor(Double minDistanceFactor) {
         this.minDistanceFactor = minDistanceFactor;
     }
 
@@ -54,27 +54,27 @@ public class WeightParams {
         this.projectId = projectId;
     }
 
-    public double getProjectFactor() {
+    public Double getProjectFactor() {
         return projectFactor;
     }
 
-    public void setProjectFactor(double projectFactor) {
+    public void setProjectFactor(Double projectFactor) {
         this.projectFactor = projectFactor;
     }
 
-    public int getDateDifference() {
+    public Integer getDateDifference() {
         return dateDifference;
     }
 
-    public void setDateDifference(int dateDifference) {
+    public void setDateDifference(Integer dateDifference) {
         this.dateDifference = dateDifference;
     }
 
-    public double getDateFactor() {
+    public Double getDateFactor() {
         return dateFactor;
     }
 
-    public void setDateFactor(double dateFactor) {
+    public void setDateFactor(Double dateFactor) {
         this.dateFactor = dateFactor;
     }
 
@@ -86,11 +86,11 @@ public class WeightParams {
         this.componentName = componentName;
     }
 
-    public double getComponentFactor() {
+    public Double getComponentFactor() {
         return componentFactor;
     }
 
-    public void setComponentFactor(double componentFactor) {
+    public void setComponentFactor(Double componentFactor) {
         this.componentFactor = componentFactor;
     }
 
@@ -102,11 +102,11 @@ public class WeightParams {
         this.labelName = labelName;
     }
 
-    public double getLabelFactor() {
+    public Double getLabelFactor() {
         return labelFactor;
     }
 
-    public void setLabelFactor(double labelFactor) {
+    public void setLabelFactor(Double labelFactor) {
         this.labelFactor = labelFactor;
     }
 
@@ -118,11 +118,11 @@ public class WeightParams {
         this.platformName = platformName;
     }
 
-    public double getPlatformFactor() {
+    public Double getPlatformFactor() {
         return platformFactor;
     }
 
-    public void setPlatformFactor(double platformFactor) {
+    public void setPlatformFactor(Double platformFactor) {
         this.platformFactor = platformFactor;
     }
 }

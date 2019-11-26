@@ -123,20 +123,12 @@ public class MillaControllerTest {
 	
 	@Test
 	public void requirementsByParamsTest() throws Exception {
-		
 		mockServer.expect(requestTo(mallikasAddress + "/requirementsByParams"))
 				.andRespond(withSuccess("{\"dummy\":\"test\"}", MediaType.APPLICATION_JSON));
-	
-		RequestParams params = new RequestParams();
-		params.setProjectId("test");
-		
-	    mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-	    ObjectWriter ow = mapper.writer().withDefaultPrettyPrinter();
-	    String requestJson = ow.writeValueAsString(params);
-	    
-		mockMvc.perform(post("/requirementsByParams")
+
+		mockMvc.perform(get("/requirementsByParams")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(requestJson))
+				.param("projectId", "test"))
 				.andExpect(status().isOk());
 	
 		mockServer.verify();
@@ -147,7 +139,7 @@ public class MillaControllerTest {
 		mockServer.expect(requestTo(mallikasAddress + "/selectedReqs"))
 			.andRespond(withSuccess("Dummy success", MediaType.APPLICATION_JSON));
 		
-		mockMvc.perform(post("/requirementsByIds")
+		mockMvc.perform(get("/requirementsByIds")
 				.param("ids", "test"))
 				.andExpect(status().isOk());	
 		mockServer.verify();
