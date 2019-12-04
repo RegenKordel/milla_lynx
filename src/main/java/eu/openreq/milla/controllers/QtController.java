@@ -127,10 +127,12 @@ public class QtController {
 	@GetMapping(value = "getTopProposedDependenciesOfRequirement")
 	public ResponseEntity<String> getTopProposedDependencies(@RequestParam List<String> requirementId,
 			@RequestParam(required = false, defaultValue = "20") Integer maxResults,
+			@RequestParam(required = false) boolean includeRejected,
 			@RequestParam(required = false, defaultValue = "") String extraDetectionParams,
 			WeightParams weightParams
 			) throws IOException {
-		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults, extraDetectionParams, weightParams);
+		return qtService.sumScoresAndGetTopProposed(requirementId, maxResults, includeRejected,
+				extraDetectionParams, weightParams);
 	}
 	
 

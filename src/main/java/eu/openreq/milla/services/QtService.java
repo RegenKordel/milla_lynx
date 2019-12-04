@@ -78,7 +78,7 @@ public class QtService {
 
 	public ResponseEntity<String> getConsistencyCheckForRequirement(List<String> requirementId,
 			Integer layerCount, boolean analysisOnly, Integer timeOut,
-			boolean omitCrossProject, boolean omitReqRelDiag) throws IOException {
+			boolean omitCrossProject, boolean omitReqRelDiag) {
 
 		String completeAddress = mulperiAddress + "/models/consistencyCheckForTransitiveClosure?analysisOnly=" + analysisOnly +
 				"&timeOut=" + timeOut + "&omitCrossProject=" + omitCrossProject
@@ -125,13 +125,13 @@ public class QtService {
 	 * @return
 	 */
 	public ResponseEntity<String> sumScoresAndGetTopProposed(List<String> requirementIds,
-			Integer maxResults, String additionalParams,
+			Integer maxResults, boolean includeRejected, String additionalParams,
 			WeightParams weightParams) throws JsonProcessingException {
 
 		RequestParams params = new RequestParams();
 		params.setRequirementIds(requirementIds);
 		params.setProposedOnly(false);
-		params.setIncludeRejected(true);
+		params.setIncludeRejected(includeRejected);
 
 		List<Dependency> proposed = new ArrayList<Dependency>();
 		List<String> acceptedAndRejectedIds = new ArrayList<String>();
@@ -150,7 +150,14 @@ public class QtService {
 			parser = new OpenReqJSONParser(detectedFromMallikasString);
 			List<Dependency> detectedFromMallikas = parser.getDependencies();
 			for (Dependency dep : detectedFromMallikas) {
-				if (dep.getStatus() == Dependency_status.PROPOSED) {
+				boolean isProposed;
+				if (includeRejected) {
+					isProposed = (dep.getStatus() == Dependency_status.PROPOSED ||
+							dep.getStatus() == Dependency_status.REJECTED);
+				} else {
+					isProposed = (dep.getStatus() == Dependency_status.PROPOSED);
+				}
+				if (isProposed) {
 					proposed.add(dep);
 				} else {
 					acceptedAndRejectedIds.add(dep.getFromid() + "_" + dep.getToid());
@@ -168,9 +175,16 @@ public class QtService {
 			List<Dependency> detectedFromServices = detectionService.getDetectedFromServices(reqId, additionalParams);
 			for (Dependency dep : detectedFromServices) {
 				String id = dep.getFromid() + "_" + dep.getToid();
-				if (!acceptedAndRejectedIds.contains(id) &&
-						dep.getStatus() == Dependency_status.PROPOSED)
-					proposed.add(dep);
+
+				boolean isValid;
+				if (includeRejected) {
+					isValid = !acceptedAndRejectedIds.contains(id) && (dep.getStatus() == Dependency_status.PROPOSED
+							|| dep.getStatus() == Dependency_status.REJECTED);
+				} else {
+					isValid = !acceptedAndRejectedIds.contains(id) &&
+							dep.getStatus() == Dependency_status.PROPOSED;
+				}
+				if (isValid) proposed.add(dep);
 			}
 		}
 

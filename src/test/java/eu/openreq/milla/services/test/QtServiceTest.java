@@ -138,7 +138,8 @@ public class QtServiceTest {
 
         String tcContent = "{\"requirements\":" + mapper.writeValueAsString(reqs) + "}";
 
-        Mockito.when(detectionService.getDetectedFromServices(Matchers.any(), Matchers.any())).thenReturn(new ArrayList<>());
+        Mockito.when(detectionService.getDetectedFromServices(Matchers.any(), Matchers.any()))
+                .thenReturn(new ArrayList<>());
         Mockito.when(mallikasService.requestWithParams(Matchers.any(), Matchers.anyString())).thenReturn(depContent,
                 "{\"dependencies\": []}", depContent, depContent);
         Mockito.when(mallikasService.getSelectedRequirements(Matchers.any())).thenReturn(reqContent,
@@ -170,7 +171,8 @@ public class QtServiceTest {
 
     @Test
     public void prioritizeDistantTest() throws IOException {
-        List<Dependency> results = qtService.prioritizeDistantDeps("test-1", dependencies, 3, 2);
+        List<Dependency> results = qtService.prioritizeDistantDeps("test-1", dependencies, 3,
+                2);
         double totalScore = 0;
         for (Dependency dep : results) {
             totalScore += dep.getDependency_score();
@@ -185,7 +187,7 @@ public class QtServiceTest {
         params.setMinimumDistance(3);
         params.setMinDistanceFactor(2.0);
         String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
-                "", params).getBody();
+                false, "", params).getBody();
 
         System.out.println(result);
 
@@ -210,7 +212,7 @@ public class QtServiceTest {
         params.setComponentFactor(3.0);
 
         String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
-                "", params).getBody();
+                false, "", params).getBody();
 
         System.out.println(result);
 
@@ -232,7 +234,7 @@ public class QtServiceTest {
         params.setProjectFactor(3.0);
 
         String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
-                "", params).getBody();
+                true, "", params).getBody();
 
         JsonObject obj = gson.fromJson(result, JsonObject.class);
         List<Dependency> dependencies = gson.fromJson(obj.get("dependencies"), depListType);
@@ -252,7 +254,7 @@ public class QtServiceTest {
         params.setDateFactor(3.0);
 
         String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
-                "", params).getBody();
+                false, "", params).getBody();
 
         JsonObject obj = gson.fromJson(result, JsonObject.class);
         List<Dependency> dependencies = gson.fromJson(obj.get("dependencies"), depListType);
@@ -272,7 +274,7 @@ public class QtServiceTest {
         params.setDateFactor(3.0);
 
         String result = qtService.sumScoresAndGetTopProposed(Collections.singletonList("test-1"), 20,
-                "", params).getBody();
+                false, "", params).getBody();
 
         JsonObject obj = gson.fromJson(result, JsonObject.class);
         List<Dependency> dependencies = gson.fromJson(obj.get("dependencies"), depListType);
