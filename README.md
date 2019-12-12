@@ -26,6 +26,10 @@ Milla uses port 9203 that needs to be open to in order that the Swagger page can
 
 Milla requires at least Mallikas service to be running.
 
+For token-based authorization using headers, the token can be added as a run property --milla.authToken=“tokenhere”, or 
+in the appropriate application.properties file. 
+If no token is provided, no such header will be included in the requests.
+
 ## How to Use This Microservice
 
 The swagger page describes all endpoints. Below are examples of the key commands for command line usage:

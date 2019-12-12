@@ -30,6 +30,7 @@ bin/
 
 *.log
 
+*token.txt
 *key.txt
 *key.txt*
 *.db
