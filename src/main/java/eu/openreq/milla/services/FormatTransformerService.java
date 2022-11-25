@@ -95,7 +95,8 @@ public class FormatTransformerService {
 			JsonElement element = elements.get(i);
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
-			addFieldsToIssue(issues, issue, gson, issueJSON);
+//			addFieldsToIssue(issues, issue, gson, issueJSON);
+			issues.add(issue);
 			element = null;
 			issue = null;
 		}
@@ -186,7 +187,9 @@ public class FormatTransformerService {
 				requirements.put(req.getId(), req);
 				requirementIds.add(req.getId());
 
-				setPriorityForReq(issue, req);
+//				setPriorityForReq(issue, req);
+				int priority = Integer.parseInt(issue.getFields().getPriority().getId());
+				req.setPriority(priority);
 				setStatusForReq(req, issue.getFields().getStatus().getName());
 				setRequirementType(req, issue.getFields().getIssuetype().getName());
 
@@ -195,7 +198,7 @@ public class FormatTransformerService {
 				addCommentsToReq(issue, req, person);
 				addDependencies(issue, req);
 				addAllRequirementParts(issue, req);
-				updateParentEpic(requirements, issue, req);
+//				updateParentEpic(requirements, issue, req);
 				
 				manageSubtasks(issue, req);
 			} catch (Exception e) {

@@ -17,7 +17,8 @@ public class NumberOfIssuesHTML
     public NumberOfIssuesHTML(String project, OAuthService service) throws IOException
     {
     	authService = service;
-        _URL = "/projects/"+ project +"/issues/?filter=allissues"; //A better way?: _URL = "/rest/api/2/search?jql=project=" + project + "&orderBy=-created&maxResults=1";
+//        _URL = "/projects/"+ project +"/issues/?filter=allissues"; //A better way?:
+        _URL = "/rest/api/2/search?jql=project=" + project + "&orderBy=-created&maxResults=1";
         _project = project;
         _numberOfIssues = detectNumberOfIssues();
         

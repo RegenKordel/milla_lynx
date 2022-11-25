@@ -22,27 +22,18 @@ import java.util.concurrent.ForkJoinPool;
  */
 public class ProjectIssues {
 
-	// name of the project
-	private String _project;
 	// amount of issues in a project
-	private int _maxProjectIssues;
-	// the REST API URI
-	private String _PROJECT_ISSUES_URL;
+	private int _maxIssues;
 	
 	private OAuthService authService;
-	
 
-	public ProjectIssues(String project, OAuthService service) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+	public ProjectIssues(OAuthService service) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
 		if (service!=null) {
 			authService = service;
 		} else {
 			authService = new OAuthService("");
 		}
-		
-		_project = project;
-		NumberOfIssuesHTML numberOfIssues = new NumberOfIssuesHTML(project, authService);
-		_maxProjectIssues = numberOfIssues.getNumberOfIssues();
-		_PROJECT_ISSUES_URL = "/rest/api/2/issue/" + _project + "-%d";
+		calcNumberOfIssues();
 	}
 	
 	/**
@@ -62,7 +53,7 @@ public class ProjectIssues {
 		List<String> paths = new ArrayList<>();
 		for (int i = start; i <= end; i++) {
 			// access the issue JSONs
-			String requestURL = String.format(_PROJECT_ISSUES_URL, i);
+			String requestURL = "/rest/api/2/search?jql=&orderBy=-created&startAt="+i+"&maxResults=1";
 			paths.add(requestURL);
 			requestURL = null;
 		}
@@ -79,11 +70,14 @@ public class ProjectIssues {
 							JsonElement element = issueJSON.fromJson(responseJSON, JsonElement.class);
 							if (element != null && element.isJsonObject()) {
 								JsonObject issueElement = element.getAsJsonObject();
-								String urlId = url.substring(url.lastIndexOf("/") + 1);
-								String responseId = issueElement.get("key").getAsString();
-								if (urlId.equals(responseId)) {
-									issues.put(url, issueElement); 
-								} 							
+								JsonObject issueArray = issueElement.get("issues").getAsJsonArray().get(0).getAsJsonObject();
+//								String urlId = url.substring(url.lastIndexOf("startAt=") + 8, url.lastIndexOf("&"));
+//								System.out.println(urlId);
+								String responseId = issueArray.get("key").getAsString();
+								System.out.println(responseId);
+//								if (urlId.equals(responseId)) {
+								issues.put(url, issueArray);
+//								}
 								issueElement = null;
 							}
 						}
@@ -97,9 +91,28 @@ public class ProjectIssues {
 		return issues.values();
 	
 	}
-	
+	private void calcNumberOfIssues()
+	{
+		Gson issueJSON = new Gson();
+
+		String requestURL = "/rest/api/2/search?jql=&maxResults=0";
+		String responseJSON = "";
+		responseJSON = authService.authorizedJiraRequest(requestURL);
+		if (responseJSON != null)
+		{
+			JsonElement element = issueJSON.fromJson(responseJSON, JsonElement.class);
+			JsonObject issueElement = element.getAsJsonObject();
+			int bla = issueElement.get("total").getAsInt();
+			_maxIssues = 10000;
+		}
+		else
+		{
+			_maxIssues = 1;
+		}
+	}
+
 	public int getNumberOfIssues() {
-		return _maxProjectIssues;
+		return _maxIssues;
 	}
 
 }

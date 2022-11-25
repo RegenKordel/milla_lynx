@@ -44,10 +44,10 @@ public class ImportService {
 
 	public ResponseEntity<String> importProjectIssues(String projectId, OAuthService authService) throws Exception {
 		
-		ProjectIssues projectIssues = new ProjectIssues(projectId, authService);
+		ProjectIssues projectIssues = new ProjectIssues(authService);
 
 		Person person = new Person();
-		person.setUsername("user_" + projectId);
+		person.setUsername("user");
 		person.setEmail("dummyEmail");
 
 		int issueCount = projectIssues.getNumberOfIssues();
@@ -71,7 +71,7 @@ public class ImportService {
 		List<String> requirementIds = new ArrayList<>();
 		Collection<JsonElement> projectIssuesAsJson;
 		
-		System.out.println("Importing " + projectId + " from Jira");
+		System.out.println("Importing from Jira");
 		
 		try {
 			while (true) { // a loop needed for sending large projects in chunks to Mallikas
