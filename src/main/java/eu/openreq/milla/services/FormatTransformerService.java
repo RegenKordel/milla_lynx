@@ -188,7 +188,11 @@ public class FormatTransformerService {
 				requirementIds.add(req.getId());
 
 //				setPriorityForReq(issue, req);
-				int priority = Integer.parseInt(issue.getFields().getPriority().getId());
+				int priority = 0;
+				if (issue.getFields().getPriority()!=null)
+				{
+					priority = Integer.parseInt(issue.getFields().getPriority().getId());
+				}
 				req.setPriority(priority);
 				setStatusForReq(req, issue.getFields().getStatus().getName());
 				setRequirementType(req, issue.getFields().getIssuetype().getName());
@@ -198,11 +202,11 @@ public class FormatTransformerService {
 				addCommentsToReq(issue, req, person);
 				addDependencies(issue, req);
 				addAllRequirementParts(issue, req);
-//				updateParentEpic(requirements, issue, req);
+				updateParentEpic(requirements, issue, req);
 				
 				manageSubtasks(issue, req);
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				System.out.println("Error in JSONConversion" + e.getMessage());
 			}
 		}
 
@@ -412,7 +416,7 @@ public class FormatTransformerService {
 	 * @param req
 	 */
 	private void updateParentEpic(HashMap<String, Requirement> requirements, Issue issue, Requirement req) {
-		Object epicKeyObject = issue.getFields().getCustomfield10400();
+		Object epicKeyObject = issue.getFields().getCustomfield10806();
 		if (epicKeyObject == null || epicKeyObject.toString().equals("null")) {
 			return; // No parent
 		}
@@ -653,7 +657,7 @@ public class FormatTransformerService {
 				environmentString = mapper.writeValueAsString(issue.getFields().getEnvironment());
 			} catch (JsonProcessingException e) {
 				environmentString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Environment" + e.getMessage());
 			}
 			reqPart.setText(environmentString);
 		}
@@ -677,7 +681,7 @@ public class FormatTransformerService {
 				labelString = mapper.writeValueAsString(issue.getFields().getLabels());
 			} catch (JsonProcessingException e) {
 				labelString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Labels" + e.getMessage());
 			}
 			reqPart.setText(labelString);
 		}
@@ -706,7 +710,7 @@ public class FormatTransformerService {
 				versionsString = mapper.writeValueAsString(names);
 			} catch (JsonProcessingException e) {
 				versionsString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Versions" + e.getMessage());
 			}
 			reqPart.setText(versionsString);
 		}
@@ -736,7 +740,7 @@ public class FormatTransformerService {
 				componentsString = mapper.writeValueAsString(names);
 			} catch (JsonProcessingException e) {
 				componentsString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Components" + e.getMessage());
 			}
 			reqPart.setText(componentsString);
 		}
@@ -765,7 +769,7 @@ public class FormatTransformerService {
 				platformsString = mapper.writeValueAsString(labels);
 			} catch (JsonProcessingException e) {
 				platformsString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Platforms" + e.getMessage());
 			}
 			reqPart.setText(platformsString);
 		}
@@ -788,7 +792,7 @@ public class FormatTransformerService {
 				String versionString = fixVersion.getName();
 				reqPart.setText(versionString);
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Versions" + e.getMessage());
 			}
 		} else {
 			reqPart.setId(req.getId() + "_FIXVERSION");

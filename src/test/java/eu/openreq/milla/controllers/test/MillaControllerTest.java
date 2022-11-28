@@ -85,42 +85,42 @@ public class MillaControllerTest {
 		mockServer = MockRestServiceServer.createServer(rt);
 		mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 		mapper = new ObjectMapper();
-		
+
 		authService.setJiraBaseUrl(JIRA_BASE_URL);
-		
+
 		Mockito.when(importService.importProjectIssues("test", new OAuthService("")))
 			.thenReturn(new ResponseEntity<String>("test", HttpStatus.OK));
-		
+
 		Mockito.when(authService.tempTokenAuthorization())
 			.thenReturn("testUrl");
-		
+
 		Mockito.when(authService.accessTokenAuthorization("testSecret"))
 			.thenReturn("testUrl");
-		
+
 		Mockito.when(authService.authorizedJiraRequest("/rest/auth/latest/session"))
 			.thenReturn("test");
-		
+
 		Mockito.when(authService.isInitialized())
 			.thenReturn(true);
 	}
-	
+
 	@Test
 	public void sendProjectToMulperiTest() throws Exception {
 		mockServer.expect(requestTo(mallikasAddress + "/projectRequirements?projectId=test&includeProposed=false"
 				+ "&requirementsOnly=false"))
 				.andRespond(withSuccess("{\"dummy\":\"test\"}", MediaType.APPLICATION_JSON));
-		
+
 		mockServer.expect(requestTo(mulperiAddress + "/models/murmeliModelToKeljuCaas"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andRespond(withSuccess("Dummy success", MediaType.TEXT_PLAIN));
-		
+
 		mockMvc.perform(post("/sendProjectToMulperi")
 				.param("projectId", "test"))
-				.andExpect(status().isOk());	
+				.andExpect(status().isOk());
 		mockServer.verify();
 	}
-	
+
 	@Test
 	public void requirementsByParamsTest() throws Exception {
 		mockServer.expect(requestTo(mallikasAddress + "/requirementsByParams"))
@@ -130,32 +130,32 @@ public class MillaControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("projectId", "test"))
 				.andExpect(status().isOk());
-	
-		mockServer.verify();
-	}	
-	
-	@Test
-	public void getRequirementsByIdsTest() throws Exception {		
-		mockServer.expect(requestTo(mallikasAddress + "/selectedReqs"))
-			.andRespond(withSuccess("Dummy success", MediaType.APPLICATION_JSON));
-		
-		mockMvc.perform(get("/requirementsByIds")
-				.param("ids", "test"))
-				.andExpect(status().isOk());	
+
 		mockServer.verify();
 	}
-	
+
 	@Test
-	public void requirementsInProjectTest() throws Exception { 
+	public void getRequirementsByIdsTest() throws Exception {
+		mockServer.expect(requestTo(mallikasAddress + "/selectedReqs"))
+			.andRespond(withSuccess("Dummy success", MediaType.APPLICATION_JSON));
+
+		mockMvc.perform(get("/requirementsByIds")
+				.param("ids", "test"))
+				.andExpect(status().isOk());
+		mockServer.verify();
+	}
+
+	@Test
+	public void requirementsInProjectTest() throws Exception {
 		mockServer.expect(requestTo(mallikasAddress + "/projectRequirements?projectId=test&includeProposed=false"
-				+ "&requirementsOnly=false")).andRespond(withSuccess("{\"dummy\":\"test\"}", 
+				+ "&requirementsOnly=false")).andRespond(withSuccess("{\"dummy\":\"test\"}",
 						MediaType.APPLICATION_JSON));
 		mockMvc.perform(get("/requirementsInProject")
 				.param("projectId","test"))
 				.andExpect(status().isOk());
 		mockServer.verify();
 	}
-	
+
 	@Test
 	public void allRequirementsTest() throws Exception {
 		mockServer.expect(requestTo(mallikasAddress + "/allRequirements"))
@@ -164,45 +164,45 @@ public class MillaControllerTest {
 				.andExpect(status().isOk());
 		mockServer.verify();
 	}
-	
+
 	@Test
 	public void qtJiraTest() throws Exception {
 		mockMvc.perform(post("/qtJira")
 				.param("projectId", "test"))
 				.andExpect(status().isOk());
-		
+
 	}
-	
+
 	@Test
 	public void qtJiraUpdateTest() throws Exception {
 		mockServer.expect(requestTo(mallikasAddress + "/listOfProjects"))
 				.andRespond(withSuccess("{\"dummy\":\"test\"}", MediaType.APPLICATION_JSON));
 		mockMvc.perform(post("/qtJiraUpdated")
 				.param("projectId", "test"))
-				.andExpect(status().isOk());		
+				.andExpect(status().isOk());
 	}
-	
+
 	@Test
 	public void jiraAuthorizationAddressTest() throws Exception {
 		mockMvc.perform(get("/getJiraAuthorizationAddress"))
-				.andExpect(status().isOk());	
+				.andExpect(status().isOk());
 	}
-	
+
 	@Test
 	public void jiraVerificationTest() throws Exception {
 		mockServer.expect(requestTo(JIRA_BASE_URL + "/plugins/servlet/oauth/access-token"))
 				.andRespond(withSuccess("Success", MediaType.TEXT_PLAIN));
-		
+
 		mockMvc.perform(post("/verifyJiraAuthorization")
 				.contentType(MediaType.TEXT_PLAIN)
 				.content("testSecret"))
-				.andExpect(status().isOk());		
+				.andExpect(status().isOk());
 	}
 
 	@Test
 	public void jiraAuthorizationTestTest() throws Exception {
 		mockMvc.perform(get("/testJiraAuthorization"))
-				.andExpect(status().isOk());		
+				.andExpect(status().isOk());
 	}
 
   

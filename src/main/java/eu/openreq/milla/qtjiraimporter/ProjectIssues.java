@@ -53,7 +53,7 @@ public class ProjectIssues {
 		List<String> paths = new ArrayList<>();
 		for (int i = start; i <= end; i++) {
 			// access the issue JSONs
-			String requestURL = "/rest/api/2/search?jql=&orderBy=-created&startAt="+i+"&maxResults=1";
+			String requestURL = "/rest/api/2/search?jql=&orderBy=-created&startAt="+i+"&maxResults=1&project=TFSAP";
 			paths.add(requestURL);
 			requestURL = null;
 		}
@@ -103,11 +103,7 @@ public class ProjectIssues {
 			JsonElement element = issueJSON.fromJson(responseJSON, JsonElement.class);
 			JsonObject issueElement = element.getAsJsonObject();
 			int bla = issueElement.get("total").getAsInt();
-			_maxIssues = 10000;
-		}
-		else
-		{
-			_maxIssues = 1;
+			_maxIssues = bla;
 		}
 	}
 

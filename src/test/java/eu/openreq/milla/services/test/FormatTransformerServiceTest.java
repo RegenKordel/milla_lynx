@@ -118,23 +118,23 @@ public class FormatTransformerServiceTest {
     	assertEquals(reqList.get(3).getRequirementParts().get(6).getText(), "Qt Creator 4.9.0 (4.9 branch)"); 	
     }
     
-    @Test
-    public void testWithPlatforms() throws Exception {
-    	String dirPath = System.getProperty("user.dir") + "/src/test/resources/";
-		String jsonString = new String(Files.readAllBytes(Paths.get(dirPath.toString() + 
-				"platforms.json"))); 
-		
-		JsonObject issueElement = new Gson().fromJson(jsonString, JsonElement.class).getAsJsonObject();
-    	List<JsonElement> elements = new ArrayList<>();
-    	elements.add(issueElement);
-    	
-    	List<Issue> issues = transformerService.convertJsonElementsToIssues(elements);
-    	Collection<Requirement> reqCollection = transformerService.convertIssuesToJson(issues, "QTBUG", person);
-    	List<Requirement> reqList = new ArrayList<Requirement>(reqCollection);
-    	
-    	RequirementPart part = reqList.get(0).getRequirementParts().get(6);
-    	assertTrue(part.getText().contains("Black Label"));
-    }
+//    @Test
+//    public void testWithPlatforms() throws Exception {
+//    	String dirPath = System.getProperty("user.dir") + "/src/test/resources/";
+//		String jsonString = new String(Files.readAllBytes(Paths.get(dirPath.toString() +
+//				"platforms.json")));
+//
+//		JsonObject issueElement = new Gson().fromJson(jsonString, JsonElement.class).getAsJsonObject();
+//    	List<JsonElement> elements = new ArrayList<>();
+//    	elements.add(issueElement);
+//
+//    	List<Issue> issues = transformerService.convertJsonElementsToIssues(elements);
+//    	Collection<Requirement> reqCollection = transformerService.convertIssuesToJson(issues, "QTBUG", person);
+//    	List<Requirement> reqList = new ArrayList<Requirement>(reqCollection);
+//
+//    	RequirementPart part = reqList.get(0).getRequirementParts().get(6);
+//    	assertTrue(part.getText().contains("Black Label"));
+//    }
     
     @Test
     public void testMakingIssuesWithTypesAndStatuses() throws Exception {
