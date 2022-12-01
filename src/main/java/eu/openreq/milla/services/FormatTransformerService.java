@@ -461,6 +461,8 @@ public class FormatTransformerService {
 		case "initiative":
 			req.setRequirement_type(Requirement_type.INITIATIVE);
 			break;
+		case "new feature":
+		case "improvement":
 		case "suggestion":
 			req.setRequirement_type(Requirement_type.ISSUE);
 			break;
@@ -506,6 +508,7 @@ public class FormatTransformerService {
 		case "waiting for 3rd party":
 		case "on hold":
 		case "in progress":
+		case "backlog":
 		case "implemented":
 			req.setStatus(Requirement_status.ACCEPTED); // ACCEPTED = In progress in Qt system
 			break;
@@ -537,6 +540,7 @@ public class FormatTransformerService {
 		case "dependency":
 			dependency.setDependency_type(Dependency_type.REQUIRES);
 			break;
+		case "relationship":
 		case "relates":
 			dependency.setDependency_type(Dependency_type.CONTRIBUTES);
 			break;
@@ -551,6 +555,7 @@ public class FormatTransformerService {
 			dependency.setDependency_type(Dependency_type.REFINES);
 			break;
 		case "subtask":
+		case "Contains(WBSGantt)":
 			dependency.setDependency_type(Dependency_type.DECOMPOSITION);
 			subtaskCount++;
 			break;

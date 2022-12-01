@@ -51,12 +51,52 @@ public class ProjectIssues {
 		Gson issueJSON = new Gson();
 		
 		List<String> paths = new ArrayList<>();
-		for (int i = start; i <= end; i++) {
+
+		List<String> issuesToLoad = new ArrayList<>();
+		issuesToLoad.add("RTFACT-10062");
+		issuesToLoad.add("RTFACT-9786");
+		issuesToLoad.add("RTFACT-14255");
+		issuesToLoad.add("RTFACT-19053");
+		issuesToLoad.add("RTFACT-16532");
+		issuesToLoad.add("RTFACT-4412");
+		issuesToLoad.add("RTFACT-8160");
+		issuesToLoad.add("RTFACT-17799");
+		issuesToLoad.add("RTFACT-14821");
+		issuesToLoad.add("RTFACT-10537");
+		issuesToLoad.add("RTFACT-12320");
+		issuesToLoad.add("RTFACT-19442");
+		issuesToLoad.add("RTFACT-20080");
+		issuesToLoad.add("RTFACT-9767");
+		issuesToLoad.add("RTFACT-7112");
+		issuesToLoad.add("RTFACT-16477");
+		issuesToLoad.add("RTFACT-12693");
+		issuesToLoad.add("RTFACT-13871");
+		issuesToLoad.add("RTFACT-21158");
+		issuesToLoad.add("RTFACT-19153");
+		issuesToLoad.add("RTFACT-12755");
+		issuesToLoad.add("RTFACT-16275"); //bis hier original danach recommended
+		issuesToLoad.add("RTFACT-18415");
+		issuesToLoad.add("RTFACT-10026");
+		issuesToLoad.add("RTFACT-24415");
+		issuesToLoad.add("HAP-1023");
+		issuesToLoad.add("RTFACT-18599");
+		issuesToLoad.add("RTFACT-21957");
+		issuesToLoad.add("RTFACT-229");
+		issuesToLoad.add("RTFACT-14449");
+
+		for (String name_of_issue : issuesToLoad) {
 			// access the issue JSONs
-			String requestURL = "/rest/api/2/search?jql=&orderBy=-created&startAt="+i+"&maxResults=1&project=TFSAP";
+			String requestURL = "/rest/api/2/issue/"+name_of_issue;
 			paths.add(requestURL);
 			requestURL = null;
 		}
+
+//		for (int i = start; i <= end; i++) {
+//			// access the issue JSONs
+//			String requestURL = "/rest/api/2/search?jql=&orderBy=-created&startAt="+i+"&maxResults=1&project=RTFACT";
+//			paths.add(requestURL);
+//			requestURL = null;
+//		}
 
 		ConcurrentHashMap<String, JsonElement> issues = new ConcurrentHashMap<>();
 		ForkJoinPool customThreadPool = new ForkJoinPool(32);
@@ -70,13 +110,13 @@ public class ProjectIssues {
 							JsonElement element = issueJSON.fromJson(responseJSON, JsonElement.class);
 							if (element != null && element.isJsonObject()) {
 								JsonObject issueElement = element.getAsJsonObject();
-								JsonObject issueArray = issueElement.get("issues").getAsJsonArray().get(0).getAsJsonObject();
+//								JsonObject issueArray = issueElement.get("issues").getAsJsonArray().get(0).getAsJsonObject();
 //								String urlId = url.substring(url.lastIndexOf("startAt=") + 8, url.lastIndexOf("&"));
 //								System.out.println(urlId);
-								String responseId = issueArray.get("key").getAsString();
+								String responseId = issueElement.get("key").getAsString();
 								System.out.println(responseId);
 //								if (urlId.equals(responseId)) {
-								issues.put(url, issueArray);
+								issues.put(url, issueElement);
 //								}
 								issueElement = null;
 							}
@@ -103,7 +143,7 @@ public class ProjectIssues {
 			JsonElement element = issueJSON.fromJson(responseJSON, JsonElement.class);
 			JsonObject issueElement = element.getAsJsonObject();
 			int bla = issueElement.get("total").getAsInt();
-			_maxIssues = bla;
+			_maxIssues = 35;
 		}
 	}
 
