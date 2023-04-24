@@ -25,7 +25,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import eu.openreq.milla.models.json.Requirement;
+import eu.closedreq.bridge.models.json.Requirement;
 import eu.openreq.milla.services.DetectionService;
 import eu.openreq.milla.services.MallikasService;
 import eu.openreq.milla.services.MulperiService;

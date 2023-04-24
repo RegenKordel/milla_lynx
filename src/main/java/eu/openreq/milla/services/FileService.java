@@ -1,7 +1,7 @@
 package eu.openreq.milla.services;
 
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Dependency_status;
+import eu.closedreq.bridge.models.json.Dependency;
+import eu.closedreq.bridge.models.json.Dependency_status;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

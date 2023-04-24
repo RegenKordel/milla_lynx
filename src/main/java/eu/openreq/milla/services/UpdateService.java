@@ -21,10 +21,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import eu.openreq.milla.models.jira.Issue;
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Person;
-import eu.openreq.milla.models.json.Project;
-import eu.openreq.milla.models.json.Requirement;
+import eu.closedreq.bridge.models.json.*;
 import eu.openreq.milla.qtjiraimporter.UpdatedIssues;
 
 @Service
@@ -101,7 +98,7 @@ public class UpdateService {
 				Project project = new Project();
 				
 				project.setId(id);
-				project.setSpecifiedRequirements(new ArrayList<String>(reqIds));
+				project.setSpecifiedRequirements(new HashSet<>(reqIds));
 				
 				JsonObject object = new JsonObject();
 				object.add("projects", gson.toJsonTree(Arrays.asList(project)));

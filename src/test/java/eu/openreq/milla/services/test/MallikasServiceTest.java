@@ -23,7 +23,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import eu.openreq.milla.MillaApplication;
-import eu.openreq.milla.models.json.Requirement;
+import eu.closedreq.bridge.models.json.Requirement;
 import eu.openreq.milla.services.MallikasService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -90,9 +90,9 @@ public class MallikasServiceTest {
     	req.setName("test");
     	
     	mockServer.expect(requestTo(mallikasAddress + "/updateRequirements?projectId=" + projectId))
-    		.andExpect(content().string("[{\"id\":null,\"name\":\"test\",\"text\":null,\"comments\":[],\"created_at\":0,"
+    		.andExpect(content().string("[{\"projectId\":null,\"id\":null,\"name\":\"test\",\"text\":null,\"comments\":null,\"created_at\":0,"
     				+ "\"modified_at\":0,\"priority\":0,\"requirement_type\":null,\"status\":null,"
-    				+ "\"children\":[],\"requirementParts\":[]}]"))
+    				+ "\"children\":null,\"effort\":0,\"requirementParts\":null}]"))
 			.andRespond(withSuccess("{\"dummy\":\"test\"}", MediaType.APPLICATION_JSON));
     	
     	mallikasService.updateRequirements(Arrays.asList(req), projectId);

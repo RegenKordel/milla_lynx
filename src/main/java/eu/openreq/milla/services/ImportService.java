@@ -19,10 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 import eu.openreq.milla.models.jira.Issue;
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Person;
-import eu.openreq.milla.models.json.Project;
-import eu.openreq.milla.models.json.Requirement;
+import eu.closedreq.bridge.models.json.*;
 import eu.openreq.milla.qtjiraimporter.ProjectIssues;
 
 @Service

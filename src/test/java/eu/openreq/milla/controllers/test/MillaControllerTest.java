@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import eu.openreq.milla.MillaApplication;
 import eu.openreq.milla.controllers.MillaController;
-import eu.openreq.milla.models.json.RequestParams;
+import eu.closedreq.bridge.models.json.RequestParams;
 import eu.openreq.milla.services.ImportService;
 import eu.openreq.milla.services.MallikasService;
 import eu.openreq.milla.services.MulperiService;

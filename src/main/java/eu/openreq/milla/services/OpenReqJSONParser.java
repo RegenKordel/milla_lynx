@@ -3,7 +3,8 @@ import java.util.List;
 
 import com.google.gson.Gson;
 
-import eu.openreq.milla.models.json.*;
+import eu.closedreq.bridge.models.json.*;
+import eu.closedreq.bridge.models.json.InputExtractor;
 
 public class OpenReqJSONParser {
 	static final Gson gson = new Gson();

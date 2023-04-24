@@ -6,9 +6,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import eu.closedreq.bridge.models.json.Dependency;
+import eu.closedreq.bridge.models.json.*;
 import eu.openreq.milla.models.TotalDependencyScore;
 import eu.openreq.milla.models.jira.Project;
-import eu.openreq.milla.models.json.*;
+import eu.openreq.milla.models.json.WeightParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -438,18 +440,20 @@ public class QtService {
 				dep.setDependency_score(dep.getDependency_score() * weightParams.getProjectFactor());
 			}
 
-			for (RequirementPart part : targetReq.getRequirementParts()) {
-				if (weightParams.getLabelName()!=null && weightParams.getLabelFactor()!=null &&
+			if (targetReq.getRequirementParts()!=null) {
+				for (RequirementPart part : targetReq.getRequirementParts()) {
+					if (weightParams.getLabelName() != null && weightParams.getLabelFactor() != null &&
 						part.getName().equals("Labels") && part.getText().equals(weightParams.getLabelName())) {
-					dep.setDependency_score(dep.getDependency_score() * weightParams.getLabelFactor());
-				}
-				if (weightParams.getPlatformName()!=null && weightParams.getPlatformFactor()!=null &&
+						dep.setDependency_score(dep.getDependency_score() * weightParams.getLabelFactor());
+					}
+					if (weightParams.getPlatformName() != null && weightParams.getPlatformFactor() != null &&
 						part.getName().equals("Platforms") && part.getText().equals(weightParams.getPlatformName())) {
-					dep.setDependency_score(dep.getDependency_score() * weightParams.getPlatformFactor());
-				}
-				if (weightParams.getComponentName()!=null && weightParams.getComponentFactor()!=null &&
+						dep.setDependency_score(dep.getDependency_score() * weightParams.getPlatformFactor());
+					}
+					if (weightParams.getComponentName() != null && weightParams.getComponentFactor() != null &&
 						part.getName().equals("Components") && part.getText().equals(weightParams.getComponentName())) {
-					dep.setDependency_score(dep.getDependency_score() * weightParams.getComponentFactor());
+						dep.setDependency_score(dep.getDependency_score() * weightParams.getComponentFactor());
+					}
 				}
 			}
 

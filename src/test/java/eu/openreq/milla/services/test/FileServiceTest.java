@@ -1,8 +1,8 @@
 package eu.openreq.milla.services.test;
 
 import eu.openreq.milla.MillaApplication;
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Dependency_status;
+import eu.closedreq.bridge.models.json.Dependency;
+import eu.closedreq.bridge.models.json.Dependency_status;
 import eu.openreq.milla.services.FileService;
 import org.junit.After;
 import org.junit.Before;

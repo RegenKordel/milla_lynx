@@ -3,13 +3,9 @@ package eu.openreq.milla.services;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
+import eu.closedreq.bridge.models.json.*;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.springframework.stereotype.Service;
 
@@ -29,16 +25,6 @@ import eu.openreq.milla.models.jira.Platforms;
 import eu.openreq.milla.models.jira.Subtask;
 import eu.openreq.milla.models.jira.Version;
 import eu.openreq.milla.models.jira.FixVersion;
-import eu.openreq.milla.models.json.Comment;
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Dependency_status;
-import eu.openreq.milla.models.json.Dependency_type;
-import eu.openreq.milla.models.json.Person;
-import eu.openreq.milla.models.json.Project;
-import eu.openreq.milla.models.json.Requirement;
-import eu.openreq.milla.models.json.RequirementPart;
-import eu.openreq.milla.models.json.Requirement_status;
-import eu.openreq.milla.models.json.Requirement_type;
 
 /**
  * Methods used to convert between formats (JsonElements to Jira Issues, and
@@ -77,7 +63,7 @@ public class FormatTransformerService {
 
 	/**
 	 * Converts JsonElements to Jira Issues
-	 * 
+	 *
 	 * @param jsonElements
 	 *            a collection of JsonElement objects
 	 * @return a List of Issue objects
@@ -104,7 +90,7 @@ public class FormatTransformerService {
 
 		return issues;
 	}
-	
+
 	/**
 	 * Adds certain customfields to Jira Issue, without this the fields would be null
 	 * @param issues
@@ -115,12 +101,12 @@ public class FormatTransformerService {
 	private void addFieldsToIssue(List<Issue> issues, Issue issue, Gson gson, JsonObject issueJSON) {
 		issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
 		if (issueJSON.getAsJsonObject("fields").get("customfield_11100") != null
-				&& !issueJSON.getAsJsonObject("fields").get("customfield_11100").isJsonNull()) {
+			&& !issueJSON.getAsJsonObject("fields").get("customfield_11100").isJsonNull()) {
 			addPlatformsToIssue(gson, issueJSON, issue);
 		}
 		issues.add(issue);
 	}
-	
+
 	/**
 	 * Issue's Platforms do not serialize properly without adding them explicitly to issue's fields
 	 * @param gson
@@ -153,14 +139,14 @@ public class FormatTransformerService {
 //		double durationMin = durationSec / 60.0;
 //		System.out.println("Lists done, it took " + durationSec + " second(s) or " + durationMin + " minute(s).");
 //	}
-	
+
 
 	/**
 	 * Converts a List of Jira Issues into OpenReq Json Requirements, and creates a
 	 * List of Requirement Ids (as Strings) that will be given to a Project.
 	 * Requirements do not know their Project, but the Project knows the Ids of its
 	 * Requirements
-	 * 
+	 *
 	 * @param issues List of Jira Issues
 	 * @param projectId
 	 * @param person A dummy placeholder necessary for OpenReq format
@@ -182,7 +168,7 @@ public class FormatTransformerService {
 				Requirement req = new Requirement();
 				req.setId(issue.getKey());
 				setNameAndTextForReq(issue, req);
-				
+
 				requirements.put(req.getId(), req);
 				requirementIds.add(req.getId());
 
@@ -196,7 +182,7 @@ public class FormatTransformerService {
 				addDependencies(issue, req);
 				addAllRequirementParts(issue, req);
 				updateParentEpic(requirements, issue, req);
-				
+
 				manageSubtasks(issue, req);
 			} catch (Exception e) {
 				System.out.println(e.getMessage());
@@ -210,7 +196,7 @@ public class FormatTransformerService {
 		int priority = Integer.parseInt(issue.getFields().getPriority().getId());
 		setRightPriority(req, priority);
 	}
-	
+
 	private void setNameAndTextForReq(Issue issue, Requirement req) {
 		String name = fixSpecialCharacters(issue.getFields().getSummary());
 		req.setName(name);
@@ -219,7 +205,7 @@ public class FormatTransformerService {
 			req.setText(text);
 		}
 	}
-	
+
 	private void setDatesToReq(Issue issue, Requirement req) {
 		req.setCreated_at(setCreatedDate(issue.getFields().getCreated()));
 		req.setModified_at(setCreatedDate(issue.getFields().getUpdated()));
@@ -228,7 +214,7 @@ public class FormatTransformerService {
 	/**
 	 * Add information stored in RequirementParts to a requirement's
 	 * RequirementParts-list
-	 * 
+	 *
 	 * @param issue
 	 * @param req
 	 */
@@ -241,7 +227,7 @@ public class FormatTransformerService {
 		addFixVersionsToRequirementParts(issue, req);
 		addComponentsToRequirementParts(issue, req);
 	}
-	
+
 	/**
 	 * Add information on issue's subtasks to requirement's dependencies
 	 * @param issue
@@ -259,23 +245,23 @@ public class FormatTransformerService {
 	/**
 	 * Method for removing special characters from a String, a quick and dirty
 	 * version to avoid UTF-8 errors.
-	 * 
+	 *
 	 * @param name
 	 *            that needs to have special characters removed
 	 * @return a fixed version of the name
 	 */
 	private String fixSpecialCharacters(String name) { // TODO this might not be necessary anymore but is left here for
-														// demo safety
+		// demo safety
 		String fixedName = name;
 		if (name != null && !name.equals("")) {
-			fixedName = name.replaceAll("[^\\x20-\\x7e]", ""); 
-		} 
+			fixedName = name.replaceAll("[^\\x20-\\x7e]", "");
+		}
 		return fixedName;
 	}
 
 	/**
 	 * Qt priorities with ids 7 and 6 are in a "wrong" order, hence this fix
-	 * 
+	 *
 	 * @param req
 	 * @param priority
 	 */
@@ -292,7 +278,7 @@ public class FormatTransformerService {
 	/**
 	 * Creates a list of Comments for a Requirement based on the Comments of a Jira
 	 * Issue
-	 * 
+	 *
 	 * @param issue
 	 *            Issue that has Comments
 	 * @param req
@@ -308,14 +294,14 @@ public class FormatTransformerService {
 				String date = String.valueOf(comment.getCreated());
 				long created = setCreatedDate(date);
 				jsonComment.setCreated_at(created);
-				req.getComments().add(jsonComment);
+				req.addComment(jsonComment);
 			}
 		}
 	}
 
 	/**
 	 * Method for parsing date data that is received as a String from a Jira Issue
-	 * 
+	 *
 	 * @param created
 	 *            date and time data as a String
 	 * @return the date and time as a Long milliseconds
@@ -345,7 +331,7 @@ public class FormatTransformerService {
 	 * Creates OpenReq Json Dependency objects based on Jira IssueLinks and Json
 	 * Requirements. Only Outward Issues are considered, since the IssueLinks go
 	 * both ways.
-	 * 
+	 *
 	 * @param issue
 	 *            Issue that has IssueLinks
 	 * @param req
@@ -365,7 +351,7 @@ public class FormatTransformerService {
 
 	/**
 	 * Create new Dependency and save it to a List of Dependencies
-	 * 
+	 *
 	 * @param reqFrom
 	 *            String id of the Requirement from
 	 * @param reqTo
@@ -391,7 +377,7 @@ public class FormatTransformerService {
 	/**
 	 * Adds children ("subRequirements") to a Requirement, Subtasks are received
 	 * from an Issue, and converted into Requirements.
-	 * 
+	 *
 	 * @param req
 	 * @param subtask
 	 */
@@ -403,7 +389,7 @@ public class FormatTransformerService {
 	 * Jira Issues know their parents (Epics)
 	 * (issue.getFields().getCustomfield10400()), and this method creates a
 	 * Dependency between an Epic and its "child" (Dependency_type Decomposition).
-	 * 
+	 *
 	 * @param requirements
 	 * @param issue
 	 * @param req
@@ -421,7 +407,7 @@ public class FormatTransformerService {
 	/**
 	 * Helper method for cleaning "" marks from issue keys that belong to epics (no
 	 * idea why epic issues seem to have extra "" around them)
-	 * 
+	 *
 	 * @param epicKey
 	 * @return
 	 */
@@ -437,38 +423,14 @@ public class FormatTransformerService {
 	/**
 	 * Assigns a Requirement_type to a Requirement, type received as a String from a
 	 * Jira Issue
-	 * 
+	 *
 	 * @param req
 	 *            Requirement needing a Requirement_type
 	 * @param type
 	 *            String received from an Issue
 	 */
 	private void setRequirementType(Requirement req, String type) {
-		switch (type.toLowerCase()) {
-		case "bug":
-			req.setRequirement_type(Requirement_type.BUG);
-			break;
-		case "epic":
-			req.setRequirement_type(Requirement_type.EPIC);
-			break;
-		case "initiative":
-			req.setRequirement_type(Requirement_type.INITIATIVE);
-			break;
-		case "suggestion":
-			req.setRequirement_type(Requirement_type.ISSUE);
-			break;
-		case "task":
-		case "sub-task":
-		case "technical task":
-			req.setRequirement_type(Requirement_type.TASK);
-			break;
-		case "change request":
-			req.setRequirement_type(Requirement_type.NON_FUNCTIONAL);
-			break;
-		case "user story":
-			req.setRequirement_type(Requirement_type.USER_STORY);
-			break;
-		}
+		req.setRequirement_type(type);
 
 		if (type.toLowerCase().contains("task")) {
 			addExactTaskTypeToRequirementParts(req, type);
@@ -478,85 +440,33 @@ public class FormatTransformerService {
 	/**
 	 * Assigns status to a Requirement according to the status (String) received
 	 * from a Jira Issue
-	 * 
+	 *
 	 * @param req
 	 *            Requirement needing a status
 	 * @param status
 	 *            String value received from a Jira Issue
 	 */
 	private void setStatusForReq(Requirement req, String status) {
-
-		switch (status.toLowerCase()) {
-		case "reported":
-		case "reopened":
-		case "open":
-		case "todo":
-		case "accepted":
-			req.setStatus(Requirement_status.SUBMITTED); // SUBMITTED = Todo in Qt system
-			break;
-		case "blocked":
-		case "need more info":
-		case "waiting for 3rd party":
-		case "on hold":
-		case "in progress":
-		case "implemented":
-			req.setStatus(Requirement_status.ACCEPTED); // ACCEPTED = In progress in Qt system
-			break;
-		case "withdrawn":
-		case "verified":
-		case "closed":
-		case "resolved":
-		case "rejected":
-		case "done":
-			req.setStatus(Requirement_status.COMPLETED); // COMPLETED = Done in Qt system
-			break;
-		}
-
+		req.setStatus(status);
 		addExactStatusToRequirementParts(req, status);
 	}
 
 	/**
 	 * Assigns Dependency_type to a Dependency according to the type (String)
 	 * received from a Jira IssueLink
-	 * 
+	 *
 	 * @param dependency
 	 *            Dependency needing a Dependency_type
 	 * @param jiraType
 	 *            String received from an IssueLink
 	 */
 	private void setDependencyType(Dependency dependency, String jiraType) {
-
-		switch (jiraType.toLowerCase()) {
-		case "dependency":
-			dependency.setDependency_type(Dependency_type.REQUIRES);
-			break;
-		case "relates":
-			dependency.setDependency_type(Dependency_type.CONTRIBUTES);
-			break;
-		case "duplicate":
-			dependency.setDependency_type(Dependency_type.DUPLICATES);
-			break;
-		case "replacement":
-			dependency.setDependency_type(Dependency_type.REPLACES);
-			break;
-		case "work breakdown":
-		case "test":
-			dependency.setDependency_type(Dependency_type.REFINES);
-			break;
-		case "subtask":
-			dependency.setDependency_type(Dependency_type.DECOMPOSITION);
-			subtaskCount++;
-			break;
-		case "epic":
-			dependency.setDependency_type(Dependency_type.DECOMPOSITION);
-			epicCount++;
-			break;
-		}
+		dependency.setDependency_type(jiraType);
 	}
 
 	/**
 	 * Assigns Dependency_status to a Dependency
-	 * 
+	 *
 	 * @param dependency
 	 *            Dependency needing a Dependency_status
 	 * @param status
@@ -564,21 +474,21 @@ public class FormatTransformerService {
 	private void setStatusForDependency(Dependency dependency, String status) {
 
 		switch (status.toLowerCase()) {
-		case "accepted":
-			dependency.setStatus(Dependency_status.ACCEPTED);
-			break;
-		case "proposed":
-			dependency.setStatus(Dependency_status.PROPOSED);
-			break;
-		case "rejected":
-			dependency.setStatus(Dependency_status.REJECTED);
-			break;
+			case "accepted":
+				dependency.setStatus(Dependency_status.ACCEPTED);
+				break;
+			case "proposed":
+				dependency.setStatus(Dependency_status.PROPOSED);
+				break;
+			case "rejected":
+				dependency.setStatus(Dependency_status.REJECTED);
+				break;
 		}
 	}
 
 	/**
 	 * The exact status of a Qt Jira Issue will be saved to RequirementParts
-	 * 
+	 *
 	 * @param req
 	 * @param status
 	 */
@@ -588,14 +498,14 @@ public class FormatTransformerService {
 		reqPart.setName("Status");
 		reqPart.setText(status);
 		reqPart.setCreated_at(new Date().getTime());
-		req.getRequirementParts().add(reqPart);
+		req.addRequirementPart(reqPart);
 
 	}
 
 	/**
 	 * Qt Jira Issues have three different task-types (task, technical task,
 	 * sub-task), and this info will be saved to RequirementParts
-	 * 
+	 *
 	 * @param req
 	 * @param taskType
 	 */
@@ -605,7 +515,7 @@ public class FormatTransformerService {
 		reqPart.setName("Task");
 		reqPart.setText(taskType);
 		reqPart.setCreated_at(new Date().getTime());
-		req.getRequirementParts().add(reqPart);
+		req.addRequirementPart(reqPart);
 
 	}
 
@@ -613,7 +523,7 @@ public class FormatTransformerService {
 	 * Add information on the resolution of an issue to a RequirementPart object. If
 	 * issue's resolution is null, create a new RequirementPart with the text
 	 * "Unresolved"
-	 * 
+	 *
 	 * @param issue
 	 * @param req
 	 */
@@ -630,11 +540,11 @@ public class FormatTransformerService {
 			reqPart.setText("Unresolved");
 			reqPart.setCreated_at(new Date().getTime());
 		}
-		req.getRequirementParts().add(reqPart);
+		req.addRequirementPart(reqPart);
 	}
 
 	/**
-	 * Add information on Issue's Environment to RequirementParts 
+	 * Add information on Issue's Environment to RequirementParts
 	 * @param issue
 	 * @param req
 	 */
@@ -654,11 +564,11 @@ public class FormatTransformerService {
 			}
 			reqPart.setText(environmentString);
 		}
-		req.getRequirementParts().add(reqPart);
+		req.addRequirementPart(reqPart);
 	}
 
 	/**
-	 * Add Issue's Labels to RequirementParts 
+	 * Add Issue's Labels to RequirementParts
 	 * @param issue
 	 * @param req
 	 */
@@ -678,7 +588,7 @@ public class FormatTransformerService {
 			}
 			reqPart.setText(labelString);
 		}
-		req.getRequirementParts().add(reqPart);
+		req.addRequirementPart(reqPart);
 	}
 
 	/**
@@ -707,9 +617,9 @@ public class FormatTransformerService {
 			}
 			reqPart.setText(versionsString);
 		}
-		req.getRequirementParts().add(reqPart);
+		req.addRequirementPart(reqPart);
 	}
-	
+
 
 	/**
 	 * Add Issue's Components to RequirementParts
@@ -737,7 +647,7 @@ public class FormatTransformerService {
 			}
 			reqPart.setText(componentsString);
 		}
-		req.getRequirementParts().add(reqPart);
+		req.addRequirementPart(reqPart);
 	}
 
 	/**
@@ -766,12 +676,12 @@ public class FormatTransformerService {
 			}
 			reqPart.setText(platformsString);
 		}
-		req.getRequirementParts().add(reqPart);
+		req.addRequirementPart(reqPart);
 	}
 
 	/**
 	 * Adds only the latest fixVersion to a RequirementPart
-	 * 
+	 *
 	 * @param issue
 	 * @param req
 	 */
@@ -791,25 +701,25 @@ public class FormatTransformerService {
 			reqPart.setId(req.getId() + "_FIXVERSION");
 			reqPart.setText("No FixVersion");
 		}
-		req.getRequirementParts().add(reqPart);
+		req.addRequirementPart(reqPart);
 	}
 
 	/**
 	 * Searches the map fixVersions to determine the latest FixVersion
-	 * 
+	 *
 	 * @param issue
 	 * @return
 	 */
 	private FixVersion getLatestFixVersion(Issue issue) {
 		FixVersion newest = null;
-		if (issue.getFields().getFixVersions() != null && !issue.getFields().getFixVersions().isEmpty()) {	
+		if (issue.getFields().getFixVersions() != null && !issue.getFields().getFixVersions().isEmpty()) {
 			List<ComparableVersion> versions = new ArrayList<ComparableVersion>();
-			HashMap<String, FixVersion> fixVerMap = new HashMap<String, FixVersion>();	
+			HashMap<String, FixVersion> fixVerMap = new HashMap<String, FixVersion>();
 			for (FixVersion fixVer : issue.getFields().getFixVersions()) {
 				versions.add(new ComparableVersion(fixVer.getName()));
 				fixVerMap.put(fixVer.getName(), fixVer);
 			}
-			
+
 			Collections.sort(versions);
 			newest = fixVerMap.get(versions.get(versions.size()-1).toString());
 		}
@@ -818,7 +728,7 @@ public class FormatTransformerService {
 
 	/**
 	 * Creates an OpenReq Json Project object
-	 * 
+	 *
 	 * @param projectId
 	 *            identifier of a Qt Jira project
 	 * @param reqIds
@@ -830,7 +740,7 @@ public class FormatTransformerService {
 		project.setId(projectId);
 		project.setName(projectId);
 		project.setCreated_at(new Date().getTime());
-		project.setSpecifiedRequirements(reqIds);
+		project.setSpecifiedRequirements(new HashSet<>(reqIds));
 		return project;
 	}
 

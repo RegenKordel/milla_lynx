@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import eu.openreq.milla.models.json.*;
+import eu.closedreq.bridge.models.json.*;
+import eu.openreq.milla.models.json.WeightParams;
 import eu.openreq.milla.services.DetectionService;
 import eu.openreq.milla.services.MallikasService;
 import eu.openreq.milla.services.MulperiService;
@@ -26,10 +27,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -117,7 +115,7 @@ public class QtServiceTest {
         RequirementPart part = new RequirementPart();
         part.setName("Components");
         part.setText("TestComp");
-        req.setRequirementParts(Collections.singletonList(part));
+        req.setRequirementParts(new HashSet<>(Collections.singletonList(part)));
         req.setId("test-2");
         req.setCreated_at(TimeUnit.MILLISECONDS.convert(4, TimeUnit.DAYS));
         reqs.add(req);
@@ -244,7 +242,6 @@ public class QtServiceTest {
             totalScore += dep.getDependency_score();
         }
         assertEquals(8, totalScore, 0);
-
     }
 
     @Test

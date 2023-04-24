@@ -25,9 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import eu.openreq.milla.MillaApplication;
 import eu.openreq.milla.controllers.QtController;
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Dependency_status;
-import eu.openreq.milla.models.json.Requirement;
+import eu.closedreq.bridge.models.json.Dependency;
+import eu.closedreq.bridge.models.json.Dependency_status;
+import eu.closedreq.bridge.models.json.Requirement;
 import eu.openreq.milla.services.FileService;
 import eu.openreq.milla.services.ImportService;
 import eu.openreq.milla.services.OAuthService;

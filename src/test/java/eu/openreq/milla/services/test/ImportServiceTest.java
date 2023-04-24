@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 
-import eu.openreq.milla.models.json.Requirement;
+import eu.closedreq.bridge.models.json.Requirement;
 import eu.openreq.milla.services.FormatTransformerService;
 import eu.openreq.milla.services.ImportService;
 import eu.openreq.milla.services.MallikasService;

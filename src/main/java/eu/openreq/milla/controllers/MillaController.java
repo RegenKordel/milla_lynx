@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpClientErrorException;
 
-import eu.openreq.milla.models.json.RequestParams;
+import eu.closedreq.bridge.models.json.RequestParams;
 import eu.openreq.milla.services.ImportService;
 import eu.openreq.milla.services.MallikasService;
 import eu.openreq.milla.services.MulperiService;

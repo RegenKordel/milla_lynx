@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import eu.openreq.milla.models.json.Dependency;
+import eu.closedreq.bridge.models.json.Dependency;
 import eu.openreq.milla.services.DetectionService;
 import eu.openreq.milla.services.MallikasService;
 import io.swagger.annotations.ApiOperation;

@@ -17,10 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 
-import eu.openreq.milla.models.json.Dependency;
-import eu.openreq.milla.models.json.Project;
-import eu.openreq.milla.models.json.RequestParams;
-import eu.openreq.milla.models.json.Requirement;
+import eu.closedreq.bridge.models.json.*;
 
 @Service
 public class MallikasService {
