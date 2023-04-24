@@ -81,6 +81,7 @@ public class FormatTransformerService {
 			JsonElement element = elements.get(i);
 			JsonObject issueJSON = element.getAsJsonObject();
 			Issue issue = gson.fromJson(issueJSON, Issue.class);
+			// TODO can this be replaced with issues.add?
 			addFieldsToIssue(issues, issue, gson, issueJSON);
 			element = null;
 			issue = null;
@@ -101,12 +102,12 @@ public class FormatTransformerService {
 	private void addFieldsToIssue(List<Issue> issues, Issue issue, Gson gson, JsonObject issueJSON) {
 		issue.getFields().setCustomfield10400(issueJSON.getAsJsonObject("fields").get("customfield_10400"));
 		if (issueJSON.getAsJsonObject("fields").get("customfield_11100") != null
-			&& !issueJSON.getAsJsonObject("fields").get("customfield_11100").isJsonNull()) {
+				&& !issueJSON.getAsJsonObject("fields").get("customfield_11100").isJsonNull()) {
 			addPlatformsToIssue(gson, issueJSON, issue);
 		}
 		issues.add(issue);
 	}
-
+	
 	/**
 	 * Issue's Platforms do not serialize properly without adding them explicitly to issue's fields
 	 * @param gson
@@ -139,14 +140,14 @@ public class FormatTransformerService {
 //		double durationMin = durationSec / 60.0;
 //		System.out.println("Lists done, it took " + durationSec + " second(s) or " + durationMin + " minute(s).");
 //	}
-
+	
 
 	/**
 	 * Converts a List of Jira Issues into OpenReq Json Requirements, and creates a
 	 * List of Requirement Ids (as Strings) that will be given to a Project.
 	 * Requirements do not know their Project, but the Project knows the Ids of its
 	 * Requirements
-	 *
+	 * 
 	 * @param issues List of Jira Issues
 	 * @param projectId
 	 * @param person A dummy placeholder necessary for OpenReq format
@@ -172,7 +173,13 @@ public class FormatTransformerService {
 				requirements.put(req.getId(), req);
 				requirementIds.add(req.getId());
 
-				setPriorityForReq(issue, req);
+//				setPriorityForReq(issue, req);
+				int priority = 0;
+				if (issue.getFields().getPriority()!=null)
+				{
+					priority = Integer.parseInt(issue.getFields().getPriority().getId());
+				}
+				req.setPriority(priority);
 				setStatusForReq(req, issue.getFields().getStatus().getName());
 				setRequirementType(req, issue.getFields().getIssuetype().getName());
 
@@ -185,7 +192,7 @@ public class FormatTransformerService {
 
 				manageSubtasks(issue, req);
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				System.out.println("Error in JSONConversion" + e.getMessage());
 			}
 		}
 
@@ -560,7 +567,7 @@ public class FormatTransformerService {
 				environmentString = mapper.writeValueAsString(issue.getFields().getEnvironment());
 			} catch (JsonProcessingException e) {
 				environmentString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Environment" + e.getMessage());
 			}
 			reqPart.setText(environmentString);
 		}
@@ -584,7 +591,7 @@ public class FormatTransformerService {
 				labelString = mapper.writeValueAsString(issue.getFields().getLabels());
 			} catch (JsonProcessingException e) {
 				labelString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Labels" + e.getMessage());
 			}
 			reqPart.setText(labelString);
 		}
@@ -613,7 +620,7 @@ public class FormatTransformerService {
 				versionsString = mapper.writeValueAsString(names);
 			} catch (JsonProcessingException e) {
 				versionsString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Versions" + e.getMessage());
 			}
 			reqPart.setText(versionsString);
 		}
@@ -643,7 +650,7 @@ public class FormatTransformerService {
 				componentsString = mapper.writeValueAsString(names);
 			} catch (JsonProcessingException e) {
 				componentsString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Components" + e.getMessage());
 			}
 			reqPart.setText(componentsString);
 		}
@@ -672,7 +679,7 @@ public class FormatTransformerService {
 				platformsString = mapper.writeValueAsString(labels);
 			} catch (JsonProcessingException e) {
 				platformsString = "";
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Platforms" + e.getMessage());
 			}
 			reqPart.setText(platformsString);
 		}
@@ -695,7 +702,7 @@ public class FormatTransformerService {
 				String versionString = fixVersion.getName();
 				reqPart.setText(versionString);
 			} catch (Exception e) {
-				System.out.println(e.getMessage());
+				System.out.println("Error in Parts_Versions" + e.getMessage());
 			}
 		} else {
 			reqPart.setId(req.getId() + "_FIXVERSION");
